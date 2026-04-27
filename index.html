@@ -114,7 +114,7 @@ body.split-view #right-map-label{
 .lbtn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.1);box-shadow:0 0 8px rgba(0,200,255,.18)}
 .lbtn.on.warn{border-color:var(--warn);color:var(--warn);background:rgba(255,107,0,.1);box-shadow:0 0 8px rgba(255,107,0,.18)}
 .lbtn.on.lite{border-color:var(--watch);color:var(--watch);background:rgba(255,234,0,.08)}
-#clock{margin-left:auto;font-family:var(--fm);font-size:12px;color:var(--text-dim);white-space:nowrap;flex-shrink:0}
+#clock{font-family:var(--fm);font-size:12px;color:var(--text-dim);white-space:nowrap;flex-shrink:0}
 .hud{position:absolute;z-index:900;background:var(--surface);border:1px solid var(--border);border-radius:4px;backdrop-filter:blur(18px);min-width:220px;max-width:310px;transition:border-color .2s,box-shadow .2s}
 .hud:hover{border-color:var(--border-hi);box-shadow:var(--glow)}
 .hud.alert-active{border-color:var(--danger);box-shadow:var(--glow-danger);animation:pulse 2s infinite}
@@ -291,9 +291,170 @@ body.split-view #right-map-label{
 .leaflet-popup-close-button{color:var(--text-dim)!important}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
+
+/* TOPBAR REFRESH CONTROL */
+.top-refresh{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-left:auto;
+  font-family:var(--fm);
+  font-size:10px;
+  color:var(--text-dim);
+  white-space:nowrap;
+}
+.top-refresh-btn{
+  font-family:var(--fm);
+  font-size:9.5px;
+  letter-spacing:.8px;
+  padding:4px 9px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:rgba(0,170,240,.05);
+  color:var(--accent);
+  cursor:pointer;
+  transition:all .15s;
+  text-transform:uppercase;
+}
+.top-refresh-btn:hover{
+  border-color:var(--border-hi);
+  background:rgba(0,200,255,.14);
+}
+.last-refresh{
+  color:var(--text-dim);
+}
+
+/* RIGHT SLIDE-OUT MENU */
+#right-drawer{
+  position:fixed;
+  top:56px;
+  right:12px;
+  bottom:18px;
+  width:330px;
+  z-index:1250;
+  transform:translateX(calc(100% + 24px));
+  transition:transform .22s ease;
+  pointer-events:none;
+}
+#right-drawer.open{
+  transform:translateX(0);
+  pointer-events:auto;
+}
+#right-drawer .drawer-shell{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  background:rgba(5,10,18,.96);
+  border:1px solid var(--border-hi);
+  border-radius:6px;
+  box-shadow:0 0 28px rgba(0,0,0,.45), var(--glow);
+  backdrop-filter:blur(18px);
+  overflow:hidden;
+}
+.drawer-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 11px;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,170,240,.04);
+}
+.drawer-title{
+  font-family:var(--fm);
+  font-size:10px;
+  letter-spacing:2px;
+  color:var(--accent);
+  text-transform:uppercase;
+}
+.drawer-close{
+  font-family:var(--fm);
+  font-size:10px;
+  color:var(--text-dim);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:3px 7px;
+  cursor:pointer;
+}
+.drawer-close:hover{
+  color:var(--danger);
+  border-color:var(--danger);
+}
+#right-stack{
+  position:relative!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:auto!important;
+  width:100%!important;
+  gap:0!important;
+  padding:8px;
+  overflow:auto;
+  flex:1;
+}
+#right-stack .hud{
+  position:relative!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  transform:none!important;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  margin-bottom:8px;
+  box-shadow:none;
+}
+#right-stack .hud:last-child{
+  margin-bottom:0;
+}
+#right-stack .hud-head{
+  cursor:pointer;
+}
+#right-stack .hud-body{
+  max-height:calc(100vh - 220px);
+  overflow:auto;
+}
+
+/* Hide the old floating positioning behavior when drawer is used */
+body.drawer-mode #right-stack{
+  display:flex;
+  flex-direction:column;
+}
+
+/* SPLIT VIEW MIRROR CURSOR */
+.mirror-cursor-dot{
+  width:16px;
+  height:16px;
+  border:2px solid #ffea00;
+  border-radius:50%;
+  background:rgba(255,234,0,.18);
+  box-shadow:0 0 8px rgba(255,234,0,.8), 0 0 18px rgba(255,234,0,.35);
+  position:relative;
+}
+.mirror-cursor-dot:before,
+.mirror-cursor-dot:after{
+  content:'';
+  position:absolute;
+  background:#ffea00;
+  opacity:.9;
+}
+.mirror-cursor-dot:before{
+  left:50%;
+  top:-7px;
+  width:2px;
+  height:26px;
+  transform:translateX(-50%);
+}
+.mirror-cursor-dot:after{
+  top:50%;
+  left:-7px;
+  width:26px;
+  height:2px;
+  transform:translateY(-50%);
+}
+
 </style>
 </head>
-<body>
+<body class="drawer-mode">
 <div id="map"></div>
 <div id="compare-map"></div>
 <div class="split-label" id="left-map-label">REFLECTIVITY</div>
@@ -311,8 +472,9 @@ body.split-view #right-map-label{
     <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
     <button class="lbtn on watch-yellow" id="btn-watches"  >WATCHES</button>
     <div class="tb-div"></div>
-    <button class="lbtn on"      id="btn-citylayers">CITY LAYERS</button>
+    <button class="lbtn on"      id="btn-citylayers">TOOLS</button>
   </div>
+  <div class="top-refresh"><button class="top-refresh-btn" id="top-refresh-btn">↻ REFRESH</button><span class="last-refresh" id="last-refresh">LAST —</span></div>
   <div id="clock">--:--:-- CDT</div>
 </div>
 
@@ -344,6 +506,13 @@ body.split-view #right-map-label{
 </div>
 
 
+
+<div id="right-drawer" aria-hidden="true">
+  <div class="drawer-shell">
+    <div class="drawer-top">
+      <div class="drawer-title">MAP TOOLS</div>
+      <div class="drawer-close" id="drawer-close">CLOSE</div>
+    </div>
 <div id="right-stack">
 <div class="hud" id="hud-radar">
   <div class="hud-head" id="hud-radar-head">
@@ -359,10 +528,6 @@ body.split-view #right-map-label{
       <div style="font-family:var(--fm);font-size:8.5px;color:var(--text-dim);letter-spacing:1px;margin-bottom:3px">VELOCITY SOURCE</div>
       <div style="font-family:var(--fm);font-size:10px;color:var(--accent)" id="vel-station-label">KFWS · Ft Worth TX</div>
       <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);margin-top:2px">Click a radar marker on the map to switch</div>
-    </div>
-    <div class="timeline-row">
-      <button class="play-btn" id="play-btn">↻ REFRESH</button>
-      <div class="tlabel" id="tlabel" style="margin-left:auto">LIVE</div>
     </div>
     <div class="radar-status">
       <span id="radar-time">Loading radar…</span>
@@ -403,6 +568,9 @@ body.split-view #right-map-label{
   </div>
 </div>
 </div>
+  </div>
+</div>
+
 
 
 
@@ -440,6 +608,8 @@ let compareMap = null;
 let compareRadarLayers = [];
 let compareBaseLayer = null;
 let isSyncingMaps = false;
+let mirrorMarkerOnMain = null;
+let mirrorMarkerOnCompare = null;
 let warningLayer = null, watchLayer = null;
 let cityLimitLayer = null;
 let fireStationLayer = null, fireDistrictLayer = null;
@@ -523,6 +693,9 @@ function initCompareMap() {
     map.setView(compareMap.getCenter(), compareMap.getZoom(), { animate:false });
     isSyncingMaps = false;
   });
+
+  compareMap.on('mousemove', e => updateMirrorCursor('compare', e.latlng));
+  compareMap.on('mouseout', hideMirrorCursors);
 }
 
 function syncCompareToMain() {
@@ -530,6 +703,61 @@ function syncCompareToMain() {
   isSyncingMaps = true;
   compareMap.setView(map.getCenter(), map.getZoom(), { animate:false });
   isSyncingMaps = false;
+}
+
+
+function makeMirrorCursorMarker(latlng, targetMap) {
+  return L.marker(latlng, {
+    interactive:false,
+    keyboard:false,
+    zIndexOffset:5000,
+    icon:L.divIcon({
+      className:'',
+      html:'<div class="mirror-cursor-dot"></div>',
+      iconSize:[16,16],
+      iconAnchor:[8,8]
+    })
+  }).addTo(targetMap);
+}
+
+function hideMirrorCursors() {
+  if (mirrorMarkerOnMain) {
+    map.removeLayer(mirrorMarkerOnMain);
+    mirrorMarkerOnMain = null;
+  }
+
+  if (compareMap && mirrorMarkerOnCompare) {
+    compareMap.removeLayer(mirrorMarkerOnCompare);
+    mirrorMarkerOnCompare = null;
+  }
+}
+
+function updateMirrorCursor(source, latlng) {
+  if (!splitViewActive || !compareMap || !latlng) return;
+
+  if (source === 'main') {
+    if (!mirrorMarkerOnCompare) {
+      mirrorMarkerOnCompare = makeMirrorCursorMarker(latlng, compareMap);
+    } else {
+      mirrorMarkerOnCompare.setLatLng(latlng);
+    }
+
+    if (mirrorMarkerOnMain) {
+      map.removeLayer(mirrorMarkerOnMain);
+      mirrorMarkerOnMain = null;
+    }
+  } else {
+    if (!mirrorMarkerOnMain) {
+      mirrorMarkerOnMain = makeMirrorCursorMarker(latlng, map);
+    } else {
+      mirrorMarkerOnMain.setLatLng(latlng);
+    }
+
+    if (mirrorMarkerOnCompare) {
+      compareMap.removeLayer(mirrorMarkerOnCompare);
+      mirrorMarkerOnCompare = null;
+    }
+  }
 }
 
 function setSplitView(active) {
@@ -560,6 +788,8 @@ function setSplitView(active) {
       buildCompareVelocityLayer();
       openStackPanel('radar');
     } else {
+      hideMirrorCursors();
+
       if (compareMap) {
         clearCompareRadarLayers();
         compareMap.invalidateSize();
@@ -578,6 +808,9 @@ map.on('moveend zoomend', () => {
   if (!splitViewActive || !compareMap || isSyncingMaps) return;
   syncCompareToMain();
 });
+
+map.on('mousemove', e => updateMirrorCursor('main', e.latlng));
+map.on('mouseout', hideMirrorCursors);
 
 
 // ── STATIONS ─────────────────────────────────────────────────────────────────
@@ -1144,8 +1377,18 @@ function setRadarType(type) {
 }
 
 function updateRadarTime() {
-  document.getElementById('radar-time').textContent =
-    new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'})+' CDT · LIVE';
+  const t = new Date().toLocaleTimeString('en-US', {
+    timeZone:'America/Chicago',
+    hour12:false,
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+
+  const radarTime = document.getElementById('radar-time');
+  if (radarTime) radarTime.textContent = t + ' CDT · LIVE';
+
+  const last = document.getElementById('last-refresh');
+  if (last) last.textContent = 'LAST ' + t + ' CDT';
 }
 
 function refreshRadar() {
@@ -1579,15 +1822,15 @@ function toggleLayer(name) {
 }
 
 [
-  ['btn-refl',     ()=>{ openStackPanel('radar'); setRadarType('reflectivity'); }],
-  ['btn-vel',      ()=>{ openStackPanel('radar'); setRadarType('velocity'); }],
+  ['btn-refl',     ()=>{ toggleToolsDrawer(true); openStackPanel('radar'); setRadarType('reflectivity'); }],
+  ['btn-vel',      ()=>{ toggleToolsDrawer(true); openStackPanel('radar'); setRadarType('velocity'); }],
   ['btn-split',    ()=>toggleSplitView()],
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
-  ['btn-citylayers', () => openStackPanel('citylayers')],
+  ['btn-citylayers', () => { toggleToolsDrawer(true); openStackPanel('citylayers'); }],
   ['btn-citylimits', () => { toggleLayer('cityLimits'); document.getElementById('btn-citylimits').classList.toggle('on', layersOn.cityLimits); }],
   ['btn-sirens', () => { toggleLayer('sirens'); document.getElementById('btn-sirens').classList.toggle('on', layersOn.sirens); }],
-  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); if (layersOn.cameras) openStackPanel('cam'); }],
+  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); if (layersOn.cameras) { toggleToolsDrawer(true); openStackPanel('cam'); } }],
   ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
   ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
 
@@ -1595,12 +1838,14 @@ function toggleLayer(name) {
 
 document.getElementById('rtype-refl').addEventListener('click',()=>{ openStackPanel('radar'); setRadarType('reflectivity'); });
 document.getElementById('rtype-vel').addEventListener('click', ()=>{ openStackPanel('radar'); setRadarType('velocity'); });
-document.getElementById('play-btn').addEventListener('click',()=>{
+document.getElementById('top-refresh-btn').addEventListener('click',()=>{
   refreshRadar();
-  document.getElementById('play-btn').textContent='↻ REFRESHED';
-  setTimeout(()=>document.getElementById('play-btn').textContent='↻ REFRESH',1500);
+  loadAlerts();
+  loadConditions();
+  const btn = document.getElementById('top-refresh-btn');
+  btn.textContent='↻ REFRESHED';
+  setTimeout(()=>btn.textContent='↻ REFRESH',1500);
 });
-document.getElementById('play-btn').textContent='↻ REFRESH';
 
 // ── HUD DRAG ──────────────────────────────────────────────────────────────────
 let drag=null,dox=0,doy=0;
@@ -1629,6 +1874,26 @@ document.addEventListener('mouseup',()=>drag=null);
 });
 
 
+
+// ── RIGHT TOOLS DRAWER ────────────────────────────────────────────────────────
+function toggleToolsDrawer(open) {
+  const drawer = document.getElementById('right-drawer');
+  const btn = document.getElementById('btn-citylayers');
+  if (!drawer) return;
+
+  const shouldOpen = typeof open === 'boolean' ? open : !drawer.classList.contains('open');
+
+  drawer.classList.toggle('open', shouldOpen);
+  drawer.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+
+  if (btn) btn.classList.toggle('on', shouldOpen);
+}
+
+const drawerClose = document.getElementById('drawer-close');
+if (drawerClose) {
+  drawerClose.addEventListener('click', () => toggleToolsDrawer(false));
+}
+
 // ── RIGHT STACK ACCORDION ─────────────────────────────────────────────────────
 function openStackPanel(panelId) {
   const panels = ['radar', 'citylayers', 'cam'];
@@ -1643,9 +1908,6 @@ function openStackPanel(panelId) {
     card.classList.toggle('collapsed', !shouldOpen);
     tog.textContent = shouldOpen ? '▾' : '▸';
   });
-
-  const cityBtn = document.getElementById('btn-citylayers');
-  if (cityBtn) cityBtn.classList.toggle('on', panelId === 'citylayers');
 }
 
 ['radar','citylayers','cam'].forEach(id => {
