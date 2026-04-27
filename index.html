@@ -320,8 +320,16 @@ const TEST_STATIONS = [
 const ALL_STATIONS = [...DFW_STATIONS, ...TEST_STATIONS];
 
 function getLayerName(station, type) {
-  if (station.tdwr) return type === 'reflectivity' ? `${station.id}_bref` : null;
-  return type === 'reflectivity' ? `${station.id}_bref_raw` : `${station.id}_bvel_raw`;
+  if (station.tdwr) {
+    return type === 'reflectivity' ? `${station.id}_bref` : null;
+  }
+  if (type === 'reflectivity') {
+    return `${station.id}_bref_raw`;
+  }
+  if (type === 'velocity') {
+    return `${station.id}_sr_bvel`;
+  }
+  return null;
 }
 
 // ── ALERT COLOR MAP ───────────────────────────────────────────────────────────
