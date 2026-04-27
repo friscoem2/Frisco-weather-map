@@ -262,25 +262,22 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     <div class="hud-tog" id="hud-radar-tog">▾</div>
   </div>
   <div class="hud-body">
-    <div class="rsect-label">NWS WSR-88D</div>
-    <div class="rsrc-grid">
-      <button class="rsrc-btn on" id="rsrc-KFWS">KFWS<small>Ft Worth</small></button>
-      <button class="rsrc-btn"    id="rsrc-KDYX">KDYX<small>Dyess AFB</small></button>
-      <button class="rsrc-btn"    id="rsrc-KFDR">KFDR<small>Altus AFB</small></button>
+    <div class="rsect-label">ACTIVE STATIONS · ALL SIMULTANEOUS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+      <div class="rsrc-btn on" style="cursor:default">KFWS<small>Ft Worth</small></div>
+      <div class="rsrc-btn on" style="cursor:default">KDYX<small>Dyess AFB</small></div>
+      <div class="rsrc-btn on" style="cursor:default">KFDR<small>Altus AFB</small></div>
+      <div class="rsrc-btn on" id="tdal-badge" style="cursor:default">TDAL<small>Love Field</small></div>
+      <div class="rsrc-btn on" id="tdfw-badge" style="cursor:default">TDFW<small>DFW Airport</small></div>
     </div>
-    <div class="rsect-label">TDWR (LIMITED DATA)</div>
-    <div class="rsrc-grid two" style="margin-bottom:8px">
-      <button class="rsrc-btn dim" id="rsrc-TDAL" title="TDWR not on public radar tile network">TDAL<small>Love Field</small></button>
-      <button class="rsrc-btn dim" id="rsrc-TDFW" title="TDWR not on public radar tile network">TDFW<small>DFW Airport</small></button>
-    </div>
+    <div id="tdwr-note" style="display:none;font-family:var(--fm);font-size:8px;color:var(--warn);margin-bottom:6px;letter-spacing:.3px">⚠ TDWR: REFLECTIVITY ONLY · NO PUBLIC VELOCITY</div>
     <div class="rtype-row">
       <button class="rtype-btn on" id="rtype-refl">REFLECTIVITY</button>
       <button class="rtype-btn"    id="rtype-vel">VELOCITY</button>
     </div>
     <div class="timeline-row">
-      <button class="play-btn" id="play-btn">▶ PLAY</button>
-      <div class="tbar" id="tbar"><div class="tfill" id="tfill" style="width:100%"></div></div>
-      <div class="tlabel" id="tlabel">LIVE</div>
+      <button class="play-btn" id="play-btn">↻ REFRESH</button>
+      <div class="tlabel" id="tlabel" style="margin-left:auto">LIVE</div>
     </div>
     <div class="radar-status">
       <span id="radar-time">Loading radar…</span>
@@ -334,45 +331,49 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
-let radarType = 'reflectivity';
-let radarSrc  = 'KFWS';
-let radarLayer = null, nwsLtngLayer = null, warningLayer = null, watchLayer = null;
-let lightningLayer = null, sirenLayer = null, camMarkerLayer = null;
-let lightningTimer = null;
+let radarType = 'reflectivity'; // 'reflectivity' | 'velocity'
+let radarLayers = [];           // active WMS layers (one per station)
+let nwsLtngLayer = null, warningLayer = null, watchLayer = null;
+let sirenLayer = null, camMarkerLayer = null;
 
 const layersOn = { warnings:true, watches:true, lightning:true, sirens:true, cameras:true };
 
-const RADAR_SITES = {
-  KFWS: { name:'KFWS · Ft Worth',   lat:32.573, lon:-97.303, avail:true,  id:'kfws' },
-  KDYX: { name:'KDYX · Dyess AFB',  lat:32.538, lon:-99.254, avail:true,  id:'kdyx' },
-  KFDR: { name:'KFDR · Altus AFB',  lat:34.362, lon:-98.977, avail:true,  id:'kfdr' },
-  TDAL: { name:'TDAL · Love Field', lat:32.847, lon:-96.852, avail:false, id:null },
-  TDFW: { name:'TDFW · DFW Airport',lat:32.897, lon:-97.037, avail:false, id:null },
-};
+// NWS opengeo GeoServer — each station has its own workspace
+// Layer naming: {site}_bref_raw = reflectivity, {site}_bvel_raw = velocity
+// CONUS composite (fallback): conus/conus_bref_qcd, conus/conus_bvel_qcd
+const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
-// NWS opengeo.ncep.noaa.gov WMS — official government radar, no key, zoom-independent
-const NWS_WMS = 'https://opengeo.ncep.noaa.gov/geoserver/conus/ows';
-const NWS_LAYERS = {
-  reflectivity: 'conus_bref_qcd',   // Base reflectivity composite
-  velocity:     'conus_bvel_qcd',   // Base velocity composite
-};
-// Per-site reflectivity layers (site-specific, better local detail)
-const NWS_SITE_LAYERS = {
-  KFWS: { reflectivity:'kfws_bref_raw', velocity:'kfws_bvel_raw' },
-  KDYX: { reflectivity:'kdyx_bref_raw', velocity:'kdyx_bvel_raw' },
-  KFDR: { reflectivity:'kfdr_bref_raw', velocity:'kfdr_bvel_raw' },
-};
-
-function makeNWSWMS(layerName) {
-  return L.tileLayer.wms(NWS_WMS, {
+// All WSR-88D stations shown simultaneously — toggling reflectivity/velocity
+function makeWMS(url, layerName, opacity) {
+  return L.tileLayer.wms(url, {
     layers: layerName,
     format: 'image/png',
     transparent: true,
-    opacity: 0.75,
+    opacity: opacity || 0.75,
     version: '1.3.0',
     uppercase: true,
-    attribution: 'NOAA/NWS'
+    attribution: 'NOAA/NWS MRMS'
   });
+}
+
+// The 5 stations we care about (each gets its own WMS layer simultaneously)
+const DFW_STATIONS = [
+  { id:'kfws', name:'KFWS', label:'Ft Worth TX',  lat:32.573, lon:-97.303 },
+  { id:'kdyx', name:'KDYX', label:'Dyess AFB TX', lat:32.538, lon:-99.254 },
+  { id:'kfdr', name:'KFDR', label:'Altus AFB OK', lat:34.362, lon:-98.977 },
+  // TDWRs — NWS GeoServer does have TDWR workspaces (tdal, tdfw)
+  { id:'tdal', name:'TDAL', label:'Love Field',   lat:32.847, lon:-96.852, tdwr:true },
+  { id:'tdfw', name:'TDFW', label:'DFW Airport',  lat:32.897, lon:-97.037, tdwr:true },
+];
+
+// TDWR layer names differ: tdal_bref (no _raw suffix)
+function getLayerName(station, type) {
+  const product = type === 'reflectivity' ? 'bref_raw' : 'bvel_raw';
+  if (station.tdwr) {
+    // TDWRs only have reflectivity on the public GeoServer
+    return type === 'reflectivity' ? `${station.id}_bref` : null;
+  }
+  return `${station.id}_${product}`;
 }
 
 // ── CLOCK ────────────────────────────────────────────────────────────────────
@@ -437,99 +438,92 @@ L.marker([33.155, -96.823], {
   interactive:false
 }).addTo(map);
 
-// ── RADAR (NWS opengeo WMS) ───────────────────────────────────────────────────
+// ── RADAR (NWS opengeo WMS — all stations simultaneously) ────────────────────
 function loadRadar() {
-  applyRadarLayer();
+  applyAllRadarLayers();
   loadNWSLightning();
-  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
-  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
+  updateRadarTime();
   document.getElementById('radar-frames').textContent = 'NWS LIVE';
-  // Hide animation controls — WMS is always live, no frame scrubbing
-  document.getElementById('play-btn').style.display = 'none';
-  document.getElementById('tbar').style.display = 'none';
-  document.getElementById('tlabel').textContent = 'LIVE';
 }
 
-function applyRadarLayer() {
-  if (radarLayer) map.removeLayer(radarLayer);
-  // Try site-specific layer first, fall back to CONUS composite
-  const siteLayers = NWS_SITE_LAYERS[radarSrc];
-  const layerName = siteLayers ? siteLayers[radarType] : NWS_LAYERS[radarType];
-  radarLayer = makeNWSWMS(layerName);
-  radarLayer.addTo(map);
-  // On tile error (layer name wrong for this site), fall back to CONUS composite
-  radarLayer.on('tileerror', () => {
-    if (radarLayer) map.removeLayer(radarLayer);
-    radarLayer = makeNWSWMS(NWS_LAYERS[radarType]);
-    radarLayer.addTo(map);
+function applyAllRadarLayers() {
+  // Remove existing radar layers
+  radarLayers.forEach(l => map.removeLayer(l));
+  radarLayers = [];
+
+  // Add CONUS composite as the base (catches everything, fills gaps)
+  const conusLayer = type => type === 'reflectivity' ? 'conus_bref_qcd' : 'conus_bvel_qcd';
+  const baseLayer = makeWMS(`${NWS_BASE}/conus/ows`, conusLayer(radarType), 0.65);
+  baseLayer.addTo(map);
+  radarLayers.push(baseLayer);
+
+  // Layer each individual station on top for higher-res local data
+  DFW_STATIONS.forEach(station => {
+    const layerName = getLayerName(station, radarType);
+    if (!layerName) return; // TDWR has no velocity — skip
+    const wmsUrl = `${NWS_BASE}/${station.id}/ows`;
+    const layer = makeWMS(wmsUrl, layerName, 0.78);
+    layer.addTo(map);
+    radarLayers.push(layer);
   });
 }
 
 function loadNWSLightning() {
-  // NWS official lightning strike density layer
   if (nwsLtngLayer) map.removeLayer(nwsLtngLayer);
   if (!layersOn.lightning) return;
-  nwsLtngLayer = L.tileLayer.wms(NWS_WMS, {
-    layers: 'conus_ltng',
-    format: 'image/png',
-    transparent: true,
-    opacity: 0.8,
-    version: '1.3.0',
-    uppercase: true,
-    attribution: 'NOAA/NWS'
-  }).addTo(map);
+  // NWS lightning strike density — conus workspace
+  nwsLtngLayer = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_ltng', 0.8);
+  nwsLtngLayer.addTo(map);
 }
 
 function setRadarType(type) {
   radarType = type;
   ['btn-refl','btn-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
   ['rtype-refl','rtype-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
-  document.getElementById(type==='reflectivity'?'btn-refl':'btn-vel').classList.add('on');
-  document.getElementById(type==='reflectivity'?'rtype-refl':'rtype-vel').classList.add('on');
-  applyRadarLayer();
+  document.getElementById(type==='reflectivity' ? 'btn-refl' : 'btn-vel').classList.add('on');
+  document.getElementById(type==='reflectivity' ? 'rtype-refl' : 'rtype-vel').classList.add('on');
+  // Update TDWR note
+  const tdwrNote = document.getElementById('tdwr-note');
+  if (tdwrNote) tdwrNote.style.display = type === 'velocity' ? 'block' : 'none';
+  applyAllRadarLayers();
+  updateRadarTime();
+}
+
+function updateRadarTime() {
   const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
   document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
 }
 
-function setRadarSrc(src) {
-  if (!RADAR_SITES[src].avail) {
-    alert(`${RADAR_SITES[src].name}: TDWR data is not available on the NWS public GeoServer.\nKFWS (Ft Worth WSR-88D) provides the best coverage of Frisco.`);
-    return;
-  }
-  radarSrc = src;
-  Object.keys(RADAR_SITES).forEach(k => {
-    const b = document.getElementById('rsrc-'+k);
-    if (b) b.classList.toggle('on', k===src);
-  });
-  applyRadarLayer();
-  // Show range ring
-  const s = RADAR_SITES[src];
-  const ring = L.circle([s.lat,s.lon],{radius:230000,color:'rgba(0,200,255,.12)',weight:1,fill:false,dashArray:'4 4',interactive:false}).addTo(map);
-  const pin  = L.marker([s.lat,s.lon],{icon:L.divIcon({className:'',html:`<div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:rgba(0,200,255,.8);background:rgba(5,10,18,.85);padding:2px 5px;border:1px solid rgba(0,200,255,.3);border-radius:2px;white-space:nowrap">${src}</div>`,iconAnchor:[-4,8]})}).addTo(map);
-  setTimeout(()=>{ map.removeLayer(ring); map.removeLayer(pin); }, 5000);
-}
-
-// WMS layers refresh by re-adding with cache-bust — no frame scrubbing needed
 function refreshRadar() {
-  applyRadarLayer();
+  applyAllRadarLayers();
   loadNWSLightning();
-  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
-  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
+  updateRadarTime();
 }
 
-// ── NWS ALERTS ───────────────────────────────────────────────────────────────
+// ── NWS ALERTS (national — warnings + watches polygons across CONUS) ──────────
 async function loadAlerts() {
   try {
-    const res = await fetch('https://api.weather.gov/alerts/active/area/TX', {
-      headers:{ 'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)' }
-    });
-    const data = await res.json();
-    const features = (data.features||[]).filter(f => {
+    // Fetch ALL active alerts nationwide for polygon rendering
+    // Also fetch DFW-specific for the HUD card
+    const [nationalRes, localRes] = await Promise.all([
+      fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert', {
+        headers:{ 'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)' }
+      }),
+      fetch('https://api.weather.gov/alerts/active/area/TX', {
+        headers:{ 'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)' }
+      })
+    ]);
+    const [nationalData, localData] = await Promise.all([nationalRes.json(), localRes.json()]);
+
+    // HUD card — DFW-area alerts only
+    const local = (localData.features||[]).filter(f => {
       const desc = (f.properties.areaDesc||'').toLowerCase();
       return desc.includes('collin')||desc.includes('dallas')||desc.includes('denton')||desc.includes('frisco');
     });
-    renderAlerts(features);
-    renderAlertPolygons(data.features||[]);
+    renderAlerts(local);
+
+    // Map polygons — all national warnings and watches
+    renderAlertPolygons(nationalData.features||[]);
   } catch(e) {
     document.getElementById('alert-list').innerHTML = '<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
   }
@@ -709,8 +703,8 @@ function toggleLayer(name) {
       if(watchLayer) on ? watchLayer.addTo(map) : map.removeLayer(watchLayer);
       break;
     case 'lightning':
-      if (on) { ltLayer.addTo(map); startLightning(); }
-      else { if(lightningTimer){clearInterval(lightningTimer);lightningTimer=null;} map.removeLayer(ltLayer); }
+      if (on) { loadNWSLightning(); }
+      else { if(nwsLtngLayer){ map.removeLayer(nwsLtngLayer); nwsLtngLayer=null; } }
       break;
     case 'sirens':
       if(sirenLayer) on ? sirenLayer.addTo(map) : map.removeLayer(sirenLayer);
@@ -737,11 +731,6 @@ function toggleLayer(name) {
   ['btn-sirens',   ()=>{ toggleLayer('sirens');   document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens); }],
   ['btn-cameras',  ()=>{ toggleLayer('cameras');  document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras); }],
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
-
-// Radar source buttons
-['KFWS','KDYX','KFDR','TDAL','TDFW'].forEach(src=>{
-  document.getElementById('rsrc-'+src).addEventListener('click',()=>setRadarSrc(src));
-});
 
 // Radar type buttons
 document.getElementById('rtype-refl').addEventListener('click',()=>setRadarType('reflectivity'));
@@ -804,7 +793,6 @@ loadAlerts();
 loadConditions();
 buildSirens();
 buildCameras();
-startLightning();
 
 })(); // IIFE — no globals, no export conflicts
 </script>
