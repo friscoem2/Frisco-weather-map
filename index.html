@@ -29,6 +29,74 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);background:var(--bg);color:var(--text)}
+/* MAP */
+
+/* SPLIT RADAR VIEW */
+#map{
+  transition:left .2s ease,width .2s ease;
+}
+
+#compare-map{
+  display:none;
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  width:50%;
+  z-index:1;
+  border-left:1px solid rgba(0,200,255,.35);
+  background:#050a12;
+}
+
+body.split-view #map{
+  left:0;
+  right:auto;
+  width:50%;
+}
+
+body.split-view #compare-map{
+  display:block;
+}
+
+.split-label{
+  position:absolute;
+  top:56px;
+  z-index:850;
+  font-family:var(--fm);
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:rgba(5,10,18,.82);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:5px 8px;
+  pointer-events:none;
+  backdrop-filter:blur(10px);
+}
+
+#left-map-label{
+  display:none;
+  left:12px;
+}
+
+#right-map-label{
+  display:none;
+  right:12px;
+}
+
+body.split-view #left-map-label,
+body.split-view #right-map-label{
+  display:block;
+}
+
+.lbtn.on.watch-yellow{
+  border-color:#ffea00;
+  color:#ffea00;
+  background:rgba(255,234,0,.10);
+  box-shadow:0 0 8px rgba(255,234,0,.18);
+}
+
 #map{position:absolute;inset:0;z-index:1}
 #topbar{
   position:absolute;top:0;left:0;right:0;z-index:1000;
@@ -81,7 +149,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .al-head{font-size:11.5px;color:var(--text-dim);margin-top:2px;line-height:1.3}
 .al-exp{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);margin-top:3px}
 .no-alerts{font-family:var(--fm);font-size:10.5px;color:var(--safe);display:flex;align-items:center;gap:6px}
-#hud-radar{bottom:20px;left:12px;min-width:240px}
+#hud-radar{min-width:240px}
 .rtype-row{display:flex;gap:4px;margin-bottom:8px}
 .rtype-btn{flex:1;font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:5px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;text-align:center;transition:all .15s;text-transform:uppercase}
 .rtype-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.09)}
@@ -96,15 +164,46 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .station-tag.tdwr{border-color:rgba(255,180,0,.4);color:rgba(255,180,0,.7)}
 .station-tag.test{border-color:rgba(160,120,255,.5);color:rgba(160,120,255,.8)}
 
-/* CITY LAYERS MENU */
-#hud-citylayers{
-  bottom:210px;
-  left:12px;
-  top:auto;
-  transform:none;
-  min-width:240px;
-  max-width:300px;
+
+/* RIGHT-SIDE ACCORDION STACK */
+#right-stack{
+  position:absolute;
+  right:12px;
+  bottom:20px;
+  z-index:920;
+  width:300px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
+
+#right-stack .hud{
+  position:relative;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  transform:none!important;
+  width:100%;
+  min-width:0;
+  max-width:none;
+}
+
+#right-stack .hud-head{
+  cursor:pointer;
+}
+
+#right-stack .hud-body{
+  max-height:52vh;
+  overflow:auto;
+}
+
+#hud-radar,
+#hud-citylayers,
+#hud-cam{min-width:270px;max-width:300px}
+
+/* CITY LAYERS MENU */
+#hud-citylayers{min-width:240px;max-width:300px}
 .city-layer-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -196,6 +295,9 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 </head>
 <body>
 <div id="map"></div>
+<div id="compare-map"></div>
+<div class="split-label" id="left-map-label">REFLECTIVITY</div>
+<div class="split-label" id="right-map-label">VELOCITY · <span id="split-vel-label">KFWS</span></div>
 <div id="rbar"></div>
 
 <div id="topbar">
@@ -204,9 +306,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   <div class="layer-btns">
     <button class="lbtn on"      id="btn-refl"     >REFLECTIVITY</button>
     <button class="lbtn"         id="btn-vel"      >VELOCITY</button>
+    <button class="lbtn"         id="btn-split"    >SPLIT</button>
     <div class="tb-div"></div>
     <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
-    <button class="lbtn on warn" id="btn-watches"  >WATCHES</button>
+    <button class="lbtn on watch-yellow" id="btn-watches"  >WATCHES</button>
     <div class="tb-div"></div>
     <button class="lbtn on"      id="btn-citylayers">CITY LAYERS</button>
   </div>
@@ -240,6 +343,8 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   </div>
 </div>
 
+
+<div id="right-stack">
 <div class="hud" id="hud-radar">
   <div class="hud-head" id="hud-radar-head">
     <div class="hud-title"><div class="dot"></div>RADAR CONTROL</div>
@@ -269,12 +374,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     </div>
   </div>
 </div>
-
-
-<div class="hud" id="hud-citylayers">
+<div class="hud collapsed" id="hud-citylayers">
   <div class="hud-head" id="hud-citylayers-head">
     <div class="hud-title"><div class="dot g"></div>CITY LAYERS</div>
-    <div class="hud-tog" id="hud-citylayers-tog">▾</div>
+    <div class="hud-tog" id="hud-citylayers-tog">▸</div>
   </div>
   <div class="hud-body">
     <div class="city-layer-grid">
@@ -290,7 +393,6 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     </div>
   </div>
 </div>
-
 <div class="hud collapsed" id="hud-cam">
   <div class="hud-head" id="hud-cam-head">
     <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS · DAL/FTW</div>
@@ -300,6 +402,13 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     <div id="cam-list"><div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0;letter-spacing:1px">LOADING…</div></div>
   </div>
 </div>
+</div>
+
+
+
+
+
+
 
 <div id="cam-modal">
   <div class="cam-modal-inner">
@@ -326,6 +435,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 // ── STATE ────────────────────────────────────────────────────────────────────
 let radarType = 'reflectivity';
 let radarLayers = [];
+let splitViewActive = false;
+let compareMap = null;
+let compareRadarLayers = [];
+let compareBaseLayer = null;
+let isSyncingMaps = false;
 let warningLayer = null, watchLayer = null;
 let cityLimitLayer = null;
 let fireStationLayer = null, fireDistrictLayer = null;
@@ -351,6 +465,120 @@ function makeWMS(url, layerName, opacity) {
     attribution: 'NOAA/NWS MRMS'
   });
 }
+
+function makeBaseMapLayer() {
+  return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    subdomains:'abcd',
+    maxZoom:20,
+    className:'basemap-tile',
+    attribution:'© CARTO © OSM contributors'
+  });
+}
+
+function clearCompareRadarLayers() {
+  if (!compareMap) return;
+  compareRadarLayers.forEach(l => compareMap.removeLayer(l));
+  compareRadarLayers = [];
+}
+
+function buildCompareVelocityLayer() {
+  if (!compareMap) return;
+
+  clearCompareRadarLayers();
+
+  const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
+
+  if (station && !station.tdwr) {
+    const ln = getLayerName(station, 'velocity');
+
+    if (ln) {
+      const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
+      l.addTo(compareMap);
+      compareRadarLayers.push(l);
+    }
+  }
+
+  const label = document.getElementById('split-vel-label');
+  if (label && station) label.textContent = station.name;
+}
+
+function initCompareMap() {
+  if (compareMap) return;
+
+  compareMap = L.map('compare-map', {
+    center: map.getCenter(),
+    zoom: map.getZoom(),
+    zoomControl: false,
+    attributionControl: false
+  });
+
+  L.control.zoom({ position:'bottomright' }).addTo(compareMap);
+
+  compareBaseLayer = makeBaseMapLayer();
+  compareBaseLayer.addTo(compareMap);
+
+  compareMap.on('moveend zoomend', () => {
+    if (!splitViewActive || isSyncingMaps) return;
+    isSyncingMaps = true;
+    map.setView(compareMap.getCenter(), compareMap.getZoom(), { animate:false });
+    isSyncingMaps = false;
+  });
+}
+
+function syncCompareToMain() {
+  if (!compareMap || isSyncingMaps) return;
+  isSyncingMaps = true;
+  compareMap.setView(map.getCenter(), map.getZoom(), { animate:false });
+  isSyncingMaps = false;
+}
+
+function setSplitView(active) {
+  splitViewActive = active;
+  document.body.classList.toggle('split-view', active);
+
+  const btn = document.getElementById('btn-split');
+  if (btn) {
+    btn.classList.toggle('on', active);
+    btn.textContent = active ? 'EXIT SPLIT' : 'SPLIT';
+  }
+
+  setTimeout(() => {
+    map.invalidateSize();
+
+    if (active) {
+      initCompareMap();
+      compareMap.invalidateSize();
+      syncCompareToMain();
+
+      // Left side stays reflectivity; right side shows selected-station velocity.
+      if (radarType !== 'reflectivity') {
+        setRadarType('reflectivity');
+      } else {
+        applyAllRadarLayers();
+      }
+
+      buildCompareVelocityLayer();
+      openStackPanel('radar');
+    } else {
+      if (compareMap) {
+        clearCompareRadarLayers();
+        compareMap.invalidateSize();
+      }
+
+      applyAllRadarLayers();
+    }
+  }, 250);
+}
+
+function toggleSplitView() {
+  setSplitView(!splitViewActive);
+}
+
+map.on('moveend zoomend', () => {
+  if (!splitViewActive || !compareMap || isSyncingMaps) return;
+  syncCompareToMain();
+});
+
 
 // ── STATIONS ─────────────────────────────────────────────────────────────────
 // DFW primary + TDWR
@@ -898,6 +1126,11 @@ function updateVelStationHUD() {
 
 
 function setRadarType(type) {
+  if (splitViewActive && type === 'velocity') {
+    buildCompareVelocityLayer();
+    openStackPanel('radar');
+    return;
+  }
   radarType=type;
   ['btn-refl','btn-vel','rtype-refl','rtype-vel'].forEach(id=>document.getElementById(id).classList.remove('on'));
   document.getElementById(type==='reflectivity'?'btn-refl':'btn-vel').classList.add('on');
@@ -917,6 +1150,7 @@ function updateRadarTime() {
 
 function refreshRadar() {
   applyAllRadarLayers();
+  if (splitViewActive) buildCompareVelocityLayer();
   updateRadarTime();
 }
 
@@ -1340,33 +1574,27 @@ function toggleLayer(name) {
     case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
     case 'cameras':
       if(camMarkerLayer) on?camMarkerLayer.addTo(map):map.removeLayer(camMarkerLayer);
-      document.getElementById('hud-cam').style.display=on?'':'none';
       break;
   }
 }
 
 [
-  ['btn-refl',     ()=>setRadarType('reflectivity')],
-  ['btn-vel',      ()=>setRadarType('velocity')],
+  ['btn-refl',     ()=>{ openStackPanel('radar'); setRadarType('reflectivity'); }],
+  ['btn-vel',      ()=>{ openStackPanel('radar'); setRadarType('velocity'); }],
+  ['btn-split',    ()=>toggleSplitView()],
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
-
-  ['btn-citylayers', () => {
-    const card = document.getElementById('hud-citylayers');
-    const isHidden = card.style.display === 'none';
-    card.style.display = isHidden ? '' : 'none';
-    document.getElementById('btn-citylayers').classList.toggle('on', isHidden);
-  }],
+  ['btn-citylayers', () => openStackPanel('citylayers')],
   ['btn-citylimits', () => { toggleLayer('cityLimits'); document.getElementById('btn-citylimits').classList.toggle('on', layersOn.cityLimits); }],
   ['btn-sirens', () => { toggleLayer('sirens'); document.getElementById('btn-sirens').classList.toggle('on', layersOn.sirens); }],
-  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); }],
+  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); if (layersOn.cameras) openStackPanel('cam'); }],
   ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
   ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
 
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
-document.getElementById('rtype-refl').addEventListener('click',()=>setRadarType('reflectivity'));
-document.getElementById('rtype-vel').addEventListener('click', ()=>setRadarType('velocity'));
+document.getElementById('rtype-refl').addEventListener('click',()=>{ openStackPanel('radar'); setRadarType('reflectivity'); });
+document.getElementById('rtype-vel').addEventListener('click', ()=>{ openStackPanel('radar'); setRadarType('velocity'); });
 document.getElementById('play-btn').addEventListener('click',()=>{
   refreshRadar();
   document.getElementById('play-btn').textContent='↻ REFRESHED';
@@ -1376,7 +1604,7 @@ document.getElementById('play-btn').textContent='↻ REFRESH';
 
 // ── HUD DRAG ──────────────────────────────────────────────────────────────────
 let drag=null,dox=0,doy=0;
-['hud-cond','hud-alerts','hud-radar','hud-citylayers','hud-cam'].forEach(id=>{
+['hud-cond','hud-alerts'].forEach(id=>{
   document.getElementById(id+'-head').addEventListener('mousedown',e=>{
     drag=document.getElementById(id);
     const r=drag.getBoundingClientRect();
@@ -1392,12 +1620,45 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('mouseup',()=>drag=null);
 
-['cond','alerts','radar','citylayers','cam'].forEach(id=>{
+['cond','alerts'].forEach(id=>{
   document.getElementById('hud-'+id+'-tog').addEventListener('click',()=>{
     const card=document.getElementById('hud-'+id);
     card.classList.toggle('collapsed');
     document.getElementById('hud-'+id+'-tog').textContent=card.classList.contains('collapsed')?'▸':'▾';
   });
+});
+
+
+// ── RIGHT STACK ACCORDION ─────────────────────────────────────────────────────
+function openStackPanel(panelId) {
+  const panels = ['radar', 'citylayers', 'cam'];
+
+  panels.forEach(id => {
+    const card = document.getElementById('hud-' + id);
+    const tog = document.getElementById('hud-' + id + '-tog');
+    const shouldOpen = id === panelId;
+
+    if (!card || !tog) return;
+
+    card.classList.toggle('collapsed', !shouldOpen);
+    tog.textContent = shouldOpen ? '▾' : '▸';
+  });
+
+  const cityBtn = document.getElementById('btn-citylayers');
+  if (cityBtn) cityBtn.classList.toggle('on', panelId === 'citylayers');
+}
+
+['radar','citylayers','cam'].forEach(id => {
+  const head = document.getElementById('hud-' + id + '-head');
+  const tog = document.getElementById('hud-' + id + '-tog');
+
+  function handleStackClick(e) {
+    e.stopPropagation();
+    openStackPanel(id);
+  }
+
+  if (head) head.addEventListener('click', handleStackClick);
+  if (tog) tog.addEventListener('click', handleStackClick);
 });
 
 // ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
