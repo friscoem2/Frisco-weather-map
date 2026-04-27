@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frisco E.M.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root {
+    --bg: #070c14;
+    --surface: rgba(10,18,30,0.92);
+    --surface2: rgba(14,24,42,0.96);
+    --border: rgba(0,180,255,0.15);
+    --border-bright: rgba(0,200,255,0.4);
+    --accent: #00c8ff;
+    --accent2: #0af;
+    --warn: #ff6b00;
+    --danger: #ff1744;
+    --safe: #00e676;
+    --watch: #ffea00;
+    --text: #c8dff0;
+    --text-dim: rgba(180,210,230,0.5);
+    --text-bright: #e8f4ff;
+    --glow: 0 0 20px rgba(0,200,255,0.3);
+    --glow-danger: 0 0 20px rgba(255,23,68,0.5);
+    --font-display: 'Rajdhani', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-display);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ─── MAP ─── */
+  #map {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* dark map tiles */
+  .leaflet-tile { filter: brightness(0.85) saturate(0.7) hue-rotate(10deg); }
+
+  /* ─── TOP BAR ─── */
+  #topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    height: 52px;
+    background: linear-gradient(180deg, rgba(7,12,20,0.98) 0%, rgba(7,12,20,0.7) 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 20px;
+    backdrop-filter: blur(12px);
+  }
+
+  #topbar .logo {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    white-space: nowrap;
+  }
+
+  #topbar .logo span {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  #topbar .divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .layer-controls {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .layer-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: rgba(0,180,255,0.05);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .layer-btn:hover {
+    border-color: var(--border-bright);
+    color: var(--text);
+    background: rgba(0,180,255,0.1);
+  }
+
+  .layer-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,200,255,0.12);
+    box-shadow: 0 0 10px rgba(0,200,255,0.2);
+  }
+
+  .layer-btn.active.warn-btn {
+    border-color: var(--warn);
+    color: var(--warn);
+    background: rgba(255,107,0,0.12);
+    box-shadow: 0 0 10px rgba(255,107,0,0.2);
+  }
+
+  .layer-btn.active.danger-btn {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(255,23,68,0.12);
+    box-shadow: 0 0 10px rgba(255,23,68,0.2);
+  }
+
+  .layer-btn.active.lightning-btn {
+    border-color: var(--watch);
+    color: var(--watch);
+    background: rgba(255,234,0,0.1);
+  }
+
+  #clock {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ─── HUD CARDS ─── */
+  .hud-card {
+    position: absolute;
+    z-index: 900;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    min-width: 240px;
+    max-width: 320px;
+    transition: box-shadow 0.3s;
+  }
+
+  .hud-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: var(--glow);
+  }
+
+  .hud-card.alert-active {
+    border-color: var(--danger);
+    box-shadow: var(--glow-danger);
+    animation: pulse-border 2s infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,23,68,0.3); }
+    50% { box-shadow: 0 0 25px rgba(255,23,68,0.7); }
+  }
+
+  .hud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,180,255,0.04);
+    cursor: move;
+    user-select: none;
+  }
+
+  .hud-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hud-title .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.5s infinite;
+  }
+
+  .hud-title .dot.green { background: var(--safe); }
+  .hud-title .dot.red { background: var(--danger); animation: blink-fast 0.8s infinite; }
+  .hud-title .dot.yellow { background: var(--watch); }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes blink-fast { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .hud-toggle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .hud-toggle:hover { color: var(--accent); background: rgba(0,200,255,0.1); }
+
+  .hud-body { padding: 10px 12px; }
+
+  /* ─── CONDITIONS CARD ─── */
+  #card-conditions { top: 68px; left: 12px; }
+
+  .conditions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cond-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .cond-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .cond-value {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-bright);
+    line-height: 1;
+  }
+
+  .cond-unit {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .cond-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ─── ALERTS CARD ─── */
+  #card-alerts { top: 68px; right: 12px; }
+
+  .alert-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .alert-item {
+    border-left: 3px solid var(--border);
+    padding: 6px 8px;
+    border-radius: 0 3px 3px 0;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .alert-item.warning { border-color: var(--danger); background: rgba(255,23,68,0.08); }
+  .alert-item.watch { border-color: var(--watch); background: rgba(255,234,0,0.06); }
+  .alert-item.advisory { border-color: var(--warn); background: rgba(255,107,0,0.08); }
+
+  .alert-event {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .alert-item.warning .alert-event { color: var(--danger); }
+  .alert-item.watch .alert-event { color: var(--watch); }
+  .alert-item.advisory .alert-event { color: var(--warn); }
+
+  .alert-headline {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  .alert-expires {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+
+  .no-alerts {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--safe);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ─── RADAR CARD ─── */
+  #card-radar { bottom: 20px; left: 12px; min-width: 260px; }
+
+  .radar-source-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .radar-src-btn {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    padding: 5px 4px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: rgba(0,180,255,0.03);
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .radar-src-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .radar-src-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,200,255,0.1);
+  }
+  .radar-src-btn.tdwr { font-size: 8px; }
+  .radar-src-btn.unavail { opacity: 0.4; cursor: default; }
+
+  .radar-type-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .radar-type-btn {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .radar-type-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,200,255,0.1);
+  }
+
+  .radar-timeline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .timeline-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(0,180,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .timeline-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0,200,255,0.4), var(--accent));
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .timeline-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .play-btn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: rgba(0,180,255,0.05);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .play-btn:hover { background: rgba(0,200,255,0.15); border-color: var(--border-bright); }
+
+  .radar-status {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ─── CAMERA CARD ─── */
+  #card-cameras { bottom: 20px; right: 12px; min-width: 280px; max-width: 320px; }
+
+  .camera-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .camera-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .camera-item:hover {
+    border-color: var(--border-bright);
+    background: rgba(0,180,255,0.06);
+  }
+
+  .camera-icon {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .camera-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .camera-district {
+    font-size: 9px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+  }
+
+  .camera-thumb {
+    width: 48px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,0.3);
+  }
+
+  /* camera modal */
+  #camera-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+  }
+
+  #camera-modal.open { display: flex; }
+
+  .camera-modal-inner {
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 16px;
+    max-width: 640px;
+    width: 90%;
+    box-shadow: var(--glow);
+  }
+
+  .camera-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .camera-modal-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .camera-modal-close {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+
+  .camera-modal-close:hover { color: var(--danger); border-color: var(--danger); }
+
+  #camera-modal img {
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: #000;
+  }
+
+  .camera-modal-link {
+    display: block;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  .camera-modal-link:hover { text-decoration: underline; }
+
+  /* ─── LIGHTNING FLASH ─── */
+  .lightning-marker {
+    width: 8px;
+    height: 8px;
+    background: var(--watch);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--watch), 0 0 2px #fff;
+    animation: fadeout 4s forwards;
+  }
+
+  @keyframes fadeout {
+    0% { opacity: 1; transform: scale(1.5); }
+    20% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; }
+  }
+
+  /* ─── REFRESH INDICATOR ─── */
+  #refresh-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    z-index: 1100;
+    transition: width 0.3s linear;
+    width: 0%;
+  }
+
+  /* ─── SIREN PINS ─── */
+  .siren-pin {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(0,200,255,0.6);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 6px rgba(0,200,255,0.4);
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  /* ─── LEAFLET OVERRIDES ─── */
+  .leaflet-control-attribution {
+    background: rgba(7,12,20,0.7) !important;
+    color: rgba(150,170,190,0.5) !important;
+    font-size: 9px !important;
+  }
+  .leaflet-control-attribution a { color: rgba(0,200,255,0.5) !important; }
+
+  .leaflet-popup-content-wrapper {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border-bright) !important;
+    border-radius: 4px !important;
+    color: var(--text) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 11px !important;
+    box-shadow: var(--glow) !important;
+  }
+  .leaflet-popup-tip { background: var(--surface2) !important; }
+  .leaflet-popup-close-button { color: var(--text-dim) !important; }
+
+  /* ─── COLLAPSED STATE ─── */
+  .hud-card.collapsed .hud-body { display: none; }
+
+  /* ─── LOADING STATE ─── */
+  .loading-text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 8px 0;
+    letter-spacing: 1px;
+  }
+
+  /* ─── NWS POLYGON STYLES ─── */
+  .leaflet-interactive:focus { outline: none; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="refresh-bar"></div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">FRISCO E.M.</div>
+  <div class="divider"></div>
+  <div class="layer-controls">
+    <button class="layer-btn active" id="btn-reflectivity" onclick="setRadarType('reflectivity')">REFLECTIVITY</button>
+    <button class="layer-btn" id="btn-velocity" onclick="setRadarType('velocity')">VELOCITY</button>
+    <div class="divider"></div>
+    <button class="layer-btn active warn-btn" id="btn-warnings" onclick="toggleLayer('warnings')">WARNINGS</button>
+    <button class="layer-btn active warn-btn" id="btn-watches" onclick="toggleLayer('watches')">WATCHES</button>
+    <button class="layer-btn active lightning-btn" id="btn-lightning" onclick="toggleLayer('lightning')">LIGHTNING</button>
+    <button class="layer-btn active" id="btn-sirens" onclick="toggleLayer('sirens')">SIRENS</button>
+    <button class="layer-btn active" id="btn-cameras" onclick="toggleLayer('cameras')">CAMERAS</button>
+  </div>
+  <div id="clock">--:--:-- CDT</div>
+</div>
+
+<!-- HUD: CONDITIONS -->
+<div class="hud-card" id="card-conditions">
+  <div class="hud-header" onmousedown="startDrag(event,'card-conditions')">
+    <div class="hud-title"><div class="dot green"></div>CONDITIONS · FRISCO</div>
+    <div class="hud-toggle" onclick="toggleCard('card-conditions')">▾</div>
+  </div>
+  <div class="hud-body">
+    <div class="conditions-grid">
+      <div class="cond-item">
+        <div class="cond-label">TEMP</div>
+        <div class="cond-value" id="cond-temp">—<span class="cond-unit">°F</span></div>
+      </div>
+      <div class="cond-item">
+        <div class="cond-label">WIND</div>
+        <div class="cond-value" id="cond-wind">—<span class="cond-unit">mph</span></div>
+      </div>
+      <div class="cond-item">
+        <div class="cond-label">HUMIDITY</div>
+        <div class="cond-value" id="cond-humidity">—<span class="cond-unit">%</span></div>
+      </div>
+      <div class="cond-item">
+        <div class="cond-label">PRESSURE</div>
+        <div class="cond-value" id="cond-pressure" style="font-size:16px">—<span class="cond-unit">hPa</span></div>
+      </div>
+    </div>
+    <div class="cond-sub" id="cond-desc">Loading conditions…</div>
+    <div class="cond-sub" id="cond-station" style="margin-top:2px;font-size:9px">SRC: KDFW · NWS</div>
+  </div>
+</div>
+
+<!-- HUD: ALERTS -->
+<div class="hud-card" id="card-alerts">
+  <div class="hud-header" onmousedown="startDrag(event,'card-alerts')">
+    <div class="hud-title"><div class="dot" id="alert-dot"></div>NWS ALERTS · COLLIN CO.</div>
+    <div class="hud-toggle" onclick="toggleCard('card-alerts')">▾</div>
+  </div>
+  <div class="hud-body">
+    <div class="alert-list" id="alert-list">
+      <div class="loading-text">FETCHING ALERTS…</div>
+    </div>
+  </div>
+</div>
+
+<!-- HUD: RADAR -->
+<div class="hud-card" id="card-radar">
+  <div class="hud-header" onmousedown="startDrag(event,'card-radar')">
+    <div class="hud-title"><div class="dot"></div>RADAR CONTROL</div>
+    <div class="hud-toggle" onclick="toggleCard('card-radar')">▾</div>
+  </div>
+  <div class="hud-body">
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-bottom:4px;letter-spacing:1px;">NWS WSR-88D</div>
+    <div class="radar-source-grid">
+      <button class="radar-src-btn active" id="rsrc-KFWS" onclick="setRadarSource('KFWS')">KFWS<br><span style="color:var(--text-dim);font-size:8px">Ft Worth</span></button>
+      <button class="radar-src-btn" id="rsrc-KDYX" onclick="setRadarSource('KDYX')">KDYX<br><span style="color:var(--text-dim);font-size:8px">Dyess AFB</span></button>
+      <button class="radar-src-btn" id="rsrc-KFDR" onclick="setRadarSource('KFDR')">KFDR<br><span style="color:var(--text-dim);font-size:8px">Altus AFB</span></button>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-bottom:4px;letter-spacing:1px;">TDWR (LIMITED)</div>
+    <div class="radar-source-grid" style="grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">
+      <button class="radar-src-btn tdwr" id="rsrc-TDAL" onclick="setRadarSource('TDAL')">TDAL<br><span style="color:var(--text-dim);font-size:8px">Love Field</span></button>
+      <button class="radar-src-btn tdwr" id="rsrc-TDFW" onclick="setRadarSource('TDFW')">TDFW<br><span style="color:var(--text-dim);font-size:8px">DFW Airport</span></button>
+    </div>
+    <div class="radar-type-row">
+      <button class="radar-type-btn active" id="rtype-reflectivity" onclick="setRadarType('reflectivity')">REFLECTIVITY</button>
+      <button class="radar-type-btn" id="rtype-velocity" onclick="setRadarType('velocity')">VELOCITY</button>
+    </div>
+    <div class="radar-timeline">
+      <button class="play-btn" id="play-btn" onclick="toggleAnimation()">▶ PLAY</button>
+      <div class="timeline-bar" onclick="scrubTimeline(event)">
+        <div class="timeline-fill" id="timeline-fill" style="width:100%"></div>
+      </div>
+      <div class="timeline-label" id="timeline-label">LIVE</div>
+    </div>
+    <div class="radar-status">
+      <span id="radar-time-display">Loading radar…</span>
+      <span id="radar-frame-count">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- HUD: CAMERAS -->
+<div class="hud-card" id="card-cameras">
+  <div class="hud-header" onmousedown="startDrag(event,'card-cameras')">
+    <div class="hud-title"><div class="dot green"></div>TXDOT CAMERAS · DAL/FTW</div>
+    <div class="hud-toggle" onclick="toggleCard('card-cameras')">▾</div>
+  </div>
+  <div class="hud-body">
+    <div class="camera-list" id="camera-list">
+      <div class="loading-text">FETCHING CAMERAS…</div>
+    </div>
+  </div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div id="camera-modal">
+  <div class="camera-modal-inner">
+    <div class="camera-modal-header">
+      <div class="camera-modal-title" id="modal-cam-name">CAMERA FEED</div>
+      <div class="camera-modal-close" onclick="closeCamera()">✕ CLOSE</div>
+    </div>
+    <img id="modal-cam-img" src="" alt="Camera feed">
+    <a class="camera-modal-link" id="modal-cam-link" href="#" target="_blank">▶ OPEN IN TXDOT ITS →</a>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// ─── MAP INIT ───────────────────────────────────────────────────────────────
+const map = L.map('map', {
+  center: [33.1507, -96.8236],
+  zoom: 11,
+  zoomControl: false,
+  attributionControl: true
+});
+
+L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+// Dark base tile
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OSM · CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let radarFrames = [];
+let radarHost = '';
+let currentFrame = 0;
+let isAnimating = false;
+let animTimer = null;
+let currentRadarType = 'reflectivity'; // reflectivity | velocity
+let currentRadarSource = 'KFWS';
+let radarLayer = null;
+let warningLayer = null;
+let watchLayer = null;
+let lightningLayer = null;
+let sirenLayer = null;
+let cameraMarkerLayer = null;
+let layers = {
+  warnings: true, watches: true, lightning: true, sirens: true, cameras: true
+};
+
+// Color options for RainViewer
+// colorScheme: 4=standard, 2=universal blue, 6=rainbow
+const RADAR_COLOR = {
+  reflectivity: { colorScheme: 4, smooth: 1 },
+  velocity: { colorScheme: 5, smooth: 1 }
+};
+
+// Radar source info (NWS WSR-88D are served via RainViewer composite)
+// TDWRs not available on RainViewer — we'll note that in UI
+const RADAR_SOURCES = {
+  KFWS: { name: 'KFWS · Ft Worth', lat: 32.573, lon: -97.303, available: true },
+  KDYX: { name: 'KDYX · Dyess AFB', lat: 32.538, lon: -99.254, available: true },
+  KFDR: { name: 'KFDR · Altus AFB', lat: 34.362, lon: -98.977, available: true },
+  TDAL: { name: 'TDAL · Love Field', lat: 32.847, lon: -96.852, available: false },
+  TDFW: { name: 'TDFW · DFW Airport', lat: 32.897, lon: -97.037, available: false },
+};
+
+// NWS alert zones for DFW area
+const NWS_ZONES = 'TXZ101,TXZ085,TXZ086,TXZ099,TXZ100';
+
+// ─── FRISCO CITY BOUNDARY ───────────────────────────────────────────────────
+// Approximate Frisco TX city limit polygon (key vertices)
+const FRISCO_BOUNDARY = [
+  [33.2069, -96.9285],[33.2069, -96.8285],[33.2069, -96.7285],
+  [33.1869, -96.7185],[33.1669, -96.7185],[33.1569, -96.7285],
+  [33.1369, -96.7385],[33.1169, -96.7485],[33.1069, -96.7685],
+  [33.0969, -96.7885],[33.0969, -96.8185],[33.0969, -96.8385],
+  [33.0969, -96.8685],[33.1069, -96.8885],[33.1169, -96.9085],
+  [33.1369, -96.9185],[33.1569, -96.9285],[33.1769, -96.9285],
+  [33.1969, -96.9285],[33.2069, -96.9285]
+];
+
+// Draw Frisco boundary
+L.polygon(FRISCO_BOUNDARY, {
+  color: 'rgba(0,200,255,0.8)',
+  weight: 1.5,
+  fillColor: 'rgba(0,200,255,0.03)',
+  fillOpacity: 1,
+  dashArray: '6 4',
+  interactive: false
+}).addTo(map);
+
+// Frisco label
+L.marker([33.1507, -96.8236], {
+  icon: L.divIcon({
+    className: '',
+    html: '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:3px;color:rgba(0,200,255,0.5);text-transform:uppercase;pointer-events:none;text-shadow:0 0 10px rgba(0,200,255,0.3)">FRISCO TX</div>',
+    iconAnchor: [35, 8]
+  }),
+  interactive: false
+}).addTo(map);
+
+// ─── CLOCK ──────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const cdt = now.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour12: false });
+  document.getElementById('clock').textContent = cdt + ' CDT';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── RADAR ──────────────────────────────────────────────────────────────────
+async function loadRadar() {
+  try {
+    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const data = await res.json();
+    radarHost = data.host;
+    radarFrames = [...(data.radar.past || []), ...(data.radar.nowcast || [])];
+    
+    document.getElementById('radar-frame-count').textContent = `${radarFrames.length} FRAMES`;
+    
+    // Show latest frame
+    currentFrame = radarFrames.length - 1;
+    renderRadarFrame(currentFrame);
+    updateTimelineLabel();
+    
+    // Note TDWR availability
+    updateTDWRStatus();
+  } catch(e) {
+    document.getElementById('radar-time-display').textContent = 'RADAR UNAVAILABLE';
+    console.error('Radar load error:', e);
+  }
+}
+
+function updateTDWRStatus() {
+  // TDWRs not available via RainViewer - update UI
+  ['TDAL','TDFW'].forEach(id => {
+    const btn = document.getElementById(`rsrc-${id}`);
+    if (btn) {
+      btn.title = 'TDWR data not available via RainViewer. NWS composite covers this area.';
+      btn.style.opacity = '0.5';
+    }
+  });
+}
+
+function renderRadarFrame(idx) {
+  if (!radarFrames.length) return;
+  const frame = radarFrames[Math.min(idx, radarFrames.length - 1)];
+  const { colorScheme, smooth } = RADAR_COLOR[currentRadarType];
+  const tileUrl = `${radarHost}${frame.path}/512/{z}/{x}/{y}/${colorScheme}/${smooth}_1.png`;
+
+  if (radarLayer) map.removeLayer(radarLayer);
+  radarLayer = L.tileLayer(tileUrl, {
+    opacity: 0.75,
+    tileSize: 512,
+    zoomOffset: -1,
+    attribution: 'RainViewer'
+  }).addTo(map);
+
+  // Update time display
+  const ts = new Date(frame.time * 1000);
+  const label = ts.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour12: false, hour: '2-digit', minute: '2-digit' });
+  const isNowcast = frame.path.includes('nowcast');
+  document.getElementById('radar-time-display').textContent = 
+    (isNowcast ? '▶ FCST ' : '') + label + ' CDT';
+  document.getElementById('timeline-fill').style.width = 
+    `${((idx + 1) / radarFrames.length) * 100}%`;
+}
+
+function updateTimelineLabel() {
+  if (!radarFrames.length) return;
+  const frame = radarFrames[currentFrame];
+  const isNowcast = frame.path && frame.path.includes('nowcast');
+  document.getElementById('timeline-label').textContent = 
+    currentFrame === radarFrames.length - 1 ? 'LIVE' : 
+    isNowcast ? 'FCST' : `T-${radarFrames.length - 1 - currentFrame}`;
+}
+
+function setRadarType(type) {
+  currentRadarType = type;
+  document.getElementById('btn-reflectivity').classList.toggle('active', type === 'reflectivity');
+  document.getElementById('btn-velocity').classList.toggle('active', type === 'velocity');
+  document.getElementById('rtype-reflectivity').classList.toggle('active', type === 'reflectivity');
+  document.getElementById('rtype-velocity').classList.toggle('active', type === 'velocity');
+  renderRadarFrame(currentFrame);
+}
+
+function setRadarSource(src) {
+  // For TDWR sources, show info popup since not on RainViewer
+  if (!RADAR_SOURCES[src].available) {
+    alert(`${RADAR_SOURCES[src].name}: TDWR data is not publicly available via RainViewer's radar tile API. The NWS WSR-88D composite (KFWS recommended) provides the best coverage for Frisco. Switching to KFWS.`);
+    src = 'KFWS';
+  }
+  
+  currentRadarSource = src;
+  Object.keys(RADAR_SOURCES).forEach(k => {
+    const btn = document.getElementById(`rsrc-${k}`);
+    if (btn) btn.classList.toggle('active', k === src);
+  });
+
+  // Pan to radar site
+  const site = RADAR_SOURCES[src];
+  if (site.available) {
+    // RainViewer serves composite mosaic, not individual site
+    // but we still center approximately
+    renderRadarFrame(currentFrame);
+    // Add a marker for the radar site temporarily
+    showRadarSiteMarker(src, site);
+  }
+}
+
+let radarSiteMarker = null;
+function showRadarSiteMarker(id, site) {
+  if (radarSiteMarker) map.removeLayer(radarSiteMarker);
+  radarSiteMarker = L.marker([site.lat, site.lon], {
+    icon: L.divIcon({
+      className: '',
+      html: `<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(0,200,255,0.8);letter-spacing:1px;background:rgba(7,12,20,0.8);padding:2px 5px;border:1px solid rgba(0,200,255,0.3);border-radius:2px;white-space:nowrap">${id}</div>`,
+      iconAnchor: [-4, 8]
+    })
+  }).addTo(map)
+    .bindPopup(`<b>${site.name}</b><br>NWS WSR-88D Radar Site`);
+  
+  // Draw range ring (~230km radius)
+  if (radarSiteMarker._rangeRing) map.removeLayer(radarSiteMarker._rangeRing);
+  const ring = L.circle([site.lat, site.lon], {
+    radius: 230000,
+    color: 'rgba(0,200,255,0.15)',
+    weight: 1,
+    fill: false,
+    dashArray: '4 4',
+    interactive: false
+  }).addTo(map);
+  radarSiteMarker._rangeRing = ring;
+  
+  setTimeout(() => {
+    if (radarSiteMarker) { map.removeLayer(radarSiteMarker); radarSiteMarker = null; }
+    if (ring) map.removeLayer(ring);
+  }, 6000);
+}
+
+function toggleAnimation() {
+  isAnimating = !isAnimating;
+  document.getElementById('play-btn').textContent = isAnimating ? '⏹ STOP' : '▶ PLAY';
+  if (isAnimating) {
+    animTimer = setInterval(() => {
+      currentFrame = (currentFrame + 1) % radarFrames.length;
+      renderRadarFrame(currentFrame);
+      updateTimelineLabel();
+    }, 400);
+  } else {
+    clearInterval(animTimer);
+    // Return to live
+    currentFrame = radarFrames.length - 1;
+    renderRadarFrame(currentFrame);
+    updateTimelineLabel();
+  }
+}
+
+function scrubTimeline(e) {
+  const bar = e.currentTarget;
+  const rect = bar.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  currentFrame = Math.floor(pct * radarFrames.length);
+  currentFrame = Math.max(0, Math.min(currentFrame, radarFrames.length - 1));
+  renderRadarFrame(currentFrame);
+  updateTimelineLabel();
+}
+
+// ─── NWS ALERTS ─────────────────────────────────────────────────────────────
+async function loadAlerts() {
+  try {
+    // Fetch active alerts for TX - filter for DFW area
+    const res = await fetch('https://api.weather.gov/alerts/active/area/TX', {
+      headers: { 'User-Agent': 'FriscoCERTWeatherMap/1.0 (frisco.cert@example.com)' }
+    });
+    const data = await res.json();
+    const features = data.features || [];
+    
+    // Filter for relevant alert types
+    const relevant = features.filter(f => {
+      const e = f.properties.event || '';
+      const zones = (f.properties.affectedZones || []).join(',');
+      const isDFW = zones.includes('TXZ101') || zones.includes('TXZ085') || 
+                    zones.includes('TXZ086') || zones.includes('TXC085') ||
+                    zones.includes('TXC113') || zones.includes('Collin') ||
+                    (f.properties.areaDesc || '').includes('Collin') ||
+                    (f.properties.areaDesc || '').includes('Dallas') ||
+                    (f.properties.areaDesc || '').includes('Denton');
+      return isDFW;
+    });
+
+    renderAlerts(relevant);
+    renderAlertPolygons(features);
+  } catch(e) {
+    document.getElementById('alert-list').innerHTML = '<div class="loading-text" style="color:var(--text-dim)">ALERTS UNAVAILABLE</div>';
+    console.error('Alerts error:', e);
+  }
+}
+
+function renderAlerts(alerts) {
+  const list = document.getElementById('alert-list');
+  const dot = document.getElementById('alert-dot');
+  const card = document.getElementById('card-alerts');
+
+  if (!alerts.length) {
+    list.innerHTML = '<div class="no-alerts">✓ NO ACTIVE ALERTS</div>';
+    dot.className = 'dot green';
+    card.classList.remove('alert-active');
+    return;
+  }
+
+  const hasWarning = alerts.some(a => a.properties.event && a.properties.event.includes('Warning'));
+  const hasWatch = alerts.some(a => a.properties.event && a.properties.event.includes('Watch'));
+  
+  dot.className = hasWarning ? 'dot red' : hasWatch ? 'dot yellow' : 'dot';
+  card.classList.toggle('alert-active', hasWarning);
+
+  list.innerHTML = alerts.slice(0, 5).map(f => {
+    const p = f.properties;
+    const isWarning = (p.event || '').includes('Warning');
+    const isWatch = (p.event || '').includes('Watch');
+    const cls = isWarning ? 'warning' : isWatch ? 'watch' : 'advisory';
+    const exp = p.expires ? new Date(p.expires).toLocaleTimeString('en-US', {
+      timeZone: 'America/Chicago', hour12: true, hour: 'numeric', minute: '2-digit'
+    }) : '—';
+    return `
+      <div class="alert-item ${cls}">
+        <div class="alert-event">${p.event || 'ALERT'}</div>
+        <div class="alert-headline">${(p.headline || '').slice(0, 80)}${p.headline && p.headline.length > 80 ? '…' : ''}</div>
+        <div class="alert-expires">EXPIRES ${exp} CDT</div>
+      </div>`;
+  }).join('');
+}
+
+function renderAlertPolygons(alerts) {
+  if (warningLayer) map.removeLayer(warningLayer);
+  if (watchLayer) map.removeLayer(watchLayer);
+
+  const warnings = [], watches = [];
+
+  alerts.forEach(f => {
+    const p = f.properties;
+    const geo = f.geometry;
+    if (!geo) return;
+    
+    const event = (p.event || '').toLowerCase();
+    const isWarning = event.includes('warning');
+    const isWatch = event.includes('watch');
+    
+    if (isWarning && layers.warnings) warnings.push(f);
+    if (isWatch && layers.watches) watches.push(f);
+  });
+
+  if (warnings.length && layers.warnings) {
+    warningLayer = L.geoJSON({ type: 'FeatureCollection', features: warnings }, {
+      style: { color: '#ff1744', weight: 2, fillColor: '#ff1744', fillOpacity: 0.15 },
+      onEachFeature: (f, layer) => {
+        layer.bindPopup(`<b style="color:var(--danger)">${f.properties.event}</b><br>${(f.properties.headline || '').slice(0, 100)}`);
+      }
+    }).addTo(map);
+  }
+
+  if (watches.length && layers.watches) {
+    watchLayer = L.geoJSON({ type: 'FeatureCollection', features: watches }, {
+      style: { color: '#ffea00', weight: 1.5, fillColor: '#ffea00', fillOpacity: 0.08, dashArray: '4 3' },
+      onEachFeature: (f, layer) => {
+        layer.bindPopup(`<b style="color:var(--watch)">${f.properties.event}</b><br>${(f.properties.headline || '').slice(0, 100)}`);
+      }
+    }).addTo(map);
+  }
+}
+
+// ─── NWS CONDITIONS ──────────────────────────────────────────────────────────
+async function loadConditions() {
+  try {
+    const res = await fetch('https://api.weather.gov/stations/KDFW/observations/latest', {
+      headers: { 'User-Agent': 'FriscoCERTWeatherMap/1.0' }
+    });
+    const data = await res.json();
+    const p = data.properties;
+
+    const tempC = p.temperature?.value;
+    const tempF = tempC != null ? Math.round(tempC * 9/5 + 32) : null;
+    const windKph = p.windSpeed?.value;
+    const windMph = windKph != null ? Math.round(windKph * 0.621371) : null;
+    const windDir = p.windDirection?.value;
+    const humidity = p.relativeHumidity?.value;
+    const pressure = p.barometricPressure?.value;
+    const pressHpa = pressure != null ? Math.round(pressure / 100) : null;
+    const desc = p.textDescription || '—';
+
+    document.getElementById('cond-temp').innerHTML = tempF != null ? `${tempF}<span class="cond-unit">°F</span>` : '—';
+    document.getElementById('cond-wind').innerHTML = windMph != null ? 
+      `${windMph}<span class="cond-unit">mph ${windDirLabel(windDir)}</span>` : '—';
+    document.getElementById('cond-humidity').innerHTML = humidity != null ? 
+      `${Math.round(humidity)}<span class="cond-unit">%</span>` : '—';
+    document.getElementById('cond-pressure').innerHTML = pressHpa != null ? 
+      `${pressHpa}<span class="cond-unit">hPa</span>` : '—';
+    document.getElementById('cond-desc').textContent = desc.toUpperCase();
+  } catch(e) {
+    document.getElementById('cond-desc').textContent = 'CONDITIONS UNAVAILABLE';
+  }
+}
+
+function windDirLabel(deg) {
+  if (deg == null) return '';
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+
+// ─── LIGHTNING (Blitzortung WebSocket) ──────────────────────────────────────
+let lightningMarkers = [];
+let lightningWs = null;
+
+function connectLightning() {
+  if (!layers.lightning) return;
+  lightningLayer = L.layerGroup().addTo(map);
+
+  // Blitzortung WebSocket servers (public)
+  const servers = ['ws1', 'ws3', 'ws5', 'ws7', 'ws8'];
+  const server = servers[Math.floor(Math.random() * servers.length)];
+  
+  try {
+    lightningWs = new WebSocket(`wss://${server}.blitzortung.org/`);
+    
+    lightningWs.onopen = () => {
+      // Subscribe to DFW bounding box
+      lightningWs.send(JSON.stringify({
+        west: -100, east: -93, south: 30, north: 37
+      }));
+    };
+
+    lightningWs.onmessage = (e) => {
+      if (!layers.lightning || !lightningLayer) return;
+      try {
+        const d = JSON.parse(e.data);
+        if (d.lat && d.lon) {
+          addLightningStrike(d.lat, d.lon);
+        }
+      } catch {}
+    };
+
+    lightningWs.onerror = () => {
+      // Silently fail — lightning is a nice-to-have
+      setTimeout(connectLightning, 30000);
+    };
+
+    lightningWs.onclose = () => {
+      if (layers.lightning) setTimeout(connectLightning, 15000);
+    };
+  } catch(e) {
+    // WebSocket unavailable in this env
+  }
+}
+
+function addLightningStrike(lat, lon) {
+  const marker = L.marker([lat, lon], {
+    icon: L.divIcon({
+      className: 'lightning-marker',
+      iconSize: [8, 8],
+      iconAnchor: [4, 4]
+    }),
+    interactive: false
+  });
+  
+  if (lightningLayer) lightningLayer.addLayer(marker);
+  lightningMarkers.push({ marker, time: Date.now() });
+
+  // Auto-remove after 4s
+  setTimeout(() => {
+    if (lightningLayer) lightningLayer.removeLayer(marker);
+  }, 4000);
+
+  // Prune old markers
+  const now = Date.now();
+  lightningMarkers = lightningMarkers.filter(m => now - m.time < 30000);
+}
+
+// ─── SIREN LOCATIONS ────────────────────────────────────────────────────────
+const FRISCO_SIRENS = [
+  { id: 'S01', lat: 33.1823, lon: -96.8219, name: 'City Hall Area' },
+  { id: 'S02', lat: 33.1651, lon: -96.8752, name: 'Lebanon / DNT' },
+  { id: 'S03', lat: 33.1407, lon: -96.8185, name: 'Preston / Main' },
+  { id: 'S04', lat: 33.1987, lon: -96.7821, name: 'Eldorado / Coit' },
+  { id: 'S05', lat: 33.1520, lon: -96.7650, name: 'Panther Creek' },
+  { id: 'S06', lat: 33.1280, lon: -96.8650, name: 'Rolater / DNT' },
+  { id: 'S07', lat: 33.1890, lon: -96.8520, name: 'Stonebrook / DNT' },
+  { id: 'S08', lat: 33.1650, lon: -96.7300, name: 'Coit / Eldorado' },
+  { id: 'S09', lat: 33.1100, lon: -96.8050, name: 'Spring Creek Pkwy' },
+  { id: 'S10', lat: 33.2050, lon: -96.8650, name: 'Stewart Creek' },
+];
+
+function buildSirenLayer() {
+  sirenLayer = L.layerGroup();
+  FRISCO_SIRENS.forEach(s => {
+    const marker = L.marker([s.lat, s.lon], {
+      icon: L.divIcon({
+        className: 'siren-pin',
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+      })
+    }).bindPopup(`<b style="color:var(--accent)">${s.id}</b><br>${s.name}`);
+    sirenLayer.addLayer(marker);
+  });
+  if (layers.sirens) sirenLayer.addTo(map);
+}
+
+// ─── TXDOT CAMERAS ──────────────────────────────────────────────────────────
+// TxDOT ITS camera data — using known public ITS portal structure
+// District codes: DAL=Dallas, FTW=Fort Worth
+// Image URLs follow pattern: https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/{cameraId}.jpg
+
+const TXDOT_CAMERAS = [
+  // Dallas District - near Frisco/Collin County
+  { id: '1001', name: 'US-75 @ SH-121', lat: 33.1234, lon: -96.6891, district: 'DAL', road: 'US-75' },
+  { id: '1002', name: 'DNT @ Lebanon', lat: 33.1650, lon: -96.8520, district: 'DAL', road: 'DNT' },
+  { id: '1003', name: 'DNT @ Main St', lat: 33.1507, lon: -96.8236, district: 'DAL', road: 'DNT' },
+  { id: '1004', name: 'DNT @ Rolater', lat: 33.1280, lon: -96.8490, district: 'DAL', road: 'DNT' },
+  { id: '1005', name: 'DNT @ SH-121', lat: 33.1100, lon: -96.8290, district: 'DAL', road: 'DNT' },
+  { id: '1006', name: 'US-75 @ Eldorado', lat: 33.1800, lon: -96.6700, district: 'DAL', road: 'US-75' },
+  { id: '1007', name: 'SH-121 @ Coit', lat: 33.1100, lon: -96.7900, district: 'FTW', road: 'SH-121' },
+  { id: '1008', name: 'SH-289 @ University', lat: 33.1507, lon: -96.8550, district: 'DAL', road: 'SH-289' },
+];
+
+function buildCameraList() {
+  cameraMarkerLayer = L.layerGroup();
+
+  const list = document.getElementById('camera-list');
+  list.innerHTML = '';
+
+  TXDOT_CAMERAS.forEach(cam => {
+    // Camera list item
+    const item = document.createElement('div');
+    item.className = 'camera-item';
+    item.innerHTML = `
+      <div class="camera-icon">📷</div>
+      <div>
+        <div class="camera-name">${cam.name}</div>
+        <div class="camera-district">${cam.district} · ${cam.road}</div>
+      </div>
+      <img class="camera-thumb" 
+           src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg"
+           onerror="this.style.display='none'"
+           alt="">
+    `;
+    item.onclick = () => openCamera(cam);
+    list.appendChild(item);
+
+    // Map marker
+    const marker = L.marker([cam.lat, cam.lon], {
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="width:12px;height:12px;background:rgba(0,230,118,0.7);border:1px solid #00e676;border-radius:2px;box-shadow:0 0 6px rgba(0,230,118,0.4)"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+      })
+    }).bindPopup(`
+      <div style="font-family:'JetBrains Mono',monospace">
+        <b style="color:var(--safe)">${cam.name}</b><br>
+        <span style="font-size:10px;color:var(--text-dim)">${cam.district} DISTRICT</span><br>
+        <img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" 
+             style="width:180px;margin-top:6px;border-radius:2px" 
+             onerror="this.style.display='none'">
+        <br>
+        <a href="https://its.txdot.gov/its/District/${cam.district}" target="_blank" 
+           style="color:var(--accent);font-size:10px">Open ITS Portal →</a>
+      </div>
+    `);
+    cameraMarkerLayer.addLayer(marker);
+  });
+
+  if (layers.cameras) cameraMarkerLayer.addTo(map);
+}
+
+function openCamera(cam) {
+  document.getElementById('modal-cam-name').textContent = cam.name;
+  document.getElementById('modal-cam-img').src = 
+    `https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg?t=${Date.now()}`;
+  document.getElementById('modal-cam-link').href = 
+    `https://its.txdot.gov/its/District/${cam.district}`;
+  document.getElementById('camera-modal').classList.add('open');
+}
+
+function closeCamera() {
+  document.getElementById('camera-modal').classList.remove('open');
+  document.getElementById('modal-cam-img').src = '';
+}
+
+document.getElementById('camera-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCamera();
+});
+
+// ─── LAYER TOGGLES ──────────────────────────────────────────────────────────
+function toggleLayer(name) {
+  layers[name] = !layers[name];
+  const btn = document.getElementById(`btn-${name}`);
+  btn.classList.toggle('active', layers[name]);
+
+  switch(name) {
+    case 'warnings':
+      if (!layers.warnings && warningLayer) map.removeLayer(warningLayer);
+      else if (layers.warnings && warningLayer) warningLayer.addTo(map);
+      break;
+    case 'watches':
+      if (!layers.watches && watchLayer) map.removeLayer(watchLayer);
+      else if (layers.watches && watchLayer) watchLayer.addTo(map);
+      break;
+    case 'lightning':
+      if (!layers.lightning) {
+        if (lightningWs) { lightningWs.close(); lightningWs = null; }
+        if (lightningLayer) map.removeLayer(lightningLayer);
+      } else {
+        connectLightning();
+      }
+      break;
+    case 'sirens':
+      if (!layers.sirens && sirenLayer) map.removeLayer(sirenLayer);
+      else if (layers.sirens && sirenLayer) sirenLayer.addTo(map);
+      break;
+    case 'cameras':
+      if (!layers.cameras && cameraMarkerLayer) map.removeLayer(cameraMarkerLayer);
+      else if (layers.cameras && cameraMarkerLayer) cameraMarkerLayer.addTo(map);
+      const camCard = document.getElementById('card-cameras');
+      camCard.style.display = layers.cameras ? '' : 'none';
+      break;
+  }
+}
+
+// ─── HUD DRAG ───────────────────────────────────────────────────────────────
+let dragTarget = null, dragOffX = 0, dragOffY = 0;
+
+function startDrag(e, id) {
+  dragTarget = document.getElementById(id);
+  const rect = dragTarget.getBoundingClientRect();
+  dragOffX = e.clientX - rect.left;
+  dragOffY = e.clientY - rect.top;
+  e.preventDefault();
+}
+
+document.addEventListener('mousemove', e => {
+  if (!dragTarget) return;
+  let x = e.clientX - dragOffX;
+  let y = e.clientY - dragOffY;
+  x = Math.max(0, Math.min(window.innerWidth - dragTarget.offsetWidth, x));
+  y = Math.max(0, Math.min(window.innerHeight - dragTarget.offsetHeight, y));
+  dragTarget.style.left = x + 'px';
+  dragTarget.style.top = y + 'px';
+  dragTarget.style.right = 'auto';
+  dragTarget.style.bottom = 'auto';
+});
+
+document.addEventListener('mouseup', () => { dragTarget = null; });
+
+// ─── HUD COLLAPSE ───────────────────────────────────────────────────────────
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('collapsed');
+  const toggle = card.querySelector('.hud-toggle');
+  toggle.textContent = card.classList.contains('collapsed') ? '▸' : '▾';
+}
+
+// ─── AUTO-REFRESH ────────────────────────────────────────────────────────────
+let refreshProgress = 0;
+const REFRESH_INTERVAL = 120; // seconds
+
+function tickRefresh() {
+  refreshProgress++;
+  const pct = (refreshProgress / REFRESH_INTERVAL) * 100;
+  document.getElementById('refresh-bar').style.width = pct + '%';
+  
+  if (refreshProgress >= REFRESH_INTERVAL) {
+    refreshProgress = 0;
+    document.getElementById('refresh-bar').style.width = '0%';
+    loadRadar();
+    loadAlerts();
+    loadConditions();
+  }
+}
+
+setInterval(tickRefresh, 1000);
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadRadar();
+loadAlerts();
+loadConditions();
+buildSirenLayer();
+buildCameraList();
+connectLightning();
+
+// Periodic alerts refresh (more frequent for active wx)
+setInterval(loadAlerts, 60000);
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
