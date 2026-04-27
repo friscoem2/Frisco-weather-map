@@ -137,7 +137,6 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     <div class="tb-div"></div>
     <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
     <button class="lbtn on warn" id="btn-watches"  >WATCHES</button>
-    <button class="lbtn on lite" id="btn-lightning">LIGHTNING</button>
     <button class="lbtn on"      id="btn-sirens"   >SIRENS</button>
     <button class="lbtn on"      id="btn-cameras"  >CAMERAS</button>
   </div>
@@ -236,11 +235,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 // ── STATE ────────────────────────────────────────────────────────────────────
 let radarType = 'reflectivity';
 let radarLayers = [];
-let nwsLtngLayer = null, warningLayer = null, watchLayer = null;
+let warningLayer = null, watchLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
 let selectedVelStation = 'kfws';
 let stationMarkerLayer = null;
-const layersOn = { warnings:true, watches:true, lightning:true, sirens:true, cameras:true };
+const layersOn = { warnings:true, watches:true, sirens:true, cameras:true };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
 function makeWMS(url, layerName, opacity) {
@@ -674,7 +673,6 @@ function loadRadar() {
   applyAllRadarLayers();
   buildStationMarkers();
   buildStationLegend();
-  loadNWSLightning();
   updateRadarTime();
   document.getElementById('radar-frames').textContent = 'NWS LIVE';
 }
@@ -783,27 +781,6 @@ function updateVelStationHUD() {
 //
 // This version uses the NOAA/NCEP OpenGeo WMS layer instead so it fails quietly
 // and does not paint broken labels across the map.
-function loadNWSLightning() {
-  if (nwsLtngLayer) {
-    map.removeLayer(nwsLtngLayer);
-    nwsLtngLayer = null;
-  }
-
-  if (!layersOn.lightning) return;
-
-  nwsLtngLayer = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_ltng', 0.75);
-
-  nwsLtngLayer.on('tileerror', function(e) {
-    // Keep the UI clean if NOAA's lightning layer is unavailable.
-    if (e && e.tile) {
-      e.tile.alt = '';
-      e.tile.style.display = 'none';
-    }
-    console.warn('NOAA lightning WMS tile unavailable. Hiding failed tile.');
-  });
-
-  nwsLtngLayer.addTo(map);
-}
 
 function setRadarType(type) {
   radarType=type;
@@ -825,7 +802,6 @@ function updateRadarTime() {
 
 function refreshRadar() {
   applyAllRadarLayers();
-  loadNWSLightning();
   updateRadarTime();
 }
 
@@ -1153,10 +1129,6 @@ function toggleLayer(name) {
   switch(name) {
     case 'warnings': if(warningLayer) on?warningLayer.addTo(map):map.removeLayer(warningLayer); break;
     case 'watches':  if(watchLayer)   on?watchLayer.addTo(map):map.removeLayer(watchLayer); break;
-    case 'lightning':
-      if(on){loadNWSLightning();}
-      else{if(nwsLtngLayer){map.removeLayer(nwsLtngLayer);nwsLtngLayer=null;}}
-      break;
     case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
     case 'cameras':
       if(camMarkerLayer) on?camMarkerLayer.addTo(map):map.removeLayer(camMarkerLayer);
@@ -1170,12 +1142,6 @@ function toggleLayer(name) {
   ['btn-vel',      ()=>setRadarType('velocity')],
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
-  ['btn-lightning',()=>{
-    layersOn.lightning=!layersOn.lightning;
-    document.getElementById('btn-lightning').classList.toggle('on',layersOn.lightning);
-    if(layersOn.lightning){loadNWSLightning();}
-    else{if(nwsLtngLayer){map.removeLayer(nwsLtngLayer);nwsLtngLayer=null;}}
-  }],
   ['btn-sirens',  ()=>{toggleLayer('sirens');  document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens);}],
   ['btn-cameras', ()=>{toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras);}],
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
