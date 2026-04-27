@@ -159,10 +159,11 @@ body.split-view #right-map-label{
 .tlabel{font-family:var(--fm);font-size:9px;color:var(--text-dim);white-space:nowrap}
 .radar-status{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);display:flex;justify-content:space-between}
 /* station legend in HUD */
-.station-tag{display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:.5px;padding:2px 5px;border-radius:2px;border:1px solid;margin:2px 2px 0 0;text-transform:uppercase}
+.station-tag{display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:.5px;padding:2px 5px;border-radius:2px;border:1px solid;margin:2px 2px 0 0;text-transform:uppercase;cursor:pointer;transition:all .15s}
 .station-tag.wsr{border-color:rgba(0,200,255,.4);color:rgba(0,200,255,.7)}
 .station-tag.tdwr{border-color:rgba(255,180,0,.4);color:rgba(255,180,0,.7)}
 .station-tag.test{border-color:rgba(160,120,255,.5);color:rgba(160,120,255,.8)}
+.station-tag:hover{filter:brightness(1.3);box-shadow:0 0 8px rgba(0,200,255,.22)}
 
 
 /* RIGHT-SIDE ACCORDION STACK */
@@ -1343,12 +1344,58 @@ function buildStationMarkers() {
 function buildStationLegend() {
   const el = document.getElementById('station-legend');
   if (!el) return;
-  el.innerHTML = ALL_STATIONS.map(s=>{
+
+  el.innerHTML = ALL_STATIONS.map(s => {
     const cls = s.tdwr ? 'tdwr' : s.test ? 'test' : 'wsr';
-    const sel = radarType==='velocity'&&s.id===selectedVelStation&&!s.tdwr
-      ? ' style="border-width:1.5px;opacity:1"' : '';
-    return `<span class="station-tag ${cls}"${sel}>${s.name}</span>`;
+    const sel = radarType === 'velocity' && s.id === selectedVelStation && !s.tdwr
+      ? ' style="border-width:1.5px;opacity:1"'
+      : '';
+
+    return `<span class="station-tag ${cls}"${sel}
+      title="${s.label}"
+      data-station-id="${s.id}"
+      role="button"
+      tabindex="0"
+      aria-label="Go to ${s.name} ${s.label}">
+      ${s.name}
+    </span>`;
   }).join('');
+
+  el.querySelectorAll('.station-tag').forEach(tag => {
+    const stationId = tag.getAttribute('data-station-id');
+
+    tag.addEventListener('click', () => {
+      flyToStation(stationId);
+    });
+
+    tag.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        flyToStation(stationId);
+      }
+    });
+  });
+}
+
+function flyToStation(stationId) {
+  const station = ALL_STATIONS.find(s => s.id === stationId);
+  if (!station) return;
+
+  const targetZoom = Math.max(map.getZoom(), 9);
+
+  map.flyTo([station.lat, station.lon], targetZoom, {
+    animate: true,
+    duration: 0.65
+  });
+
+  if (splitViewActive && compareMap) {
+    setTimeout(() => {
+      compareMap.setView([station.lat, station.lon], targetZoom, { animate:false });
+    }, 700);
+  }
+
+  const status = document.getElementById('radar-frames');
+  if (status) status.textContent = station.name + ' · ' + station.label;
 }
 
 function updateVelStationHUD() {
