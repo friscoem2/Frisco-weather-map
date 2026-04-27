@@ -98,22 +98,23 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 
 /* CITY LAYERS MENU */
 #hud-citylayers{
-  top:62px;
-  left:50%;
-  transform:translateX(-50%);
-  min-width:280px;
-  max-width:340px;
+  bottom:210px;
+  left:12px;
+  top:auto;
+  transform:none;
+  min-width:240px;
+  max-width:300px;
 }
 .city-layer-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:6px;
+  gap:5px;
 }
 .city-layer-btn{
   font-family:var(--fm);
   font-size:8.5px;
   letter-spacing:.7px;
-  padding:7px 6px;
+  padding:6px 5px;
   border-radius:3px;
   border:1px solid var(--border);
   background:rgba(0,170,240,.04);
@@ -149,7 +150,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   font-size:8px;
   color:var(--text-dim);
   line-height:1.4;
-  margin-top:8px;
+  margin-top:7px;
   border-top:1px solid var(--border);
   padding-top:7px;
 }
@@ -169,11 +170,21 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .cam-mclose{font-family:var(--fm);font-size:11px;color:var(--text-dim);cursor:pointer;padding:3px 8px;border:1px solid var(--border);border-radius:3px;transition:all .15s}
 .cam-mclose:hover{color:var(--danger);border-color:var(--danger)}
 #cam-modal img{width:100%;border-radius:3px;border:1px solid var(--border);background:#000;display:block}
-.cam-mlink{display:block;margin-top:8px;font-family:var(--fm);font-size:9.5px;color:var(--accent);text-decoration:none;letter-spacing:.5px}
+.cam-mlink{display:block;margin-top:7px;font-family:var(--fm);font-size:9.5px;color:var(--accent);text-decoration:none;letter-spacing:.5px}
 .cam-mlink:hover{text-decoration:underline}
 .siren-dot{width:9px;height:9px;border-radius:50%;background:rgba(0,200,255,.55);border:1.5px solid var(--accent);box-shadow:0 0 5px rgba(0,200,255,.35)}
 #rbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);z-index:1100;width:0;transition:width .4s linear}
-.leaflet-tile{filter:brightness(.9) saturate(.65)}
+.basemap-tile{
+  filter:brightness(.9) saturate(.65);
+}
+.radar-tile{
+  image-rendering:auto;
+  filter:saturate(1.2) contrast(1.08) blur(.35px);
+  transform:translateZ(0);
+}
+.leaflet-overlay-pane svg{
+  filter:none;
+}
 .leaflet-control-attribution{background:rgba(5,10,18,.75)!important;color:rgba(130,160,180,.5)!important;font-size:8.5px!important}
 .leaflet-control-attribution a{color:rgba(0,200,255,.4)!important}
 .leaflet-popup-content-wrapper{background:var(--surface2)!important;border:1px solid var(--border-hi)!important;border-radius:4px!important;color:var(--text)!important;font-family:var(--fm)!important;font-size:11px!important;box-shadow:var(--glow)!important}
@@ -252,7 +263,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
       <span id="radar-time">Loading radar…</span>
       <span id="radar-frames">—</span>
     </div>
-    <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:7px">
+    <div style="margin-top:7px;border-top:1px solid var(--border);padding-top:7px">
       <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:5px">ACTIVE STATIONS</div>
       <div id="station-legend"></div>
     </div>
@@ -272,19 +283,18 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
       <button class="city-layer-btn on"   id="btn-cameras">CAMERAS</button>
       <button class="city-layer-btn fire on" id="btn-firestations">FIRE STA.</button>
       <button class="city-layer-btn fire" id="btn-firedistricts">FIRE DIST.</button>
-      <button class="city-layer-btn pd"   id="btn-policebeats">PD BEATS</button>
     </div>
     <div class="city-layer-note">
-      Fire stations, fire districts, and police beats load from Frisco public ArcGIS services.
-      Districts and beats are off by default to keep the map clean.
+      Fire stations and fire districts load from Frisco public ArcGIS services.
+      Fire districts are off by default to keep the map clean.
     </div>
   </div>
 </div>
 
-<div class="hud" id="hud-cam">
+<div class="hud collapsed" id="hud-cam">
   <div class="hud-head" id="hud-cam-head">
     <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS · DAL/FTW</div>
-    <div class="hud-tog" id="hud-cam-tog">▾</div>
+    <div class="hud-tog" id="hud-cam-tog">▸</div>
   </div>
   <div class="hud-body">
     <div id="cam-list"><div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0;letter-spacing:1px">LOADING…</div></div>
@@ -310,7 +320,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 const map = L.map('map', { center:[33.155,-96.823], zoom:12, zoomControl:false, attributionControl:true });
 L.control.zoom({ position:'bottomleft' }).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  subdomains:'abcd', maxZoom:20, attribution:'© CARTO © OSM contributors'
+  subdomains:'abcd', maxZoom:20, className:'basemap-tile', attribution:'© CARTO © OSM contributors'
 }).addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
@@ -318,11 +328,11 @@ let radarType = 'reflectivity';
 let radarLayers = [];
 let warningLayer = null, watchLayer = null;
 let cityLimitLayer = null;
-let fireStationLayer = null, fireDistrictLayer = null, policeBeatLayer = null;
+let fireStationLayer = null, fireDistrictLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
 let selectedVelStation = 'kfws';
 let stationMarkerLayer = null;
-const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false, policeBeats:false };
+const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
 function makeWMS(url, layerName, opacity) {
@@ -337,6 +347,7 @@ function makeWMS(url, layerName, opacity) {
     updateWhenIdle: true,
     updateWhenZooming: false,
     keepBuffer: 1,
+    className: 'radar-tile',
     attribution: 'NOAA/NWS MRMS'
   });
 }
@@ -794,7 +805,7 @@ function applyAllRadarLayers() {
 
   if (radarType === 'reflectivity') {
     // CONUS composite base. This gives broad coverage without loading every single radar site.
-    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.6);
+    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.52);
     base.addTo(map);
     radarLayers.push(base);
 
@@ -803,7 +814,7 @@ function applyAllRadarLayers() {
       const ln = getLayerName(s, 'reflectivity');
       if (!ln) return;
 
-      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.78);
+      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.68);
       l.addTo(map);
       radarLayers.push(l);
     });
@@ -1152,13 +1163,6 @@ const FIRE_DISTRICT_STYLE = {
   dashArray:   '4 3'
 };
 
-const POLICE_BEAT_STYLE = {
-  color:       '#007aff',
-  weight:      1.5,
-  fillColor:   '#007aff',
-  fillOpacity: 0.06,
-  dashArray:   '4 3'
-};
 
 async function buildFireStations() {
   try {
@@ -1223,33 +1227,6 @@ async function buildFireDistricts() {
     if (layersOn.fireDistricts) fireDistrictLayer.addTo(map);
   } catch(e) {
     console.error('Fire districts load error:', e);
-  }
-}
-
-async function buildPoliceBeats() {
-  try {
-    const url = `${CITY_SERVICES_BASE}/5/query?f=geojson&where=1%3D1&outFields=NAME&outSR=4326`;
-    const res  = await fetch(url);
-    const data = await res.json();
-
-    policeBeatLayer = L.geoJSON(data, {
-      style: POLICE_BEAT_STYLE,
-      onEachFeature: (feature, layer) => {
-        const name = (feature.properties && feature.properties.NAME) || 'Police Beat';
-        layer.bindPopup(`
-          <div style="font-family:'JetBrains Mono',monospace">
-            <div style="color:#007aff;font-size:11px;font-weight:600">${name}</div>
-            <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Frisco Police Beat</div>
-          </div>
-        `);
-        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.15 }));
-        layer.on('mouseout',  () => layer.setStyle({ fillOpacity: POLICE_BEAT_STYLE.fillOpacity }));
-      }
-    });
-
-    if (layersOn.policeBeats) policeBeatLayer.addTo(map);
-  } catch(e) {
-    console.error('Police beats load error:', e);
   }
 }
 
@@ -1358,7 +1335,6 @@ function toggleLayer(name) {
     case 'cityLimits': if(cityLimitLayer) on ? cityLimitLayer.addTo(map) : map.removeLayer(cityLimitLayer); break;
     case 'fireStations': if(fireStationLayer) on ? fireStationLayer.addTo(map) : map.removeLayer(fireStationLayer); break;
     case 'fireDistricts': if(fireDistrictLayer) on ? fireDistrictLayer.addTo(map) : map.removeLayer(fireDistrictLayer); break;
-    case 'policeBeats': if(policeBeatLayer) on ? policeBeatLayer.addTo(map) : map.removeLayer(policeBeatLayer); break;
     case 'warnings': if(warningLayer) on?warningLayer.addTo(map):map.removeLayer(warningLayer); break;
     case 'watches':  if(watchLayer)   on?watchLayer.addTo(map):map.removeLayer(watchLayer); break;
     case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
@@ -1386,7 +1362,6 @@ function toggleLayer(name) {
   ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); }],
   ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
   ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
-  ['btn-policebeats', () => { toggleLayer('policeBeats'); document.getElementById('btn-policebeats').classList.toggle('on', layersOn.policeBeats); }],
 
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
@@ -1449,7 +1424,6 @@ buildSirens();
 buildCameras();
 buildFireStations();
 buildFireDistricts();
-buildPoliceBeats();
 
 })();
 
