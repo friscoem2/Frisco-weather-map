@@ -265,8 +265,6 @@ const DFW_STATIONS = [
   { id:'kfws', name:'KFWS', label:'Ft Worth TX',    lat:32.573, lon:-97.303 },
   { id:'kdyx', name:'KDYX', label:'Dyess AFB TX',   lat:32.538, lon:-99.254 },
   { id:'kfdr', name:'KFDR', label:'Altus AFB OK',   lat:34.362, lon:-98.977 },
-  { id:'tdal', name:'TDAL', label:'Love Field TX',  lat:32.847, lon:-96.852, tdwr:true },
-  { id:'tdfw', name:'TDFW', label:'DFW Airport TX', lat:32.897, lon:-97.037, tdwr:true },
 ];
 
 // Test/aux stations — shown on map with purple tint, included in reflectivity stack
@@ -778,10 +776,66 @@ function updateVelStationHUD() {
   if (el&&station) el.textContent=station.name+' · '+station.label;
 }
 
+// ── LIGHTNING ────────────────────────────────────────────────────────────────
+// NOAA's old conus_ltng WMS layer is unreliable/not consistently available.
+// Use nowCOAST's ArcGIS REST lightning strike density image service instead.
+// This is a gridded lightning density product, not individual strike points.
+const LIGHTNING_SERVICE_URL = 'https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/sat_meteo_emulated_imagery_lightningstrikedensity_goes_time/MapServer';
+
+function createArcGISDynamicTileLayer(serviceUrl, options = {}) {
+  return new (L.GridLayer.extend({
+    createTile: function(coords, done) {
+      const tile = document.createElement('img');
+      const size = this.getTileSize();
+      const bounds = this._tileCoordsToBounds(coords);
+      const sw = map.options.crs.project(bounds.getSouthWest());
+      const ne = map.options.crs.project(bounds.getNorthEast());
+
+      const bbox = [sw.x, sw.y, ne.x, ne.y].join(',');
+      const params = new URLSearchParams({
+        f: 'image',
+        format: 'png32',
+        transparent: 'true',
+        bbox: bbox,
+        bboxSR: '3857',
+        imageSR: '3857',
+        size: size.x + ',' + size.y,
+        dpi: '96'
+      });
+
+      if (options.layers) params.set('layers', options.layers);
+      if (options.layerDefs) params.set('layerDefs', options.layerDefs);
+      if (options.time) params.set('time', options.time);
+
+      tile.alt = options.alt || '';
+      tile.crossOrigin = '';
+      tile.onload = function(){ done(null, tile); };
+      tile.onerror = function(){ done(null, tile); };
+      tile.src = serviceUrl + '/export?' + params.toString() + '&t=' + Date.now();
+
+      if (options.opacity != null) tile.style.opacity = options.opacity;
+      return tile;
+    }
+  }))(options);
+}
+
 function loadNWSLightning() {
-  if (nwsLtngLayer) map.removeLayer(nwsLtngLayer);
+  if (nwsLtngLayer) {
+    map.removeLayer(nwsLtngLayer);
+    nwsLtngLayer = null;
+  }
+
   if (!layersOn.lightning) return;
-  nwsLtngLayer=makeWMS(`${NWS_BASE}/conus/ows`,'conus_ltng',0.8);
+
+  nwsLtngLayer = createArcGISDynamicTileLayer(LIGHTNING_SERVICE_URL, {
+    opacity: 0.78,
+    updateWhenIdle: true,
+    updateWhenZooming: false,
+    keepBuffer: 1,
+    alt: 'NOAA nowCOAST lightning strike density',
+    attribution: 'NOAA nowCOAST lightning density'
+  });
+
   nwsLtngLayer.addTo(map);
 }
 
