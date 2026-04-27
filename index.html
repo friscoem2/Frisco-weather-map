@@ -363,36 +363,286 @@ function getNearestReflectivityStations(limit = MAX_ACTIVE_REFLECTIVITY_RADARS) 
 }
 
 // ── ALERT COLOR MAP ───────────────────────────────────────────────────────────
-function alertStyle(event) {
-  const e = (event||'').toLowerCase();
-  if (e.includes('tornado warning'))
-    return { color:'#ff1744', fill:'#ff1744', fillOp:.22, weight:2.5, dash:null };
-  if (e.includes('severe thunderstorm warning'))
-    return { color:'#ff6b00', fill:'#ff6b00', fillOp:.18, weight:2, dash:null };
-  if (e.includes('flash flood warning')||e.includes('flood warning'))
-    return { color:'#9c27b0', fill:'#9c27b0', fillOp:.16, weight:2, dash:null };
-  if (e.includes('hurricane warning')||e.includes('special marine warning'))
-    return { color:'#ff1744', fill:'#ff1744', fillOp:.15, weight:2, dash:null };
-  if (e.includes('warning'))
-    return { color:'#ff5722', fill:'#ff5722', fillOp:.13, weight:1.5, dash:null };
-  if (e.includes('tornado watch'))
-    return { color:'#ffea00', fill:'#ffea00', fillOp:.10, weight:1.5, dash:'5 3' };
-  if (e.includes('severe thunderstorm watch'))
-    return { color:'#ffb300', fill:'#ffb300', fillOp:.09, weight:1.5, dash:'5 3' };
-  if (e.includes('flash flood watch')||e.includes('flood watch'))
-    return { color:'#00bcd4', fill:'#00bcd4', fillOp:.09, weight:1.5, dash:'5 3' };
-  return { color:'#cddc39', fill:'#cddc39', fillOp:.07, weight:1, dash:'4 3' };
+// Custom warning/watch palette:
+// Tornado Warning: dark red / maroon
+// Severe Thunderstorm Warning: orange
+// Flash Flood Warning: dark green
+// Tornado Watch: red
+// Severe Thunderstorm Watch: yellow
+// Flood Watch: light green
+// Winter products: teal / purple
+// Advisories / statements: lighter accent colors
+
+function getAlertTheme(event) {
+  const e = (event || '').toLowerCase();
+
+  // WARNINGS
+  if (e.includes('tornado warning')) {
+    return {
+      color: '#7f0000',
+      fill: '#7f0000',
+      fillOp: 0.24,
+      weight: 3,
+      dash: null
+    };
+  }
+
+  if (e.includes('severe thunderstorm warning')) {
+    return {
+      color: '#ff8c00',
+      fill: '#ff8c00',
+      fillOp: 0.20,
+      weight: 2.5,
+      dash: null
+    };
+  }
+
+  if (e.includes('flash flood warning')) {
+    return {
+      color: '#006400',
+      fill: '#006400',
+      fillOp: 0.20,
+      weight: 2.5,
+      dash: null
+    };
+  }
+
+  if (e.includes('flood warning')) {
+    return {
+      color: '#008000',
+      fill: '#008000',
+      fillOp: 0.16,
+      weight: 2,
+      dash: null
+    };
+  }
+
+  if (e.includes('hurricane warning') || e.includes('tropical storm warning')) {
+    return {
+      color: '#b00020',
+      fill: '#b00020',
+      fillOp: 0.18,
+      weight: 2.5,
+      dash: null
+    };
+  }
+
+  if (e.includes('special marine warning')) {
+    return {
+      color: '#ff9900',
+      fill: '#ff9900',
+      fillOp: 0.16,
+      weight: 2,
+      dash: null
+    };
+  }
+
+  if (
+    e.includes('winter storm warning') ||
+    e.includes('blizzard warning') ||
+    e.includes('ice storm warning')
+  ) {
+    return {
+      color: '#800080',
+      fill: '#800080',
+      fillOp: 0.16,
+      weight: 2.25,
+      dash: null
+    };
+  }
+
+  if (e.includes('warning')) {
+    return {
+      color: '#ff6600',
+      fill: '#ff6600',
+      fillOp: 0.14,
+      weight: 2,
+      dash: null
+    };
+  }
+
+  // WATCHES
+  if (e.includes('tornado watch')) {
+    return {
+      color: '#ff0000',
+      fill: '#ff0000',
+      fillOp: 0.11,
+      weight: 2.25,
+      dash: '8 5'
+    };
+  }
+
+  if (e.includes('severe thunderstorm watch')) {
+    return {
+      color: '#ffff00',
+      fill: '#ffff00',
+      fillOp: 0.12,
+      weight: 2.25,
+      dash: '8 5'
+    };
+  }
+
+  if (e.includes('flash flood watch') || e.includes('flood watch')) {
+    return {
+      color: '#90ee90',
+      fill: '#90ee90',
+      fillOp: 0.12,
+      weight: 2,
+      dash: '8 5'
+    };
+  }
+
+  if (e.includes('hurricane watch') || e.includes('tropical storm watch')) {
+    return {
+      color: '#ff4d6d',
+      fill: '#ff4d6d',
+      fillOp: 0.10,
+      weight: 2,
+      dash: '8 5'
+    };
+  }
+
+  if (e.includes('winter storm watch')) {
+    return {
+      color: '#008b8b',
+      fill: '#008b8b',
+      fillOp: 0.11,
+      weight: 2,
+      dash: '8 5'
+    };
+  }
+
+  if (e.includes('watch')) {
+    return {
+      color: '#ffd166',
+      fill: '#ffd166',
+      fillOp: 0.09,
+      weight: 1.75,
+      dash: '8 5'
+    };
+  }
+
+  // WINTER ADVISORIES / WINTER PRODUCTS
+  if (
+    e.includes('winter weather advisory') ||
+    e.includes('freezing rain advisory') ||
+    e.includes('snow advisory')
+  ) {
+    return {
+      color: '#7b68ee',
+      fill: '#7b68ee',
+      fillOp: 0.09,
+      weight: 1.75,
+      dash: '3 4'
+    };
+  }
+
+  if (
+    e.includes('wind chill') ||
+    e.includes('hard freeze') ||
+    e.includes('freeze warning') ||
+    e.includes('frost advisory')
+  ) {
+    return {
+      color: '#40e0d0',
+      fill: '#40e0d0',
+      fillOp: 0.09,
+      weight: 1.75,
+      dash: '3 4'
+    };
+  }
+
+  // ADVISORIES
+  if (e.includes('dense fog advisory')) {
+    return {
+      color: '#b0c4de',
+      fill: '#b0c4de',
+      fillOp: 0.08,
+      weight: 1.5,
+      dash: '3 4'
+    };
+  }
+
+  if (e.includes('wind advisory')) {
+    return {
+      color: '#d2b48c',
+      fill: '#d2b48c',
+      fillOp: 0.08,
+      weight: 1.5,
+      dash: '3 4'
+    };
+  }
+
+  if (e.includes('heat advisory') || e.includes('excessive heat')) {
+    return {
+      color: '#ffb347',
+      fill: '#ffb347',
+      fillOp: 0.09,
+      weight: 1.5,
+      dash: '3 4'
+    };
+  }
+
+  if (e.includes('small craft advisory')) {
+    return {
+      color: '#66cccc',
+      fill: '#66cccc',
+      fillOp: 0.08,
+      weight: 1.5,
+      dash: '3 4'
+    };
+  }
+
+  if (e.includes('advisory')) {
+    return {
+      color: '#80dfff',
+      fill: '#80dfff',
+      fillOp: 0.07,
+      weight: 1.5,
+      dash: '3 4'
+    };
+  }
+
+  // STATEMENTS / SPECIAL WEATHER
+  if (
+    e.includes('special weather statement') ||
+    e.includes('short term forecast') ||
+    e.includes('hazardous weather outlook')
+  ) {
+    return {
+      color: '#d9f0ff',
+      fill: '#d9f0ff',
+      fillOp: 0.055,
+      weight: 1.25,
+      dash: '2 5'
+    };
+  }
+
+  // FALLBACK
+  return {
+    color: '#cccccc',
+    fill: '#cccccc',
+    fillOp: 0.05,
+    weight: 1,
+    dash: '2 5'
+  };
 }
+
+function alertStyle(event) {
+  const s = getAlertTheme(event);
+
+  return {
+    color: s.color,
+    weight: s.weight,
+    fillColor: s.fill,
+    fillOpacity: s.fillOp,
+    dashArray: s.dash || undefined,
+    opacity: 0.95
+  };
+}
+
 function alertPopupColor(event) {
-  const e = (event||'').toLowerCase();
-  if (e.includes('tornado warning'))          return '#ff1744';
-  if (e.includes('severe thunderstorm warn')) return '#ff6b00';
-  if (e.includes('flood warning'))            return '#9c27b0';
-  if (e.includes('warning'))                  return '#ff5722';
-  if (e.includes('tornado watch'))            return '#ffea00';
-  if (e.includes('thunderstorm watch'))       return '#ffb300';
-  if (e.includes('flood watch'))              return '#00bcd4';
-  return '#cddc39';
+  return getAlertTheme(event).color;
 }
 
 // ── CLOCK ─────────────────────────────────────────────────────────────────────
@@ -618,18 +868,28 @@ function renderAlertPolygons(all) {
   });
   function makeLayer(features,layerOn) {
     if (!features.length||!layerOn) return null;
-    return L.geoJSON({type:'FeatureCollection',features},{
-      style:f=>{
-        const s=alertStyle(f.properties.event);
-        return {color:s.color,weight:s.weight,fillColor:s.fill,fillOpacity:s.fillOp,dashArray:s.dash||undefined};
-      },
-      onEachFeature:(f,l)=>{
-        const col=alertPopupColor(f.properties.event);
-        const exp=f.properties.expires
-          ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
-        l.bindPopup(`<div style="font-family:'JetBrains Mono',monospace;max-width:260px"><div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">${f.properties.event||'ALERT'}</div><div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">${(f.properties.headline||'').slice(0,140)}</div><div style="font-size:8.5px;color:var(--text-dim)">EXPIRES ${exp}</div></div>`,{maxWidth:280});
-      }
-    });
+return L.geoJSON({type:'FeatureCollection',features},{
+  style: f => alertStyle(f.properties.event),
+  onEachFeature:(f,l)=>{
+    const col=alertPopupColor(f.properties.event);
+    const exp=f.properties.expires
+      ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
+
+    l.bindPopup(`
+      <div style="font-family:'JetBrains Mono',monospace;max-width:260px">
+        <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">
+          ${f.properties.event||'ALERT'}
+        </div>
+        <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">
+          ${(f.properties.headline||'').slice(0,140)}
+        </div>
+        <div style="font-size:8.5px;color:var(--text-dim)">
+          EXPIRES ${exp}
+        </div>
+      </div>
+    `,{maxWidth:280});
+  }
+});
   }
   warningLayer=makeLayer(warnings,layersOn.warnings);
   if (warningLayer) warningLayer.addTo(map);
