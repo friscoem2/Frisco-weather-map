@@ -453,6 +453,94 @@ body.drawer-mode #right-stack{
   transform:translateY(-50%);
 }
 
+
+/* EXPANDABLE NWS ALERT CARDS */
+.al-item{
+  cursor:pointer;
+  transition:all .15s;
+}
+.al-item:hover{
+  border-color:var(--border-hi);
+  background:rgba(0,170,240,.06)!important;
+}
+.al-item.expanded{
+  background:rgba(0,0,0,.32)!important;
+}
+.al-full{
+  display:none;
+  margin-top:7px;
+  padding-top:7px;
+  border-top:1px solid var(--border);
+  font-family:var(--fm);
+  font-size:8.6px;
+  color:var(--text-dim);
+  line-height:1.45;
+}
+.al-item.expanded .al-full{
+  display:block;
+}
+.al-meta{
+  display:grid;
+  grid-template-columns:74px 1fr;
+  gap:3px 7px;
+  margin-bottom:7px;
+}
+.al-meta-label{
+  color:rgba(160,200,225,.55);
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.al-meta-value{
+  color:var(--text);
+}
+.al-section-title{
+  color:var(--accent);
+  font-size:8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin:7px 0 3px;
+}
+.al-description{
+  white-space:pre-wrap;
+  max-height:160px;
+  overflow:auto;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(0,170,240,.12);
+  border-radius:3px;
+  padding:6px;
+}
+.al-actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  margin-top:7px;
+}
+.al-action{
+  font-family:var(--fm);
+  font-size:8px;
+  letter-spacing:.6px;
+  padding:4px 7px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:rgba(0,170,240,.06);
+  color:var(--accent);
+  cursor:pointer;
+  text-transform:uppercase;
+  text-decoration:none;
+}
+.al-action:hover{
+  border-color:var(--border-hi);
+  background:rgba(0,200,255,.12);
+}
+.al-toggle-hint{
+  font-family:var(--fm);
+  font-size:7.5px;
+  color:rgba(160,200,225,.35);
+  margin-top:4px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+
 </style>
 </head>
 <body class="drawer-mode">
@@ -612,6 +700,9 @@ let isSyncingMaps = false;
 let mirrorMarkerOnMain = null;
 let mirrorMarkerOnCompare = null;
 let warningLayer = null, watchLayer = null;
+let localAlertFeatures = [];
+let alertFeatureIndex = new Map();
+let alertLayerIndex = new Map();
 let cityLimitLayer = null;
 let fireStationLayer = null, fireDistrictLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
@@ -1513,13 +1604,75 @@ function isWatchedWatch(event) {
 }
 
 function isLocalDFWAlert(feature) {
-  const d = (feature.properties?.areaDesc || '').toLowerCase();
+  const p = feature.properties || {};
+  const area = (p.areaDesc || '').toLowerCase();
+  const geocode = p.geocode || {};
 
-  return d.includes('collin') ||
-         d.includes('dallas') ||
-         d.includes('denton') ||
-         d.includes('tarrant') ||
-         d.includes('frisco');
+  // NWS geocode SAME county codes for the local North Texas watch area:
+  // Collin TX    = 048085
+  // Dallas TX    = 048113
+  // Denton TX    = 048121
+  // Ellis TX     = 048139
+  // Hunt TX      = 048231
+  // Kaufman TX   = 048257
+  // Rockwall TX  = 048397
+  // Johnson TX   = 048251
+  // Jack TX      = 048237
+  // Parker TX    = 048367
+  // Montague TX  = 048337
+  // Clay TX      = 048077
+  // Tarrant TX   = 048439
+  // Wise TX      = 048497
+  const localSameCodes = new Set([
+    '048085', // Collin
+    '048113', // Dallas
+    '048121', // Denton
+    '048139', // Ellis
+    '048231', // Hunt
+    '048257', // Kaufman
+    '048397', // Rockwall
+    '048251', // Johnson
+    '048237', // Jack
+    '048367', // Parker
+    '048337', // Montague
+    '048077', // Clay
+    '048439', // Tarrant
+    '048497'  // Wise
+  ]);
+
+  const sameCodes = Array.isArray(geocode.SAME) ? geocode.SAME : [];
+  if (sameCodes.some(code => localSameCodes.has(String(code)))) {
+    return true;
+  }
+
+  // Fallback for areaDesc text. Require TX/Texas context so same-name counties in other states do not match.
+  const hasTexasContext =
+    /tx/.test(area) ||
+    /texas/.test(area) ||
+    area.includes(', tx') ||
+    area.includes(', texas');
+
+  if (!hasTexasContext) return false;
+
+  const localCountyNames = [
+    'collin',
+    'dallas',
+    'denton',
+    'ellis',
+    'hunt',
+    'kaufman',
+    'rockwall',
+    'johnson',
+    'jack',
+    'parker',
+    'montague',
+    'clay',
+    'tarrant',
+    'wise',
+    'frisco'
+  ];
+
+  return localCountyNames.some(name => area.includes(name));
 }
 
 // ── ALERTS ────────────────────────────────────────────────────────────────────
@@ -1572,14 +1725,162 @@ async function loadAlerts() {
   }
 }
 
+
+function getAlertId(feature, fallbackIndex = 0) {
+  return feature.id ||
+         feature.properties?.id ||
+         feature.properties?.['@id'] ||
+         feature.properties?.capId ||
+         `${feature.properties?.event || 'alert'}-${feature.properties?.areaDesc || 'area'}-${feature.properties?.sent || fallbackIndex}`;
+}
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function formatAlertTime(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleString('en-US', {
+      timeZone:'America/Chicago',
+      month:'short',
+      day:'numeric',
+      hour:'numeric',
+      minute:'2-digit',
+      hour12:true
+    }) + ' CDT';
+  } catch(e) {
+    return value;
+  }
+}
+
+function getAlertSourceUrl(feature) {
+  return feature.properties?.['@id'] ||
+         feature.properties?.id ||
+         feature.id ||
+         '';
+}
+
+function zoomToAlert(alertId) {
+  const layer = alertLayerIndex.get(alertId);
+  if (!layer) return;
+
+  try {
+    if (typeof layer.getBounds === 'function') {
+      map.fitBounds(layer.getBounds(), { padding:[28, 28], maxZoom:10 });
+    } else if (typeof layer.getLatLng === 'function') {
+      map.flyTo(layer.getLatLng(), Math.max(map.getZoom(), 9), { duration:.6 });
+    }
+  } catch(e) {
+    console.warn('Unable to zoom to alert:', e);
+  }
+}
+
+function openAlertSource(alertId) {
+  const feature = alertFeatureIndex.get(alertId);
+  const url = feature ? getAlertSourceUrl(feature) : '';
+
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+
+function renderAlertDetails(feature, alertId) {
+  const p = feature.properties || {};
+  const sourceUrl = getAlertSourceUrl(feature);
+  const hasLayer = alertLayerIndex.has(alertId);
+  const description = p.description || p.headline || 'No detailed description provided.';
+  const instruction = p.instruction || '';
+
+  return `
+    <div class="al-full">
+      <div class="al-meta">
+        <div class="al-meta-label">Area</div>
+        <div class="al-meta-value">${escapeHTML(p.areaDesc || '—')}</div>
+
+        <div class="al-meta-label">Office</div>
+        <div class="al-meta-value">${escapeHTML(p.senderName || p.sender || '—')}</div>
+
+        <div class="al-meta-label">Severity</div>
+        <div class="al-meta-value">${escapeHTML(p.severity || '—')}</div>
+
+        <div class="al-meta-label">Certainty</div>
+        <div class="al-meta-value">${escapeHTML(p.certainty || '—')}</div>
+
+        <div class="al-meta-label">Urgency</div>
+        <div class="al-meta-value">${escapeHTML(p.urgency || '—')}</div>
+
+        <div class="al-meta-label">Sent</div>
+        <div class="al-meta-value">${escapeHTML(formatAlertTime(p.sent))}</div>
+
+        <div class="al-meta-label">Effective</div>
+        <div class="al-meta-value">${escapeHTML(formatAlertTime(p.effective))}</div>
+
+        <div class="al-meta-label">Expires</div>
+        <div class="al-meta-value">${escapeHTML(formatAlertTime(p.expires))}</div>
+      </div>
+
+      <div class="al-section-title">Full Description</div>
+      <div class="al-description">${escapeHTML(description)}</div>
+
+      ${instruction ? `
+        <div class="al-section-title">Instructions</div>
+        <div class="al-description">${escapeHTML(instruction)}</div>
+      ` : ''}
+
+      <div class="al-actions">
+        ${hasLayer ? `<button class="al-action" data-alert-zoom="${escapeHTML(alertId)}">Zoom to Polygon</button>` : ''}
+        ${sourceUrl ? `<button class="al-action" data-alert-source="${escapeHTML(alertId)}">Open NWS Source</button>` : ''}
+      </div>
+
+      <div class="al-toggle-hint">Click card to collapse</div>
+    </div>
+  `;
+}
+
+function wireAlertCardInteractions() {
+  const list = document.getElementById('alert-list');
+  if (!list) return;
+
+  list.querySelectorAll('.al-item').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('.al-action')) return;
+      card.classList.toggle('expanded');
+    });
+  });
+
+  list.querySelectorAll('[data-alert-zoom]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      zoomToAlert(btn.getAttribute('data-alert-zoom'));
+    });
+  });
+
+  list.querySelectorAll('[data-alert-source]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openAlertSource(btn.getAttribute('data-alert-source'));
+    });
+  });
+}
+
 function renderAlerts(alerts) {
   const list=document.getElementById('alert-list');
   const dot=document.getElementById('alert-dot');
   const card=document.getElementById('hud-alerts');
 
+  localAlertFeatures = alerts || [];
+
   if (!alerts.length) {
     list.innerHTML='<div class="no-alerts">✓ NO ACTIVE LOCAL WATCHED ALERTS</div>';
-    dot.className='dot g'; card.classList.remove('alert-active'); return;
+    dot.className='dot g';
+    card.classList.remove('alert-active');
+    return;
   }
 
   const hasWarn=alerts.some(a=>isWatchedWarning(a.properties?.event || ''));
@@ -1587,23 +1888,31 @@ function renderAlerts(alerts) {
   dot.className=hasWarn?'dot r':hasWatch?'dot y':'dot';
   card.classList.toggle('alert-active',hasWarn);
 
-  list.innerHTML=alerts.slice(0,6).map(f=>{
-    const p=f.properties;
+  list.innerHTML=alerts.slice(0,8).map((f, i)=>{
+    const p=f.properties || {};
+    const alertId = getAlertId(f, i);
+    alertFeatureIndex.set(alertId, f);
+
     const isW=isWatchedWarning(p.event || '');
     const isA=isWatchedWatch(p.event || '');
     const cls=isW?'W':isA?'A':'Y';
     const exp=p.expires?new Date(p.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'}):'—';
     const col = alertPopupColor(p.event || '');
 
-    return `<div class="al-item ${cls}" style="border-color:${col};background:rgba(0,0,0,.22)">
-      <div class="al-event" style="color:${col}">${p.event||'ALERT'}</div>
-      <div class="al-head">${(p.headline||'').slice(0,90)}${(p.headline||'').length>90?'…':''}</div>
-      <div class="al-exp">EXP ${exp} CDT</div>
+    return `<div class="al-item ${cls}" data-alert-id="${escapeHTML(alertId)}" style="border-color:${col};background:rgba(0,0,0,.22)">
+      <div class="al-event" style="color:${col}">${escapeHTML(p.event||'ALERT')}</div>
+      <div class="al-head">${escapeHTML((p.headline||'').slice(0,120))}${(p.headline||'').length>120?'…':''}</div>
+      <div class="al-exp">EXP ${escapeHTML(exp)} CDT</div>
+      <div class="al-toggle-hint">Click for full NWS text + source</div>
+      ${renderAlertDetails(f, alertId)}
     </div>`;
   }).join('');
+
+  wireAlertCardInteractions();
 }
 
 function renderAlertPolygons(all) {
+  alertLayerIndex.clear();
   if (warningLayer) map.removeLayer(warningLayer);
   if (watchLayer) map.removeLayer(watchLayer);
 
@@ -1628,6 +1937,9 @@ function renderAlertPolygons(all) {
     return L.geoJSON({type:'FeatureCollection',features},{
       style: f => alertStyle(f.properties.event),
       onEachFeature:(f,l)=>{
+        const alertId = getAlertId(f);
+        alertFeatureIndex.set(alertId, f);
+        alertLayerIndex.set(alertId, l);
         const col=alertPopupColor(f.properties.event);
         const exp=f.properties.expires
           ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
@@ -1657,6 +1969,8 @@ function renderAlertPolygons(all) {
 
   watchLayer=makeLayer(watches,layersOn.watches);
   if (watchLayer) watchLayer.addTo(map);
+
+  if (localAlertFeatures && localAlertFeatures.length) renderAlerts(localAlertFeatures);
 
   console.log(`Loaded watched alerts: ${warnings.length} warnings, ${watches.length} watches`);
 }
