@@ -262,18 +262,14 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     <div class="hud-tog" id="hud-radar-tog">▾</div>
   </div>
   <div class="hud-body">
-    <div class="rsect-label">ACTIVE STATIONS · ALL SIMULTANEOUS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-      <div class="rsrc-btn on" style="cursor:default">KFWS<small>Ft Worth</small></div>
-      <div class="rsrc-btn on" style="cursor:default">KDYX<small>Dyess AFB</small></div>
-      <div class="rsrc-btn on" style="cursor:default">KFDR<small>Altus AFB</small></div>
-      <div class="rsrc-btn on" id="tdal-badge" style="cursor:default">TDAL<small>Love Field</small></div>
-      <div class="rsrc-btn on" id="tdfw-badge" style="cursor:default">TDFW<small>DFW Airport</small></div>
-    </div>
-    <div id="tdwr-note" style="display:none;font-family:var(--fm);font-size:8px;color:var(--warn);margin-bottom:6px;letter-spacing:.3px">⚠ TDWR: REFLECTIVITY ONLY · NO PUBLIC VELOCITY</div>
     <div class="rtype-row">
       <button class="rtype-btn on" id="rtype-refl">REFLECTIVITY</button>
       <button class="rtype-btn"    id="rtype-vel">VELOCITY</button>
+    </div>
+    <div id="vel-station-row" style="display:none;margin-bottom:8px">
+      <div style="font-family:var(--fm);font-size:8.5px;color:var(--text-dim);letter-spacing:1px;margin-bottom:3px">VELOCITY SOURCE</div>
+      <div style="font-family:var(--fm);font-size:10px;color:var(--accent)" id="vel-station-label">KFWS · Ft Worth TX</div>
+      <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);margin-top:2px">Click a radar marker on the map to switch</div>
     </div>
     <div class="timeline-row">
       <button class="play-btn" id="play-btn">↻ REFRESH</button>
@@ -335,15 +331,13 @@ let radarType = 'reflectivity'; // 'reflectivity' | 'velocity'
 let radarLayers = [];           // active WMS layers (one per station)
 let nwsLtngLayer = null, warningLayer = null, watchLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
+let selectedVelStation = 'kfws'; // which station drives velocity view
+let stationMarkerLayer = null;   // clickable radar site markers
 
 const layersOn = { warnings:true, watches:true, lightning:true, sirens:true, cameras:true };
 
-// NWS opengeo GeoServer — each station has its own workspace
-// Layer naming: {site}_bref_raw = reflectivity, {site}_bvel_raw = velocity
-// CONUS composite (fallback): conus/conus_bref_qcd, conus/conus_bvel_qcd
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
-// All WSR-88D stations shown simultaneously — toggling reflectivity/velocity
 function makeWMS(url, layerName, opacity) {
   return L.tileLayer.wms(url, {
     layers: layerName,
@@ -352,28 +346,57 @@ function makeWMS(url, layerName, opacity) {
     opacity: opacity || 0.75,
     version: '1.3.0',
     uppercase: true,
+    detectRetina: true,
     attribution: 'NOAA/NWS MRMS'
   });
 }
 
-// The 5 stations we care about (each gets its own WMS layer simultaneously)
 const DFW_STATIONS = [
   { id:'kfws', name:'KFWS', label:'Ft Worth TX',  lat:32.573, lon:-97.303 },
   { id:'kdyx', name:'KDYX', label:'Dyess AFB TX', lat:32.538, lon:-99.254 },
   { id:'kfdr', name:'KFDR', label:'Altus AFB OK', lat:34.362, lon:-98.977 },
-  // TDWRs — NWS GeoServer does have TDWR workspaces (tdal, tdfw)
-  { id:'tdal', name:'TDAL', label:'Love Field',   lat:32.847, lon:-96.852, tdwr:true },
-  { id:'tdfw', name:'TDFW', label:'DFW Airport',  lat:32.897, lon:-97.037, tdwr:true },
+  { id:'tdal', name:'TDAL', label:'Love Field TX',lat:32.847, lon:-96.852, tdwr:true },
+  { id:'tdfw', name:'TDFW', label:'DFW Airport TX',lat:32.897,lon:-97.037, tdwr:true },
 ];
 
-// TDWR layer names differ: tdal_bref (no _raw suffix)
 function getLayerName(station, type) {
-  const product = type === 'reflectivity' ? 'bref_raw' : 'bvel_raw';
-  if (station.tdwr) {
-    // TDWRs only have reflectivity on the public GeoServer
-    return type === 'reflectivity' ? `${station.id}_bref` : null;
-  }
-  return `${station.id}_${product}`;
+  if (station.tdwr) return type === 'reflectivity' ? `${station.id}_bref` : null;
+  return type === 'reflectivity' ? `${station.id}_bref_raw` : `${station.id}_bvel_raw`;
+}
+
+// ── ALERT COLOR MAP ──────────────────────────────────────────────────────────
+function alertStyle(event) {
+  const e = (event||'').toLowerCase();
+  if (e.includes('tornado warning'))
+    return { color:'#ff1744', fill:'#ff1744', fillOp:.22, weight:2.5, dash:null };
+  if (e.includes('severe thunderstorm warning'))
+    return { color:'#ff6b00', fill:'#ff6b00', fillOp:.18, weight:2,   dash:null };
+  if (e.includes('flash flood warning') || e.includes('flood warning'))
+    return { color:'#9c27b0', fill:'#9c27b0', fillOp:.16, weight:2,   dash:null };
+  if (e.includes('special marine warning') || e.includes('hurricane warning'))
+    return { color:'#ff1744', fill:'#ff1744', fillOp:.15, weight:2,   dash:null };
+  if (e.includes('warning'))
+    return { color:'#ff5722', fill:'#ff5722', fillOp:.13, weight:1.5, dash:null };
+  if (e.includes('tornado watch'))
+    return { color:'#ffea00', fill:'#ffea00', fillOp:.10, weight:1.5, dash:'5 3' };
+  if (e.includes('severe thunderstorm watch'))
+    return { color:'#ffb300', fill:'#ffb300', fillOp:.09, weight:1.5, dash:'5 3' };
+  if (e.includes('flash flood watch') || e.includes('flood watch'))
+    return { color:'#00bcd4', fill:'#00bcd4', fillOp:.09, weight:1.5, dash:'5 3' };
+  // generic watch
+  return { color:'#cddc39', fill:'#cddc39', fillOp:.07, weight:1,   dash:'4 3' };
+}
+
+function alertPopupColor(event) {
+  const e = (event||'').toLowerCase();
+  if (e.includes('tornado warning'))          return '#ff1744';
+  if (e.includes('severe thunderstorm warn')) return '#ff6b00';
+  if (e.includes('flood warning'))            return '#9c27b0';
+  if (e.includes('warning'))                  return '#ff5722';
+  if (e.includes('tornado watch'))            return '#ffea00';
+  if (e.includes('thunderstorm watch'))       return '#ffb300';
+  if (e.includes('flood watch'))              return '#00bcd4';
+  return '#cddc39';
 }
 
 // ── CLOCK ────────────────────────────────────────────────────────────────────
@@ -438,34 +461,97 @@ L.marker([33.155, -96.823], {
   interactive:false
 }).addTo(map);
 
-// ── RADAR (NWS opengeo WMS — all stations simultaneously) ────────────────────
+// ── RADAR (NWS opengeo WMS) ───────────────────────────────────────────────────
 function loadRadar() {
   applyAllRadarLayers();
+  buildStationMarkers();
   loadNWSLightning();
   updateRadarTime();
   document.getElementById('radar-frames').textContent = 'NWS LIVE';
 }
 
 function applyAllRadarLayers() {
-  // Remove existing radar layers
   radarLayers.forEach(l => map.removeLayer(l));
   radarLayers = [];
 
-  // Add CONUS composite as the base (catches everything, fills gaps)
-  const conusLayer = type => type === 'reflectivity' ? 'conus_bref_qcd' : 'conus_bvel_qcd';
-  const baseLayer = makeWMS(`${NWS_BASE}/conus/ows`, conusLayer(radarType), 0.65);
-  baseLayer.addTo(map);
-  radarLayers.push(baseLayer);
+  if (radarType === 'reflectivity') {
+    // CONUS composite base + all per-station reflectivity stacked
+    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.65);
+    base.addTo(map); radarLayers.push(base);
+    DFW_STATIONS.forEach(s => {
+      const ln = getLayerName(s, 'reflectivity');
+      if (!ln) return;
+      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.78);
+      l.addTo(map); radarLayers.push(l);
+    });
+  } else {
+    // Velocity — single selected station only (user picks via map marker)
+    const station = DFW_STATIONS.find(s => s.id === selectedVelStation);
+    if (station && !station.tdwr) {
+      const ln = getLayerName(station, 'velocity');
+      const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
+      l.addTo(map); radarLayers.push(l);
+    }
+    updateVelStationHUD();
+  }
+}
 
-  // Layer each individual station on top for higher-res local data
+function buildStationMarkers() {
+  if (stationMarkerLayer) map.removeLayer(stationMarkerLayer);
+  stationMarkerLayer = L.layerGroup().addTo(map);
+
   DFW_STATIONS.forEach(station => {
-    const layerName = getLayerName(station, radarType);
-    if (!layerName) return; // TDWR has no velocity — skip
-    const wmsUrl = `${NWS_BASE}/${station.id}/ows`;
-    const layer = makeWMS(wmsUrl, layerName, 0.78);
-    layer.addTo(map);
-    radarLayers.push(layer);
+    const isSelected = station.id === selectedVelStation;
+    const isTdwr = !!station.tdwr;
+    const color = isTdwr ? 'rgba(255,180,0,' : 'rgba(0,200,255,';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        position:relative;width:34px;height:34px;
+        display:flex;align-items:center;justify-content:center;
+      ">
+        <div style="
+          position:absolute;inset:0;border-radius:50%;
+          border:1.5px solid ${isTdwr ? '#ffb300' : '#00c8ff'};
+          background:${isTdwr ? 'rgba(255,180,0,.08)' : 'rgba(0,200,255,.08)'};
+          ${radarType==='velocity' && isSelected && !isTdwr ? 'box-shadow:0 0 12px rgba(0,200,255,.5);border-width:2px;' : ''}
+        "></div>
+        <div style="
+          font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;
+          letter-spacing:.5px;color:${isTdwr ? '#ffb300' : '#00c8ff'};
+          text-shadow:0 0 6px ${isTdwr ? 'rgba(255,180,0,.5)' : 'rgba(0,200,255,.5)'};
+          position:relative;z-index:1;text-align:center;line-height:1.1;
+          pointer-events:none;
+        ">${station.name}<br><span style="font-size:6.5px;opacity:.7">${isTdwr?'TDWR':'WSR'}</span></div>
+      </div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17]
+    });
+
+    const marker = L.marker([station.lat, station.lon], { icon, zIndexOffset: 500 });
+
+    marker.bindPopup(`
+      <div style="font-family:'JetBrains Mono',monospace;min-width:160px">
+        <div style="color:${isTdwr?'#ffb300':'#00c8ff'};font-size:11px;font-weight:600;margin-bottom:4px">${station.name} · ${station.label}</div>
+        <div style="font-size:9.5px;color:var(--text-dim);margin-bottom:6px">${isTdwr?'Terminal Doppler Weather Radar':'NEXRAD WSR-88D'}</div>
+        ${isTdwr
+          ? '<div style="font-size:9px;color:#ffb300">Reflectivity only · No public velocity</div>'
+          : `<div style="font-size:9px;color:var(--text-dim);margin-bottom:6px">Click to use for velocity view</div>
+             <button onclick="selectVelStation('${station.id}')" style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 10px;background:rgba(0,200,255,.12);border:1px solid #00c8ff;color:#00c8ff;border-radius:3px;cursor:pointer;letter-spacing:.5px">
+               ${isSelected && radarType==='velocity' ? '✓ ACTIVE VELOCITY SRC' : 'SELECT FOR VELOCITY'}
+             </button>`
+        }
+      </div>
+    `, { maxWidth: 220 });
+
+    stationMarkerLayer.addLayer(marker);
   });
+}
+
+function updateVelStationHUD() {
+  const station = DFW_STATIONS.find(s => s.id === selectedVelStation);
+  const el = document.getElementById('vel-station-label');
+  if (el && station) el.textContent = station.name + ' · ' + station.label;
 }
 
 function loadNWSLightning() {
@@ -482,10 +568,11 @@ function setRadarType(type) {
   ['rtype-refl','rtype-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById(type==='reflectivity' ? 'btn-refl' : 'btn-vel').classList.add('on');
   document.getElementById(type==='reflectivity' ? 'rtype-refl' : 'rtype-vel').classList.add('on');
-  // Update TDWR note
-  const tdwrNote = document.getElementById('tdwr-note');
-  if (tdwrNote) tdwrNote.style.display = type === 'velocity' ? 'block' : 'none';
+  // Show velocity station selector row only in velocity mode
+  const velRow = document.getElementById('vel-station-row');
+  if (velRow) velRow.style.display = type === 'velocity' ? 'block' : 'none';
   applyAllRadarLayers();
+  buildStationMarkers(); // rebuild to update selected highlight
   updateRadarTime();
 }
 
@@ -558,25 +645,45 @@ function renderAlerts(alerts) {
 function renderAlertPolygons(all) {
   if (warningLayer) map.removeLayer(warningLayer);
   if (watchLayer)   map.removeLayer(watchLayer);
-  const warnings=[], watches=[];
-  all.forEach(f=>{
+  const warnings = [], watches = [];
+  all.forEach(f => {
     if (!f.geometry) return;
-    const ev=(f.properties.event||'').toLowerCase();
+    const ev = (f.properties.event||'').toLowerCase();
     if (ev.includes('warning')) warnings.push(f);
     else if (ev.includes('watch')) watches.push(f);
   });
-  if (warnings.length && layersOn.warnings) {
-    warningLayer = L.geoJSON({type:'FeatureCollection',features:warnings},{
-      style:{color:'#ff1744',weight:2,fillColor:'#ff1744',fillOpacity:.13},
-      onEachFeature:(f,l)=>l.bindPopup(`<b style="color:#ff1744">${f.properties.event}</b><br>${(f.properties.headline||'').slice(0,100)}`)
-    }).addTo(map);
+
+  function makeAlertLayer(features, layerOn) {
+    if (!features.length || !layerOn) return null;
+    return L.geoJSON({ type:'FeatureCollection', features }, {
+      style: f => {
+        const s = alertStyle(f.properties.event);
+        return {
+          color: s.color, weight: s.weight,
+          fillColor: s.fill, fillOpacity: s.fillOp,
+          dashArray: s.dash || undefined
+        };
+      },
+      onEachFeature: (f, l) => {
+        const col = alertPopupColor(f.properties.event);
+        const exp = f.properties.expires
+          ? new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'}) + ' CDT'
+          : '—';
+        l.bindPopup(`
+          <div style="font-family:'JetBrains Mono',monospace;max-width:260px">
+            <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">${f.properties.event||'ALERT'}</div>
+            <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">${(f.properties.headline||'').slice(0,140)}</div>
+            <div style="font-size:8.5px;color:var(--text-dim)">EXPIRES ${exp}</div>
+          </div>
+        `, { maxWidth: 280 });
+      }
+    });
   }
-  if (watches.length && layersOn.watches) {
-    watchLayer = L.geoJSON({type:'FeatureCollection',features:watches},{
-      style:{color:'#ffea00',weight:1.5,fillColor:'#ffea00',fillOpacity:.07,dashArray:'4 3'},
-      onEachFeature:(f,l)=>l.bindPopup(`<b style="color:#ffea00">${f.properties.event}</b><br>${(f.properties.headline||'').slice(0,100)}`)
-    }).addTo(map);
-  }
+
+  warningLayer = makeAlertLayer(warnings, layersOn.warnings);
+  if (warningLayer) warningLayer.addTo(map);
+  watchLayer = makeAlertLayer(watches, layersOn.watches);
+  if (watchLayer) watchLayer.addTo(map);
 }
 
 // ── CONDITIONS ────────────────────────────────────────────────────────────────
@@ -613,16 +720,48 @@ function startLightning() {
 
 // ── SIRENS ────────────────────────────────────────────────────────────────────
 const SIRENS = [
-  {id:'S01',lat:33.182,lon:-96.822,name:'City Hall Area'},
-  {id:'S02',lat:33.165,lon:-96.875,name:'Lebanon / DNT'},
-  {id:'S03',lat:33.141,lon:-96.819,name:'Preston / Main'},
-  {id:'S04',lat:33.199,lon:-96.782,name:'Eldorado / Coit'},
-  {id:'S05',lat:33.152,lon:-96.765,name:'Panther Creek'},
-  {id:'S06',lat:33.128,lon:-96.865,name:'Rolater / DNT'},
-  {id:'S07',lat:33.189,lon:-96.852,name:'Stonebrook / DNT'},
-  {id:'S08',lat:33.165,lon:-96.730,name:'Coit / Eldorado'},
-  {id:'S09',lat:33.110,lon:-96.805,name:'Spring Creek Pkwy'},
-  {id:'S10',lat:33.205,lon:-96.865,name:'Stewart Creek'},
+  {id:'1001',lat:33.212666,lon:-96.754569,name:'Red Bud Estates'},
+  {id:'1002',lat:33.159629,lon:-96.738656,name:'Custer Creek Farms'},
+  {id:'1003',lat:33.158582,lon:-96.870102,name:'Wilma Fisher Elementary School'},
+  {id:'1004',lat:33.135827,lon:-96.824044,name:'Frisco Police Department'},
+  {id:'1005',lat:33.105576,lon:-96.840227,name:'Fire Station 3'},
+  {id:'1006',lat:33.128538,lon:-96.796025,name:'Collin College Frisco'},
+  {id:'1007',lat:33.169369,lon:-96.812036,name:'Warren Sports Complex'},
+  {id:'1008',lat:33.149541,lon:-96.822368,name:'Old Water Tower on Main'},
+  {id:'1009',lat:33.148628,lon:-96.789149,name:'J.W. & Ruth Christie Elementary School'},
+  {id:'1010',lat:33.116403,lon:-96.779393,name:'Lebanon Rd @ White Rock Creek'},
+  {id:'1011',lat:33.111269,lon:-96.814685,name:'Parkwood Blvd Water Tower'},
+  {id:'1012',lat:33.134309,lon:-96.768296,name:'Centennial High School'},
+  {id:'1013',lat:33.12084,lon:-96.866635,name:'Lebanon Rd & Quail Hollow Rd'},
+  {id:'1014',lat:33.130127,lon:-96.737443,name:'Superior Water System @ Custer'},
+  {id:'1015',lat:33.145947,lon:-96.831897,name:'Cotton Gin Rd'},
+  {id:'1016',lat:33.141666,lon:-96.876566,name:'Pioneer Middle School'},
+  {id:'1017',lat:33.150645,lon:-96.752147,name:'Harold Bacchus Community Park'},
+  {id:'1018',lat:33.162728,lon:-96.758456,name:'Yucca Ridge Park / Independence High School'},
+  {id:'1019',lat:33.175387,lon:-96.796408,name:'Eldorado @ Gladstone'},
+  {id:'1020',lat:33.123136,lon:-96.846921,name:'Legacy @ Beavers Bend Park'},
+  {id:'1021',lat:33.159556,lon:-96.849237,name:'Caroll Elementary School'},
+  {id:'1022',lat:33.186322,lon:-96.845277,name:'Trent Middle School'},
+  {id:'1023',lat:33.190199,lon:-96.866733,name:'Lone Star High School'},
+  {id:'1024',lat:33.089808,lon:-96.842177,name:'Town & Country Blvd'},
+  {id:'1025',lat:33.145668,lon:-96.893902,name:'Fire Station 7'},
+  {id:'1026',lat:33.12628,lon:-96.887258,name:'Lebanon Rd & Dustwhirl Dr'},
+  {id:'1027',lat:33.14876,lon:-96.808159,name:'Central Fire Station'},
+  {id:'1028',lat:33.192472,lon:-96.790133,name:'Miramonte Park/Hays Middle School'},
+  {id:'1029',lat:33.177283,lon:-96.865579,name:'George and Debra Purefoy Elementary School'},
+  {id:'1030',lat:33.178774,lon:-96.771906,name:'Libby Cash Maus Middle School'},
+  {id:'1031',lat:33.174342,lon:-96.744382,name:'Eldorado @ Palm Springs'},
+  {id:'1032',lat:33.109807,lon:-96.801823,name:'Fire Station 2'},
+  {id:'1033',lat:33.136883,lon:-96.860217,name:'Vaughn Elementary School'},
+  {id:'1034',lat:33.175718,lon:-96.832198,name:'Frisco St @ Eldorado'},
+  {id:'1035',lat:33.101069,lon:-96.818123,name:'Parkwood Blvd and Gaylord Pkwy'},
+  {id:'1036',lat:33.138791,lon:-96.909829,name:'Crown Park Ln @ Golf Club at Frisco Lakes'},
+  {id:'1037',lat:33.141455,lon:-96.776996,name:'Bessie Gunstream Elementary School'},
+  {id:'1038',lat:33.128926,lon:-96.750927,name:'Billy Thompson Vandeventer Middle School'},
+  {id:'1039',lat:33.211194,lon:-96.877611,name:'Minett Elementary'},
+  {id:'1040',lat:33.203674,lon:-96.805065,name:'Fire Station 9'},
+  {id:'1042',lat:33.2079,lon:-96.83823,name:'Legacy @ PGA'},
+  {id:'1043',lat:33.211061,lon:-96.862525,name:'Panther Creek High School'},
 ];
 
 function buildSirens() {
@@ -788,6 +927,19 @@ setInterval(()=>{
 setInterval(loadAlerts, 60000);
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+// Listen for station selection from popup buttons (which live outside the IIFE)
+document.addEventListener('selectVelStation', e => {
+  selectedVelStation = e.detail;
+  if (radarType !== 'velocity') {
+    setRadarType('velocity');
+  } else {
+    applyAllRadarLayers();
+    buildStationMarkers();
+    updateRadarTime();
+  }
+  map.closePopup();
+});
+
 loadRadar();
 loadAlerts();
 loadConditions();
@@ -795,6 +947,12 @@ buildSirens();
 buildCameras();
 
 })(); // IIFE — no globals, no export conflicts
+
+// selectVelStation must be global — called from Leaflet popup button
+function selectVelStation(stationId) {
+  // Delegate into the IIFE's closure via a custom event
+  document.dispatchEvent(new CustomEvent('selectVelStation', { detail: stationId }));
+}
 </script>
 </body>
 </html>
