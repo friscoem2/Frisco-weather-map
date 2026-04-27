@@ -29,11 +29,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);background:var(--bg);color:var(--text)}
-
-/* MAP */
 #map{position:absolute;inset:0;z-index:1}
-
-/* TOPBAR */
 #topbar{
   position:absolute;top:0;left:0;right:0;z-index:1000;
   height:48px;
@@ -42,52 +38,21 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   display:flex;align-items:center;padding:0 14px;gap:16px;
   backdrop-filter:blur(14px);
 }
-.logo{
-  font-family:var(--fd);font-size:17px;font-weight:700;
-  letter-spacing:3px;color:var(--accent);
-  text-shadow:0 0 16px rgba(0,200,255,.4);
-  white-space:nowrap;flex-shrink:0;
-}
+.logo{font-family:var(--fd);font-size:17px;font-weight:700;letter-spacing:3px;color:var(--accent);text-shadow:0 0 16px rgba(0,200,255,.4);white-space:nowrap;flex-shrink:0}
 .tb-div{width:1px;height:26px;background:var(--border);flex-shrink:0}
 .layer-btns{display:flex;gap:5px;flex-wrap:wrap}
-
-.lbtn{
-  font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.8px;
-  padding:4px 11px;border-radius:3px;
-  border:1px solid var(--border);background:rgba(0,170,240,.04);
-  color:var(--text-dim);cursor:pointer;transition:all .15s;
-  text-transform:uppercase;white-space:nowrap;
-}
+.lbtn{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.8px;padding:4px 11px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.04);color:var(--text-dim);cursor:pointer;transition:all .15s;text-transform:uppercase;white-space:nowrap}
 .lbtn:hover{border-color:var(--border-hi);color:var(--text)}
 .lbtn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.1);box-shadow:0 0 8px rgba(0,200,255,.18)}
 .lbtn.on.warn{border-color:var(--warn);color:var(--warn);background:rgba(255,107,0,.1);box-shadow:0 0 8px rgba(255,107,0,.18)}
-.lbtn.on.danger{border-color:var(--danger);color:var(--danger);background:rgba(255,23,68,.1)}
 .lbtn.on.lite{border-color:var(--watch);color:var(--watch);background:rgba(255,234,0,.08)}
-
 #clock{margin-left:auto;font-family:var(--fm);font-size:12px;color:var(--text-dim);white-space:nowrap;flex-shrink:0}
-
-/* HUD CARDS */
-.hud{
-  position:absolute;z-index:900;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:4px;backdrop-filter:blur(18px);
-  min-width:220px;max-width:310px;
-  transition:border-color .2s,box-shadow .2s;
-}
+.hud{position:absolute;z-index:900;background:var(--surface);border:1px solid var(--border);border-radius:4px;backdrop-filter:blur(18px);min-width:220px;max-width:310px;transition:border-color .2s,box-shadow .2s}
 .hud:hover{border-color:var(--border-hi);box-shadow:var(--glow)}
 .hud.alert-active{border-color:var(--danger);box-shadow:var(--glow-danger);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 10px rgba(255,23,68,.3)}50%{box-shadow:0 0 28px rgba(255,23,68,.7)}}
-
-.hud-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 11px;border-bottom:1px solid var(--border);
-  background:rgba(0,170,240,.03);cursor:move;user-select:none;
-}
-.hud-title{
-  font-family:var(--fm);font-size:9.5px;letter-spacing:2px;
-  text-transform:uppercase;color:var(--accent);
-  display:flex;align-items:center;gap:6px;
-}
+.hud-head{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border-bottom:1px solid var(--border);background:rgba(0,170,240,.03);cursor:move;user-select:none}
+.hud-title{font-family:var(--fm);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:6px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.6s infinite;flex-shrink:0}
 .dot.g{background:var(--safe)}
 .dot.r{background:var(--danger);animation:blink .8s infinite}
@@ -97,16 +62,12 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .hud-tog:hover{color:var(--accent);background:rgba(0,200,255,.1)}
 .hud-body{padding:10px 11px}
 .hud.collapsed .hud-body{display:none}
-
-/* CONDITIONS */
 #hud-cond{top:62px;left:12px}
 .cg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ci label{display:block;font-family:var(--fm);font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:2px}
 .ci .val{font-family:var(--fd);font-size:22px;font-weight:600;color:var(--text-hi);line-height:1}
 .ci .val sup{font-size:12px;color:var(--text-dim);font-weight:400}
 .cond-desc{font-family:var(--fm);font-size:9.5px;color:var(--text-dim);margin-top:7px;letter-spacing:.5px}
-
-/* ALERTS */
 #hud-alerts{top:62px;right:12px;min-width:260px;max-width:310px}
 .al-item{border-left:3px solid var(--border);padding:6px 8px;border-radius:0 3px 3px 0;background:rgba(0,0,0,.2);margin-bottom:5px}
 .al-item:last-child{margin-bottom:0}
@@ -120,57 +81,27 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .al-head{font-size:11.5px;color:var(--text-dim);margin-top:2px;line-height:1.3}
 .al-exp{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);margin-top:3px}
 .no-alerts{font-family:var(--fm);font-size:10.5px;color:var(--safe);display:flex;align-items:center;gap:6px}
-
-/* RADAR */
-#hud-radar{bottom:20px;left:12px;min-width:255px}
-.rsect-label{font-family:var(--fm);font-size:8.5px;letter-spacing:1px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase}
-.rsrc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:6px}
-.rsrc-grid.two{grid-template-columns:1fr 1fr}
-.rsrc-btn{
-  font-family:var(--fm);font-size:8.5px;letter-spacing:.5px;
-  padding:5px 3px;border-radius:3px;border:1px solid var(--border);
-  background:rgba(0,170,240,.03);color:var(--text-dim);
-  cursor:pointer;text-align:center;transition:all .15s;text-transform:uppercase;
-  line-height:1.3;
-}
-.rsrc-btn:hover{border-color:var(--border-hi);color:var(--text)}
-.rsrc-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.09)}
-.rsrc-btn.dim{opacity:.45;cursor:default}
-.rsrc-btn small{display:block;font-size:7.5px;color:var(--text-dim)}
+#hud-radar{bottom:20px;left:12px;min-width:240px}
 .rtype-row{display:flex;gap:4px;margin-bottom:8px}
-.rtype-btn{
-  flex:1;font-family:var(--fm);font-size:9px;letter-spacing:1px;
-  padding:5px;border-radius:3px;border:1px solid var(--border);
-  background:transparent;color:var(--text-dim);cursor:pointer;
-  text-align:center;transition:all .15s;text-transform:uppercase;
-}
+.rtype-btn{flex:1;font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:5px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;text-align:center;transition:all .15s;text-transform:uppercase}
 .rtype-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.09)}
-.timeline-row{display:flex;align-items:center;gap:8px}
-.tbar{flex:1;height:3px;background:rgba(0,170,240,.15);border-radius:2px;overflow:hidden;cursor:pointer}
-.tfill{height:100%;background:linear-gradient(90deg,rgba(0,200,255,.35),var(--accent));border-radius:2px;transition:width .25s}
-.tlabel{font-family:var(--fm);font-size:9px;color:var(--text-dim);white-space:nowrap}
-.play-btn{
-  font-family:var(--fm);font-size:9.5px;padding:3px 8px;
-  border:1px solid var(--border);border-radius:2px;
-  background:rgba(0,170,240,.05);color:var(--accent);cursor:pointer;transition:all .15s;
-}
+.timeline-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.play-btn{font-family:var(--fm);font-size:9.5px;padding:3px 8px;border:1px solid var(--border);border-radius:2px;background:rgba(0,170,240,.05);color:var(--accent);cursor:pointer;transition:all .15s}
 .play-btn:hover{background:rgba(0,200,255,.14);border-color:var(--border-hi)}
-.radar-status{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);margin-top:6px;display:flex;justify-content:space-between}
-
-/* CAMERAS */
+.tlabel{font-family:var(--fm);font-size:9px;color:var(--text-dim);white-space:nowrap}
+.radar-status{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);display:flex;justify-content:space-between}
+/* station legend in HUD */
+.station-tag{display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:.5px;padding:2px 5px;border-radius:2px;border:1px solid;margin:2px 2px 0 0;text-transform:uppercase}
+.station-tag.wsr{border-color:rgba(0,200,255,.4);color:rgba(0,200,255,.7)}
+.station-tag.tdwr{border-color:rgba(255,180,0,.4);color:rgba(255,180,0,.7)}
+.station-tag.test{border-color:rgba(160,120,255,.5);color:rgba(160,120,255,.8)}
 #hud-cam{bottom:20px;right:12px;min-width:270px;max-width:300px}
-.cam-item{
-  display:flex;align-items:center;gap:8px;padding:6px 7px;
-  border:1px solid var(--border);border-radius:3px;background:rgba(0,0,0,.2);
-  cursor:pointer;transition:all .15s;margin-bottom:5px;
-}
+.cam-item{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--border);border-radius:3px;background:rgba(0,0,0,.2);cursor:pointer;transition:all .15s;margin-bottom:5px}
 .cam-item:last-child{margin-bottom:0}
 .cam-item:hover{border-color:var(--border-hi);background:rgba(0,170,240,.06)}
 .cam-name{font-family:var(--fm);font-size:9.5px;color:var(--text);flex:1}
 .cam-dist{font-family:var(--fm);font-size:8px;color:var(--text-dim)}
 .cam-thumb{width:46px;height:30px;object-fit:cover;border-radius:2px;border:1px solid var(--border);background:rgba(0,0,0,.4)}
-
-/* CAMERA MODAL */
 #cam-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);align-items:center;justify-content:center}
 #cam-modal.open{display:flex}
 .cam-modal-inner{background:var(--surface2);border:1px solid var(--border-hi);border-radius:5px;padding:16px;max-width:620px;width:90%;box-shadow:var(--glow)}
@@ -181,52 +112,38 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 #cam-modal img{width:100%;border-radius:3px;border:1px solid var(--border);background:#000;display:block}
 .cam-mlink{display:block;margin-top:8px;font-family:var(--fm);font-size:9.5px;color:var(--accent);text-decoration:none;letter-spacing:.5px}
 .cam-mlink:hover{text-decoration:underline}
-
-/* SIREN MARKER */
 .siren-dot{width:9px;height:9px;border-radius:50%;background:rgba(0,200,255,.55);border:1.5px solid var(--accent);box-shadow:0 0 5px rgba(0,200,255,.35)}
-
-/* LIGHTNING */
-.lt-strike{width:7px;height:7px;border-radius:50%;background:var(--watch);box-shadow:0 0 5px var(--watch),0 0 2px #fff;animation:lt-fade 3.5s forwards}
-@keyframes lt-fade{0%{opacity:1;transform:scale(1.6)}15%{opacity:1;transform:scale(1)}100%{opacity:0}}
-
-/* REFRESH BAR */
 #rbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);z-index:1100;width:0;transition:width .4s linear}
-
-/* LEAFLET OVERRIDES */
 .leaflet-tile{filter:brightness(.9) saturate(.65)}
 .leaflet-control-attribution{background:rgba(5,10,18,.75)!important;color:rgba(130,160,180,.5)!important;font-size:8.5px!important}
 .leaflet-control-attribution a{color:rgba(0,200,255,.4)!important}
 .leaflet-popup-content-wrapper{background:var(--surface2)!important;border:1px solid var(--border-hi)!important;border-radius:4px!important;color:var(--text)!important;font-family:var(--fm)!important;font-size:11px!important;box-shadow:var(--glow)!important}
 .leaflet-popup-tip{background:var(--surface2)!important}
 .leaflet-popup-close-button{color:var(--text-dim)!important}
-
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
 </style>
 </head>
 <body>
-
 <div id="map"></div>
 <div id="rbar"></div>
 
-<!-- TOPBAR -->
 <div id="topbar">
   <div class="logo">FRISCO E.M.</div>
   <div class="tb-div"></div>
   <div class="layer-btns">
-    <button class="lbtn on"        id="btn-refl"     >REFLECTIVITY</button>
-    <button class="lbtn"           id="btn-vel"      >VELOCITY</button>
+    <button class="lbtn on"      id="btn-refl"     >REFLECTIVITY</button>
+    <button class="lbtn"         id="btn-vel"      >VELOCITY</button>
     <div class="tb-div"></div>
-    <button class="lbtn on warn"   id="btn-warnings" >WARNINGS</button>
-    <button class="lbtn on warn"   id="btn-watches"  >WATCHES</button>
-    <button class="lbtn on lite"   id="btn-lightning">LIGHTNING</button>
-    <button class="lbtn on"        id="btn-sirens"   >SIRENS</button>
-    <button class="lbtn on"        id="btn-cameras"  >CAMERAS</button>
+    <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
+    <button class="lbtn on warn" id="btn-watches"  >WATCHES</button>
+    <button class="lbtn on lite" id="btn-lightning">LIGHTNING</button>
+    <button class="lbtn on"      id="btn-sirens"   >SIRENS</button>
+    <button class="lbtn on"      id="btn-cameras"  >CAMERAS</button>
   </div>
   <div id="clock">--:--:-- CDT</div>
 </div>
 
-<!-- CONDITIONS HUD -->
 <div class="hud" id="hud-cond">
   <div class="hud-head" id="hud-cond-head">
     <div class="hud-title"><div class="dot g"></div>CONDITIONS · FRISCO</div>
@@ -244,7 +161,6 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   </div>
 </div>
 
-<!-- ALERTS HUD -->
 <div class="hud" id="hud-alerts">
   <div class="hud-head" id="hud-alerts-head">
     <div class="hud-title"><div class="dot" id="alert-dot"></div>NWS ALERTS · DFW AREA</div>
@@ -255,7 +171,6 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   </div>
 </div>
 
-<!-- RADAR HUD -->
 <div class="hud" id="hud-radar">
   <div class="hud-head" id="hud-radar-head">
     <div class="hud-title"><div class="dot"></div>RADAR CONTROL</div>
@@ -279,10 +194,13 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
       <span id="radar-time">Loading radar…</span>
       <span id="radar-frames">—</span>
     </div>
+    <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:7px">
+      <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:5px">ACTIVE STATIONS</div>
+      <div id="station-legend"></div>
+    </div>
   </div>
 </div>
 
-<!-- CAMERAS HUD -->
 <div class="hud" id="hud-cam">
   <div class="hud-head" id="hud-cam-head">
     <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS · DAL/FTW</div>
@@ -293,7 +211,6 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   </div>
 </div>
 
-<!-- CAMERA MODAL -->
 <div id="cam-modal">
   <div class="cam-modal-inner">
     <div class="cam-mhead">
@@ -310,83 +227,75 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 (function() {
 'use strict';
 
-// ── MAP ──────────────────────────────────────────────────────────────────────
-const map = L.map('map', {
-  center: [33.155, -96.823],
-  zoom: 12,
-  zoomControl: false,
-  attributionControl: true
-});
-L.control.zoom({ position: 'bottomleft' }).addTo(map);
-
-// CartoDB Dark Matter — free, no API key required, full zoom support
+const map = L.map('map', { center:[33.155,-96.823], zoom:12, zoomControl:false, attributionControl:true });
+L.control.zoom({ position:'bottomleft' }).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  subdomains: 'abcd',
-  maxZoom: 20,
-  attribution: '© CARTO © OSM contributors'
+  subdomains:'abcd', maxZoom:20, attribution:'© CARTO © OSM contributors'
 }).addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
-let radarType = 'reflectivity'; // 'reflectivity' | 'velocity'
-let radarLayers = [];           // active WMS layers (one per station)
+let radarType = 'reflectivity';
+let radarLayers = [];
 let nwsLtngLayer = null, warningLayer = null, watchLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
-let selectedVelStation = 'kfws'; // which station drives velocity view
-let stationMarkerLayer = null;   // clickable radar site markers
-
+let selectedVelStation = 'kfws';
+let stationMarkerLayer = null;
 const layersOn = { warnings:true, watches:true, lightning:true, sirens:true, cameras:true };
-
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
 function makeWMS(url, layerName, opacity) {
   return L.tileLayer.wms(url, {
-    layers: layerName,
-    format: 'image/png',
-    transparent: true,
-    opacity: opacity || 0.75,
-    version: '1.3.0',
-    uppercase: true,
-    detectRetina: true,
-    attribution: 'NOAA/NWS MRMS'
+    layers:layerName, format:'image/png', transparent:true,
+    opacity:opacity||0.75, version:'1.3.0', uppercase:true,
+    attribution:'NOAA/NWS MRMS'
   });
 }
 
+// ── STATIONS ─────────────────────────────────────────────────────────────────
+// DFW primary + TDWR
 const DFW_STATIONS = [
-  { id:'kfws', name:'KFWS', label:'Ft Worth TX',  lat:32.573, lon:-97.303 },
-  { id:'kdyx', name:'KDYX', label:'Dyess AFB TX', lat:32.538, lon:-99.254 },
-  { id:'kfdr', name:'KFDR', label:'Altus AFB OK', lat:34.362, lon:-98.977 },
-  { id:'tdal', name:'TDAL', label:'Love Field TX',lat:32.847, lon:-96.852, tdwr:true },
-  { id:'tdfw', name:'TDFW', label:'DFW Airport TX',lat:32.897,lon:-97.037, tdwr:true },
+  { id:'kfws', name:'KFWS', label:'Ft Worth TX',    lat:32.573, lon:-97.303 },
+  { id:'kdyx', name:'KDYX', label:'Dyess AFB TX',   lat:32.538, lon:-99.254 },
+  { id:'kfdr', name:'KFDR', label:'Altus AFB OK',   lat:34.362, lon:-98.977 },
+  { id:'tdal', name:'TDAL', label:'Love Field TX',  lat:32.847, lon:-96.852, tdwr:true },
+  { id:'tdfw', name:'TDFW', label:'DFW Airport TX', lat:32.897, lon:-97.037, tdwr:true },
 ];
+
+// Test/aux stations — shown on map with purple tint, included in reflectivity stack
+const TEST_STATIONS = [
+  { id:'klsx', name:'KLSX', label:'St. Louis MO',    lat:38.699, lon:-90.683, test:true },
+  { id:'kvwx', name:'KVWX', label:'Evansville IN',   lat:38.260, lon:-87.724, test:true },
+  { id:'kind', name:'KIND', label:'Indianapolis IN',  lat:39.707, lon:-86.280, test:true },
+];
+
+const ALL_STATIONS = [...DFW_STATIONS, ...TEST_STATIONS];
 
 function getLayerName(station, type) {
   if (station.tdwr) return type === 'reflectivity' ? `${station.id}_bref` : null;
   return type === 'reflectivity' ? `${station.id}_bref_raw` : `${station.id}_bvel_raw`;
 }
 
-// ── ALERT COLOR MAP ──────────────────────────────────────────────────────────
+// ── ALERT COLOR MAP ───────────────────────────────────────────────────────────
 function alertStyle(event) {
   const e = (event||'').toLowerCase();
   if (e.includes('tornado warning'))
     return { color:'#ff1744', fill:'#ff1744', fillOp:.22, weight:2.5, dash:null };
   if (e.includes('severe thunderstorm warning'))
-    return { color:'#ff6b00', fill:'#ff6b00', fillOp:.18, weight:2,   dash:null };
-  if (e.includes('flash flood warning') || e.includes('flood warning'))
-    return { color:'#9c27b0', fill:'#9c27b0', fillOp:.16, weight:2,   dash:null };
-  if (e.includes('special marine warning') || e.includes('hurricane warning'))
-    return { color:'#ff1744', fill:'#ff1744', fillOp:.15, weight:2,   dash:null };
+    return { color:'#ff6b00', fill:'#ff6b00', fillOp:.18, weight:2, dash:null };
+  if (e.includes('flash flood warning')||e.includes('flood warning'))
+    return { color:'#9c27b0', fill:'#9c27b0', fillOp:.16, weight:2, dash:null };
+  if (e.includes('hurricane warning')||e.includes('special marine warning'))
+    return { color:'#ff1744', fill:'#ff1744', fillOp:.15, weight:2, dash:null };
   if (e.includes('warning'))
     return { color:'#ff5722', fill:'#ff5722', fillOp:.13, weight:1.5, dash:null };
   if (e.includes('tornado watch'))
     return { color:'#ffea00', fill:'#ffea00', fillOp:.10, weight:1.5, dash:'5 3' };
   if (e.includes('severe thunderstorm watch'))
     return { color:'#ffb300', fill:'#ffb300', fillOp:.09, weight:1.5, dash:'5 3' };
-  if (e.includes('flash flood watch') || e.includes('flood watch'))
+  if (e.includes('flash flood watch')||e.includes('flood watch'))
     return { color:'#00bcd4', fill:'#00bcd4', fillOp:.09, weight:1.5, dash:'5 3' };
-  // generic watch
-  return { color:'#cddc39', fill:'#cddc39', fillOp:.07, weight:1,   dash:'4 3' };
+  return { color:'#cddc39', fill:'#cddc39', fillOp:.07, weight:1, dash:'4 3' };
 }
-
 function alertPopupColor(event) {
   const e = (event||'').toLowerCase();
   if (e.includes('tornado warning'))          return '#ff1744';
@@ -399,97 +308,63 @@ function alertPopupColor(event) {
   return '#cddc39';
 }
 
-// ── CLOCK ────────────────────────────────────────────────────────────────────
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function tick() {
-  const t = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false});
-  document.getElementById('clock').textContent = t + ' CDT';
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false}) + ' CDT';
 }
-setInterval(tick, 1000); tick();
+setInterval(tick,1000); tick();
 
-// ── FRISCO BOUNDARY (Census TIGER — real city limits) ────────────────────────
+// ── FRISCO BOUNDARY ───────────────────────────────────────────────────────────
 async function loadFriscoBoundary() {
   try {
-    // Census TIGER/Line Places — Frisco TX (GEOID 4827684)
-    const url = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Places_CouSub_ConCity_SubMCD/MapServer/4/query' +
-      '?where=GEOID%3D%274827684%27&outFields=NAME,GEOID&outSR=4326&f=geojson&returnGeometry=true';
+    const url = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Places_CouSub_ConCity_SubMCD/MapServer/4/query'
+      + '?where=GEOID%3D%274827684%27&outFields=NAME,GEOID&outSR=4326&f=geojson&returnGeometry=true';
     const res = await fetch(url);
     const data = await res.json();
-    if (data.features && data.features.length) {
-      L.geoJSON(data, {
-        style: {
-          color: 'rgba(0,200,255,0.75)',
-          weight: 1.5,
-          fillColor: 'rgba(0,200,255,0.03)',
-          fillOpacity: 1,
-          dashArray: '6 4',
-          interactive: false
-        }
-      }).addTo(map);
-      console.log('Frisco boundary loaded from Census TIGER');
+    if (data.features&&data.features.length) {
+      L.geoJSON(data,{style:{color:'rgba(0,200,255,0.75)',weight:1.5,fillColor:'rgba(0,200,255,0.03)',fillOpacity:1,dashArray:'6 4',interactive:false}}).addTo(map);
     }
-  } catch(e) {
-    console.warn('Census TIGER unavailable, using fallback boundary', e);
-    loadFallbackBoundary();
-  }
+  } catch(e) { loadFallbackBoundary(); }
 }
-
 function loadFallbackBoundary() {
-  // Reasonably accurate Frisco TX city limit polygon from OSM/manual trace
-  const coords = [
-    [-96.9298,33.2075],[-96.8954,33.2211],[-96.8617,33.2211],[-96.8198,33.2211],
-    [-96.7853,33.2075],[-96.7509,33.1939],[-96.7337,33.1735],[-96.7165,33.1462],
-    [-96.7165,33.1189],[-96.7337,33.0984],[-96.7681,33.0848],[-96.8026,33.0780],
-    [-96.8370,33.0780],[-96.8715,33.0848],[-96.9059,33.0984],[-96.9231,33.1189],
-    [-96.9404,33.1462],[-96.9404,33.1735],[-96.9298,33.2075]
-  ];
-  L.polygon(coords.map(c => [c[1],c[0]]), {
-    color:'rgba(0,200,255,0.75)',weight:1.5,
-    fillColor:'rgba(0,200,255,0.03)',fillOpacity:1,
-    dashArray:'6 4',interactive:false
-  }).addTo(map);
+  const coords=[[-96.9298,33.2075],[-96.8954,33.2211],[-96.8617,33.2211],[-96.8198,33.2211],[-96.7853,33.2075],[-96.7509,33.1939],[-96.7337,33.1735],[-96.7165,33.1462],[-96.7165,33.1189],[-96.7337,33.0984],[-96.7681,33.0848],[-96.8026,33.0780],[-96.8370,33.0780],[-96.8715,33.0848],[-96.9059,33.0984],[-96.9231,33.1189],[-96.9404,33.1462],[-96.9404,33.1735],[-96.9298,33.2075]];
+  L.polygon(coords.map(c=>[c[1],c[0]]),{color:'rgba(0,200,255,0.75)',weight:1.5,fillColor:'rgba(0,200,255,0.03)',fillOpacity:1,dashArray:'6 4',interactive:false}).addTo(map);
 }
-
 loadFriscoBoundary();
+L.marker([33.155,-96.823],{icon:L.divIcon({className:'',html:'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:3px;color:rgba(0,200,255,.4);pointer-events:none;white-space:nowrap;text-shadow:0 0 8px rgba(0,200,255,.25)">FRISCO TX</div>',iconAnchor:[35,8]}),interactive:false}).addTo(map);
 
-// Frisco label
-L.marker([33.155, -96.823], {
-  icon: L.divIcon({
-    className:'',
-    html:'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:3px;color:rgba(0,200,255,.4);pointer-events:none;white-space:nowrap;text-shadow:0 0 8px rgba(0,200,255,.25)">FRISCO TX</div>',
-    iconAnchor:[35,8]
-  }),
-  interactive:false
-}).addTo(map);
-
-// ── RADAR (NWS opengeo WMS) ───────────────────────────────────────────────────
+// ── RADAR ─────────────────────────────────────────────────────────────────────
 function loadRadar() {
   applyAllRadarLayers();
   buildStationMarkers();
+  buildStationLegend();
   loadNWSLightning();
   updateRadarTime();
   document.getElementById('radar-frames').textContent = 'NWS LIVE';
 }
 
 function applyAllRadarLayers() {
-  radarLayers.forEach(l => map.removeLayer(l));
-  radarLayers = [];
+  radarLayers.forEach(l=>map.removeLayer(l));
+  radarLayers=[];
 
-  if (radarType === 'reflectivity') {
-    // CONUS composite base + all per-station reflectivity stacked
-    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.65);
+  if (radarType==='reflectivity') {
+    // CONUS composite base
+    const base = makeWMS(`${NWS_BASE}/conus/ows`,'conus_bref_qcd',0.6);
     base.addTo(map); radarLayers.push(base);
-    DFW_STATIONS.forEach(s => {
-      const ln = getLayerName(s, 'reflectivity');
+    // All stations — DFW primary + test stations
+    ALL_STATIONS.forEach(s=>{
+      const ln=getLayerName(s,'reflectivity');
       if (!ln) return;
-      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.78);
+      const l=makeWMS(`${NWS_BASE}/${s.id}/ows`,ln,0.78);
       l.addTo(map); radarLayers.push(l);
     });
   } else {
-    // Velocity — single selected station only (user picks via map marker)
-    const station = DFW_STATIONS.find(s => s.id === selectedVelStation);
-    if (station && !station.tdwr) {
-      const ln = getLayerName(station, 'velocity');
-      const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
+    // Velocity — single selected station
+    const station=ALL_STATIONS.find(s=>s.id===selectedVelStation);
+    if (station&&!station.tdwr) {
+      const ln=getLayerName(station,'velocity');
+      const l=makeWMS(`${NWS_BASE}/${station.id}/ows`,ln,0.82);
       l.addTo(map); radarLayers.push(l);
     }
     updateVelStationHUD();
@@ -500,85 +375,84 @@ function buildStationMarkers() {
   if (stationMarkerLayer) map.removeLayer(stationMarkerLayer);
   stationMarkerLayer = L.layerGroup().addTo(map);
 
-  DFW_STATIONS.forEach(station => {
-    const isSelected = station.id === selectedVelStation;
+  ALL_STATIONS.forEach(station=>{
+    const isSelected = station.id===selectedVelStation;
     const isTdwr = !!station.tdwr;
-    const color = isTdwr ? 'rgba(255,180,0,' : 'rgba(0,200,255,';
+    const isTest = !!station.test;
+    const ringColor = isTdwr ? '#ffb300' : isTest ? '#a078ff' : '#00c8ff';
+    const ringBg    = isTdwr ? 'rgba(255,180,0,.08)' : isTest ? 'rgba(160,120,255,.08)' : 'rgba(0,200,255,.08)';
+    const selGlow   = radarType==='velocity'&&isSelected&&!isTdwr
+      ? `box-shadow:0 0 14px ${ringColor}99;border-width:2.5px;` : '';
+
     const icon = L.divIcon({
-      className: '',
-      html: `<div style="
-        position:relative;width:34px;height:34px;
-        display:flex;align-items:center;justify-content:center;
-      ">
-        <div style="
-          position:absolute;inset:0;border-radius:50%;
-          border:1.5px solid ${isTdwr ? '#ffb300' : '#00c8ff'};
-          background:${isTdwr ? 'rgba(255,180,0,.08)' : 'rgba(0,200,255,.08)'};
-          ${radarType==='velocity' && isSelected && !isTdwr ? 'box-shadow:0 0 12px rgba(0,200,255,.5);border-width:2px;' : ''}
-        "></div>
-        <div style="
-          font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;
-          letter-spacing:.5px;color:${isTdwr ? '#ffb300' : '#00c8ff'};
-          text-shadow:0 0 6px ${isTdwr ? 'rgba(255,180,0,.5)' : 'rgba(0,200,255,.5)'};
-          position:relative;z-index:1;text-align:center;line-height:1.1;
-          pointer-events:none;
-        ">${station.name}<br><span style="font-size:6.5px;opacity:.7">${isTdwr?'TDWR':'WSR'}</span></div>
+      className:'',
+      html:`<div style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center">
+        <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid ${ringColor};background:${ringBg};${selGlow}"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:500;letter-spacing:.4px;color:${ringColor};text-shadow:0 0 6px ${ringColor}88;position:relative;z-index:1;text-align:center;line-height:1.15;pointer-events:none">
+          ${station.name}<br><span style="font-size:6px;opacity:.65">${isTdwr?'TDWR':isTest?'TEST':'WSR'}</span>
+        </div>
       </div>`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17]
+      iconSize:[36,36],iconAnchor:[18,18]
     });
 
-    const marker = L.marker([station.lat, station.lon], { icon, zIndexOffset: 500 });
-
-    marker.bindPopup(`
-      <div style="font-family:'JetBrains Mono',monospace;min-width:160px">
-        <div style="color:${isTdwr?'#ffb300':'#00c8ff'};font-size:11px;font-weight:600;margin-bottom:4px">${station.name} · ${station.label}</div>
-        <div style="font-size:9.5px;color:var(--text-dim);margin-bottom:6px">${isTdwr?'Terminal Doppler Weather Radar':'NEXRAD WSR-88D'}</div>
+    const canSelectVel = !isTdwr;
+    const btnLabel = isSelected&&radarType==='velocity' ? '✓ ACTIVE VEL SRC' : 'USE FOR VELOCITY';
+    const popup = `
+      <div style="font-family:'JetBrains Mono',monospace;min-width:170px">
+        <div style="color:${ringColor};font-size:11px;font-weight:600;margin-bottom:3px">${station.name} · ${station.label}</div>
+        <div style="font-size:9px;color:var(--text-dim);margin-bottom:${canSelectVel?'6px':'0'}">${isTdwr?'Terminal Doppler Weather Radar':isTest?'NEXRAD WSR-88D · TEST STATION':'NEXRAD WSR-88D'}</div>
         ${isTdwr
-          ? '<div style="font-size:9px;color:#ffb300">Reflectivity only · No public velocity</div>'
-          : `<div style="font-size:9px;color:var(--text-dim);margin-bottom:6px">Click to use for velocity view</div>
-             <button onclick="selectVelStation('${station.id}')" style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 10px;background:rgba(0,200,255,.12);border:1px solid #00c8ff;color:#00c8ff;border-radius:3px;cursor:pointer;letter-spacing:.5px">
-               ${isSelected && radarType==='velocity' ? '✓ ACTIVE VELOCITY SRC' : 'SELECT FOR VELOCITY'}
-             </button>`
+          ? '<div style="font-size:8.5px;color:#ffb300;margin-top:2px">Reflectivity only · No public velocity</div>'
+          : `<button onclick="selectVelStation('${station.id}')" style="font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:4px 10px;background:${isSelected&&radarType==='velocity'?'rgba(0,200,255,.2)':'rgba(0,200,255,.1)'};border:1px solid ${ringColor};color:${ringColor};border-radius:3px;cursor:pointer;letter-spacing:.4px;width:100%">${btnLabel}</button>`
         }
-      </div>
-    `, { maxWidth: 220 });
+      </div>`;
 
-    stationMarkerLayer.addLayer(marker);
+    L.marker([station.lat,station.lon],{icon,zIndexOffset:500})
+      .bindPopup(popup,{maxWidth:230})
+      .addTo(stationMarkerLayer);
   });
 }
 
+function buildStationLegend() {
+  const el = document.getElementById('station-legend');
+  if (!el) return;
+  el.innerHTML = ALL_STATIONS.map(s=>{
+    const cls = s.tdwr ? 'tdwr' : s.test ? 'test' : 'wsr';
+    const sel = radarType==='velocity'&&s.id===selectedVelStation&&!s.tdwr
+      ? ' style="border-width:1.5px;opacity:1"' : '';
+    return `<span class="station-tag ${cls}"${sel}>${s.name}</span>`;
+  }).join('');
+}
+
 function updateVelStationHUD() {
-  const station = DFW_STATIONS.find(s => s.id === selectedVelStation);
-  const el = document.getElementById('vel-station-label');
-  if (el && station) el.textContent = station.name + ' · ' + station.label;
+  const station=ALL_STATIONS.find(s=>s.id===selectedVelStation);
+  const el=document.getElementById('vel-station-label');
+  if (el&&station) el.textContent=station.name+' · '+station.label;
 }
 
 function loadNWSLightning() {
   if (nwsLtngLayer) map.removeLayer(nwsLtngLayer);
   if (!layersOn.lightning) return;
-  // NWS lightning strike density — conus workspace
-  nwsLtngLayer = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_ltng', 0.8);
+  nwsLtngLayer=makeWMS(`${NWS_BASE}/conus/ows`,'conus_ltng',0.8);
   nwsLtngLayer.addTo(map);
 }
 
 function setRadarType(type) {
-  radarType = type;
-  ['btn-refl','btn-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
-  ['rtype-refl','rtype-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
-  document.getElementById(type==='reflectivity' ? 'btn-refl' : 'btn-vel').classList.add('on');
-  document.getElementById(type==='reflectivity' ? 'rtype-refl' : 'rtype-vel').classList.add('on');
-  // Show velocity station selector row only in velocity mode
-  const velRow = document.getElementById('vel-station-row');
-  if (velRow) velRow.style.display = type === 'velocity' ? 'block' : 'none';
+  radarType=type;
+  ['btn-refl','btn-vel','rtype-refl','rtype-vel'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById(type==='reflectivity'?'btn-refl':'btn-vel').classList.add('on');
+  document.getElementById(type==='reflectivity'?'rtype-refl':'rtype-vel').classList.add('on');
+  const velRow=document.getElementById('vel-station-row');
+  if (velRow) velRow.style.display=type==='velocity'?'block':'none';
   applyAllRadarLayers();
-  buildStationMarkers(); // rebuild to update selected highlight
+  buildStationMarkers();
+  buildStationLegend();
   updateRadarTime();
 }
 
 function updateRadarTime() {
-  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
-  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
+  document.getElementById('radar-time').textContent =
+    new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'})+' CDT · LIVE';
 }
 
 function refreshRadar() {
@@ -587,135 +461,96 @@ function refreshRadar() {
   updateRadarTime();
 }
 
-// ── NWS ALERTS (national — warnings + watches polygons across CONUS) ──────────
+// ── ALERTS ────────────────────────────────────────────────────────────────────
 async function loadAlerts() {
   try {
-    // Fetch ALL active alerts nationwide for polygon rendering
-    // Also fetch DFW-specific for the HUD card
-    const [nationalRes, localRes] = await Promise.all([
-      fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert', {
-        headers:{ 'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)' }
-      }),
-      fetch('https://api.weather.gov/alerts/active/area/TX', {
-        headers:{ 'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)' }
-      })
+    const [natRes,txRes] = await Promise.all([
+      fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert',{headers:{'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)'}}),
+      fetch('https://api.weather.gov/alerts/active/area/TX',{headers:{'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)'}})
     ]);
-    const [nationalData, localData] = await Promise.all([nationalRes.json(), localRes.json()]);
-
-    // HUD card — DFW-area alerts only
-    const local = (localData.features||[]).filter(f => {
-      const desc = (f.properties.areaDesc||'').toLowerCase();
-      return desc.includes('collin')||desc.includes('dallas')||desc.includes('denton')||desc.includes('frisco');
+    const [natData,txData] = await Promise.all([natRes.json(),txRes.json()]);
+    const local=(txData.features||[]).filter(f=>{
+      const d=(f.properties.areaDesc||'').toLowerCase();
+      return d.includes('collin')||d.includes('dallas')||d.includes('denton')||d.includes('frisco');
     });
     renderAlerts(local);
-
-    // Map polygons — all national warnings and watches
-    renderAlertPolygons(nationalData.features||[]);
+    renderAlertPolygons(natData.features||[]);
   } catch(e) {
-    document.getElementById('alert-list').innerHTML = '<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
+    document.getElementById('alert-list').innerHTML='<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
   }
 }
 
 function renderAlerts(alerts) {
-  const list = document.getElementById('alert-list');
-  const dot  = document.getElementById('alert-dot');
-  const card = document.getElementById('hud-alerts');
+  const list=document.getElementById('alert-list');
+  const dot=document.getElementById('alert-dot');
+  const card=document.getElementById('hud-alerts');
   if (!alerts.length) {
-    list.innerHTML = '<div class="no-alerts">✓ NO ACTIVE ALERTS</div>';
+    list.innerHTML='<div class="no-alerts">✓ NO ACTIVE ALERTS</div>';
     dot.className='dot g'; card.classList.remove('alert-active'); return;
   }
-  const hasWarn = alerts.some(a=>(a.properties.event||'').includes('Warning'));
-  const hasWatch = alerts.some(a=>(a.properties.event||'').includes('Watch'));
-  dot.className = hasWarn?'dot r':hasWatch?'dot y':'dot';
-  card.classList.toggle('alert-active', hasWarn);
-  list.innerHTML = alerts.slice(0,6).map(f=>{
+  const hasWarn=alerts.some(a=>(a.properties.event||'').includes('Warning'));
+  const hasWatch=alerts.some(a=>(a.properties.event||'').includes('Watch'));
+  dot.className=hasWarn?'dot r':hasWatch?'dot y':'dot';
+  card.classList.toggle('alert-active',hasWarn);
+  list.innerHTML=alerts.slice(0,6).map(f=>{
     const p=f.properties;
     const isW=(p.event||'').includes('Warning');
     const isA=(p.event||'').includes('Watch');
     const cls=isW?'W':isA?'A':'Y';
     const exp=p.expires?new Date(p.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'}):'—';
-    return `<div class="al-item ${cls}">
-      <div class="al-event">${p.event||'ALERT'}</div>
-      <div class="al-head">${(p.headline||'').slice(0,90)}${(p.headline||'').length>90?'…':''}</div>
-      <div class="al-exp">EXP ${exp} CDT</div>
-    </div>`;
+    return `<div class="al-item ${cls}"><div class="al-event">${p.event||'ALERT'}</div><div class="al-head">${(p.headline||'').slice(0,90)}${(p.headline||'').length>90?'…':''}</div><div class="al-exp">EXP ${exp} CDT</div></div>`;
   }).join('');
 }
 
 function renderAlertPolygons(all) {
   if (warningLayer) map.removeLayer(warningLayer);
-  if (watchLayer)   map.removeLayer(watchLayer);
-  const warnings = [], watches = [];
-  all.forEach(f => {
+  if (watchLayer) map.removeLayer(watchLayer);
+  const warnings=[],watches=[];
+  all.forEach(f=>{
     if (!f.geometry) return;
-    const ev = (f.properties.event||'').toLowerCase();
+    const ev=(f.properties.event||'').toLowerCase();
     if (ev.includes('warning')) warnings.push(f);
     else if (ev.includes('watch')) watches.push(f);
   });
-
-  function makeAlertLayer(features, layerOn) {
-    if (!features.length || !layerOn) return null;
-    return L.geoJSON({ type:'FeatureCollection', features }, {
-      style: f => {
-        const s = alertStyle(f.properties.event);
-        return {
-          color: s.color, weight: s.weight,
-          fillColor: s.fill, fillOpacity: s.fillOp,
-          dashArray: s.dash || undefined
-        };
+  function makeLayer(features,layerOn) {
+    if (!features.length||!layerOn) return null;
+    return L.geoJSON({type:'FeatureCollection',features},{
+      style:f=>{
+        const s=alertStyle(f.properties.event);
+        return {color:s.color,weight:s.weight,fillColor:s.fill,fillOpacity:s.fillOp,dashArray:s.dash||undefined};
       },
-      onEachFeature: (f, l) => {
-        const col = alertPopupColor(f.properties.event);
-        const exp = f.properties.expires
-          ? new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'}) + ' CDT'
-          : '—';
-        l.bindPopup(`
-          <div style="font-family:'JetBrains Mono',monospace;max-width:260px">
-            <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">${f.properties.event||'ALERT'}</div>
-            <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">${(f.properties.headline||'').slice(0,140)}</div>
-            <div style="font-size:8.5px;color:var(--text-dim)">EXPIRES ${exp}</div>
-          </div>
-        `, { maxWidth: 280 });
+      onEachFeature:(f,l)=>{
+        const col=alertPopupColor(f.properties.event);
+        const exp=f.properties.expires
+          ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
+        l.bindPopup(`<div style="font-family:'JetBrains Mono',monospace;max-width:260px"><div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">${f.properties.event||'ALERT'}</div><div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">${(f.properties.headline||'').slice(0,140)}</div><div style="font-size:8.5px;color:var(--text-dim)">EXPIRES ${exp}</div></div>`,{maxWidth:280});
       }
     });
   }
-
-  warningLayer = makeAlertLayer(warnings, layersOn.warnings);
+  warningLayer=makeLayer(warnings,layersOn.warnings);
   if (warningLayer) warningLayer.addTo(map);
-  watchLayer = makeAlertLayer(watches, layersOn.watches);
+  watchLayer=makeLayer(watches,layersOn.watches);
   if (watchLayer) watchLayer.addTo(map);
 }
 
 // ── CONDITIONS ────────────────────────────────────────────────────────────────
 async function loadConditions() {
   try {
-    const res = await fetch('https://api.weather.gov/stations/KDFW/observations/latest',{
-      headers:{'User-Agent':'FriscoEM/1.0'}
-    });
-    const d = (await res.json()).properties;
-    const tc=d.temperature?.value, tf=tc!=null?Math.round(tc*9/5+32):null;
-    const ws=d.windSpeed?.value, wm=ws!=null?Math.round(ws*.621371):null;
-    const wd=d.windDirection?.value;
-    const hum=d.relativeHumidity?.value;
-    const pres=d.barometricPressure?.value, ph=pres!=null?Math.round(pres/100):null;
-    document.getElementById('c-temp').innerHTML = tf!=null?`${tf}<sup>°F</sup>`:'—';
-    document.getElementById('c-wind').innerHTML = wm!=null?`${wm}<sup style="font-size:10px"> mph ${dirLabel(wd)}</sup>`:'—';
-    document.getElementById('c-hum').innerHTML  = hum!=null?`${Math.round(hum)}<sup>%</sup>`:'—';
-    document.getElementById('c-pres').innerHTML = ph!=null?`${ph}<sup>hPa</sup>`:'—';
-    document.getElementById('c-desc').textContent = (d.textDescription||'').toUpperCase();
-  } catch(e) {
-    document.getElementById('c-desc').textContent='CONDITIONS UNAVAILABLE';
-  }
+    const d=(await (await fetch('https://api.weather.gov/stations/KDFW/observations/latest',{headers:{'User-Agent':'FriscoEM/1.0'}})).json()).properties;
+    const tc=d.temperature?.value,tf=tc!=null?Math.round(tc*9/5+32):null;
+    const ws=d.windSpeed?.value,wm=ws!=null?Math.round(ws*.621371):null;
+    const wd=d.windDirection?.value,hum=d.relativeHumidity?.value;
+    const pres=d.barometricPressure?.value,ph=pres!=null?Math.round(pres/100):null;
+    document.getElementById('c-temp').innerHTML=tf!=null?`${tf}<sup>°F</sup>`:'—';
+    document.getElementById('c-wind').innerHTML=wm!=null?`${wm}<sup style="font-size:10px"> mph ${dirLabel(wd)}</sup>`:'—';
+    document.getElementById('c-hum').innerHTML=hum!=null?`${Math.round(hum)}<sup>%</sup>`:'—';
+    document.getElementById('c-pres').innerHTML=ph!=null?`${ph}<sup>hPa</sup>`:'—';
+    document.getElementById('c-desc').textContent=(d.textDescription||'').toUpperCase();
+  } catch(e){document.getElementById('c-desc').textContent='CONDITIONS UNAVAILABLE';}
 }
 function dirLabel(deg) {
-  if (deg==null) return '';
-  return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(deg/22.5)%16];
-}
-
-// ── LIGHTNING — handled by NWS conus_ltng WMS layer (loaded in loadNWSLightning)
-// Toggle just removes/adds that WMS layer
-function startLightning() {
-  loadNWSLightning();
+  if(deg==null)return'';
+  return['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(deg/22.5)%16];
 }
 
 // ── SIRENS ────────────────────────────────────────────────────────────────────
@@ -765,145 +600,117 @@ const SIRENS = [
 ];
 
 function buildSirens() {
-  sirenLayer = L.layerGroup();
-  SIRENS.forEach(s => {
-    L.marker([s.lat,s.lon],{
-      icon:L.divIcon({className:'siren-dot',iconSize:[9,9],iconAnchor:[4.5,4.5]})
-    }).bindPopup(`<b style="color:var(--accent)">${s.id}</b> · ${s.name}`).addTo(sirenLayer);
+  sirenLayer=L.layerGroup();
+  SIRENS.forEach(s=>{
+    L.marker([s.lat,s.lon],{icon:L.divIcon({className:'siren-dot',iconSize:[9,9],iconAnchor:[4.5,4.5]})})
+      .bindPopup(`<b style="color:var(--accent)">${s.id}</b> · ${s.name}`).addTo(sirenLayer);
   });
-  if (layersOn.sirens) sirenLayer.addTo(map);
+  if(layersOn.sirens)sirenLayer.addTo(map);
 }
 
 // ── CAMERAS ───────────────────────────────────────────────────────────────────
-const CAMERAS = [
-  {id:'1001',name:'US-75 @ SH-121',  lat:33.123,lon:-96.689,dist:'DAL',road:'US-75'},
-  {id:'1002',name:'DNT @ Lebanon',   lat:33.165,lon:-96.852,dist:'DAL',road:'DNT'},
-  {id:'1003',name:'DNT @ Main St',   lat:33.151,lon:-96.824,dist:'DAL',road:'DNT'},
-  {id:'1004',name:'DNT @ Rolater',   lat:33.128,lon:-96.849,dist:'DAL',road:'DNT'},
-  {id:'1005',name:'DNT @ SH-121',    lat:33.110,lon:-96.829,dist:'DAL',road:'DNT'},
+const CAMERAS=[
+  {id:'1001',name:'US-75 @ SH-121',lat:33.123,lon:-96.689,dist:'DAL',road:'US-75'},
+  {id:'1002',name:'DNT @ Lebanon',lat:33.165,lon:-96.852,dist:'DAL',road:'DNT'},
+  {id:'1003',name:'DNT @ Main St',lat:33.151,lon:-96.824,dist:'DAL',road:'DNT'},
+  {id:'1004',name:'DNT @ Rolater',lat:33.128,lon:-96.849,dist:'DAL',road:'DNT'},
+  {id:'1005',name:'DNT @ SH-121',lat:33.110,lon:-96.829,dist:'DAL',road:'DNT'},
   {id:'1006',name:'US-75 @ Eldorado',lat:33.180,lon:-96.670,dist:'DAL',road:'US-75'},
-  {id:'1007',name:'SH-121 @ Coit',   lat:33.110,lon:-96.790,dist:'FTW',road:'SH-121'},
+  {id:'1007',name:'SH-121 @ Coit',lat:33.110,lon:-96.790,dist:'FTW',road:'SH-121'},
   {id:'1008',name:'SH-289 @ University',lat:33.151,lon:-96.855,dist:'DAL',road:'SH-289'},
 ];
 
 function buildCameras() {
-  camMarkerLayer = L.layerGroup();
-  const list = document.getElementById('cam-list');
-  list.innerHTML = '';
-  CAMERAS.forEach(cam => {
-    const item = document.createElement('div');
-    item.className = 'cam-item';
-    item.innerHTML = `
-      <div>
-        <div class="cam-name">${cam.name}</div>
-        <div class="cam-dist">${cam.dist} · ${cam.road}</div>
-      </div>
-      <img class="cam-thumb" src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" onerror="this.style.display='none'" alt="">
-    `;
-    item.addEventListener('click', ()=>openCam(cam));
+  camMarkerLayer=L.layerGroup();
+  const list=document.getElementById('cam-list');
+  list.innerHTML='';
+  CAMERAS.forEach(cam=>{
+    const item=document.createElement('div');
+    item.className='cam-item';
+    item.innerHTML=`<div><div class="cam-name">${cam.name}</div><div class="cam-dist">${cam.dist} · ${cam.road}</div></div><img class="cam-thumb" src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" onerror="this.style.display='none'" alt="">`;
+    item.addEventListener('click',()=>openCam(cam));
     list.appendChild(item);
-
-    const marker = L.marker([cam.lat,cam.lon],{
-      icon:L.divIcon({
-        className:'',
-        html:'<div style="width:11px;height:11px;background:rgba(0,230,118,.65);border:1.5px solid #00e676;border-radius:2px;box-shadow:0 0 5px rgba(0,230,118,.35)"></div>',
-        iconSize:[11,11],iconAnchor:[5.5,5.5]
-      })
-    }).bindPopup(`<b style="color:#00e676">${cam.name}</b><br><span style="font-size:10px;color:var(--text-dim)">${cam.dist}</span><br>
-      <img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" style="width:180px;margin-top:6px;border-radius:2px" onerror="this.style.display='none'">
-      <br><a href="https://its.txdot.gov/its/District/${cam.dist}" target="_blank" style="color:var(--accent);font-size:10px">Open ITS →</a>`);
+    const marker=L.marker([cam.lat,cam.lon],{icon:L.divIcon({className:'',html:'<div style="width:11px;height:11px;background:rgba(0,230,118,.65);border:1.5px solid #00e676;border-radius:2px;box-shadow:0 0 5px rgba(0,230,118,.35)"></div>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
+      .bindPopup(`<b style="color:#00e676">${cam.name}</b><br><span style="font-size:10px;color:var(--text-dim)">${cam.dist}</span><br><img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" style="width:180px;margin-top:6px;border-radius:2px" onerror="this.style.display='none'"><br><a href="https://its.txdot.gov/its/District/${cam.dist}" target="_blank" style="color:var(--accent);font-size:10px">Open ITS →</a>`);
     camMarkerLayer.addLayer(marker);
   });
-  if (layersOn.cameras) camMarkerLayer.addTo(map);
+  if(layersOn.cameras)camMarkerLayer.addTo(map);
 }
 
 function openCam(cam) {
-  document.getElementById('cam-m-name').textContent = cam.name;
-  document.getElementById('cam-m-img').src = `https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg?t=${Date.now()}`;
-  document.getElementById('cam-m-link').href = `https://its.txdot.gov/its/District/${cam.dist}`;
+  document.getElementById('cam-m-name').textContent=cam.name;
+  document.getElementById('cam-m-img').src=`https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg?t=${Date.now()}`;
+  document.getElementById('cam-m-link').href=`https://its.txdot.gov/its/District/${cam.dist}`;
   document.getElementById('cam-modal').classList.add('open');
 }
 function closeCam() {
   document.getElementById('cam-modal').classList.remove('open');
   document.getElementById('cam-m-img').src='';
 }
-document.getElementById('cam-mclose').addEventListener('click', closeCam);
-document.getElementById('cam-modal').addEventListener('click', e=>{ if(e.target===document.getElementById('cam-modal')) closeCam(); });
+document.getElementById('cam-mclose').addEventListener('click',closeCam);
+document.getElementById('cam-modal').addEventListener('click',e=>{if(e.target===document.getElementById('cam-modal'))closeCam();});
 
 // ── LAYER TOGGLES ─────────────────────────────────────────────────────────────
 function toggleLayer(name) {
-  layersOn[name] = !layersOn[name];
-  const on = layersOn[name];
+  layersOn[name]=!layersOn[name];
+  const on=layersOn[name];
   switch(name) {
-    case 'warnings':
-      if(warningLayer) on ? warningLayer.addTo(map) : map.removeLayer(warningLayer);
-      break;
-    case 'watches':
-      if(watchLayer) on ? watchLayer.addTo(map) : map.removeLayer(watchLayer);
-      break;
+    case 'warnings': if(warningLayer) on?warningLayer.addTo(map):map.removeLayer(warningLayer); break;
+    case 'watches':  if(watchLayer)   on?watchLayer.addTo(map):map.removeLayer(watchLayer); break;
     case 'lightning':
-      if (on) { loadNWSLightning(); }
-      else { if(nwsLtngLayer){ map.removeLayer(nwsLtngLayer); nwsLtngLayer=null; } }
+      if(on){loadNWSLightning();}
+      else{if(nwsLtngLayer){map.removeLayer(nwsLtngLayer);nwsLtngLayer=null;}}
       break;
-    case 'sirens':
-      if(sirenLayer) on ? sirenLayer.addTo(map) : map.removeLayer(sirenLayer);
-      break;
+    case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
     case 'cameras':
-      if(camMarkerLayer) on ? camMarkerLayer.addTo(map) : map.removeLayer(camMarkerLayer);
-      document.getElementById('hud-cam').style.display = on ? '' : 'none';
+      if(camMarkerLayer) on?camMarkerLayer.addTo(map):map.removeLayer(camMarkerLayer);
+      document.getElementById('hud-cam').style.display=on?'':'none';
       break;
   }
 }
 
-// Wire topbar buttons
 [
   ['btn-refl',     ()=>setRadarType('reflectivity')],
   ['btn-vel',      ()=>setRadarType('velocity')],
-  ['btn-warnings', ()=>{ toggleLayer('warnings'); document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings); }],
-  ['btn-watches',  ()=>{ toggleLayer('watches');  document.getElementById('btn-watches').classList.toggle('on',layersOn.watches); }],
+  ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
+  ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
   ['btn-lightning',()=>{
-    layersOn.lightning = !layersOn.lightning;
-    document.getElementById('btn-lightning').classList.toggle('on', layersOn.lightning);
-    if (layersOn.lightning) { loadNWSLightning(); }
-    else { if(nwsLtngLayer){ map.removeLayer(nwsLtngLayer); nwsLtngLayer=null; } }
+    layersOn.lightning=!layersOn.lightning;
+    document.getElementById('btn-lightning').classList.toggle('on',layersOn.lightning);
+    if(layersOn.lightning){loadNWSLightning();}
+    else{if(nwsLtngLayer){map.removeLayer(nwsLtngLayer);nwsLtngLayer=null;}}
   }],
-  ['btn-sirens',   ()=>{ toggleLayer('sirens');   document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens); }],
-  ['btn-cameras',  ()=>{ toggleLayer('cameras');  document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras); }],
+  ['btn-sirens',  ()=>{toggleLayer('sirens');  document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens);}],
+  ['btn-cameras', ()=>{toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras);}],
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
-// Radar type buttons
 document.getElementById('rtype-refl').addEventListener('click',()=>setRadarType('reflectivity'));
 document.getElementById('rtype-vel').addEventListener('click', ()=>setRadarType('velocity'));
-
-// Play button — NWS WMS is always live, repurpose as manual refresh
-document.getElementById('play-btn').addEventListener('click', ()=>{
+document.getElementById('play-btn').addEventListener('click',()=>{
   refreshRadar();
-  document.getElementById('play-btn').textContent = '↻ REFRESHED';
-  setTimeout(()=>document.getElementById('play-btn').textContent='↻ REFRESH', 1500);
+  document.getElementById('play-btn').textContent='↻ REFRESHED';
+  setTimeout(()=>document.getElementById('play-btn').textContent='↻ REFRESH',1500);
 });
-document.getElementById('play-btn').textContent = '↻ REFRESH';
+document.getElementById('play-btn').textContent='↻ REFRESH';
 
-// ── HUD DRAG ─────────────────────────────────────────────────────────────────
-let drag=null, dox=0, doy=0;
+// ── HUD DRAG ──────────────────────────────────────────────────────────────────
+let drag=null,dox=0,doy=0;
 ['hud-cond','hud-alerts','hud-radar','hud-cam'].forEach(id=>{
   document.getElementById(id+'-head').addEventListener('mousedown',e=>{
     drag=document.getElementById(id);
     const r=drag.getBoundingClientRect();
-    dox=e.clientX-r.left; doy=e.clientY-r.top;
-    e.preventDefault();
+    dox=e.clientX-r.left; doy=e.clientY-r.top; e.preventDefault();
   });
 });
 document.addEventListener('mousemove',e=>{
-  if(!drag) return;
-  let x=e.clientX-dox, y=e.clientY-doy;
+  if(!drag)return;
+  let x=e.clientX-dox,y=e.clientY-doy;
   x=Math.max(0,Math.min(window.innerWidth-drag.offsetWidth,x));
   y=Math.max(0,Math.min(window.innerHeight-drag.offsetHeight,y));
-  drag.style.left=x+'px'; drag.style.top=y+'px';
-  drag.style.right='auto'; drag.style.bottom='auto';
+  drag.style.left=x+'px';drag.style.top=y+'px';drag.style.right='auto';drag.style.bottom='auto';
 });
 document.addEventListener('mouseup',()=>drag=null);
 
-// ── HUD COLLAPSE ──────────────────────────────────────────────────────────────
 ['cond','alerts','radar','cam'].forEach(id=>{
   document.getElementById('hud-'+id+'-tog').addEventListener('click',()=>{
     const card=document.getElementById('hud-'+id);
@@ -913,30 +720,19 @@ document.addEventListener('mouseup',()=>drag=null);
 });
 
 // ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
-const INTERVAL=120;
-let tick2=0;
+const INTERVAL=120; let tick2=0;
 setInterval(()=>{
   tick2++;
   document.getElementById('rbar').style.width=(tick2/INTERVAL*100)+'%';
-  if(tick2>=INTERVAL){
-    tick2=0;
-    document.getElementById('rbar').style.width='0%';
-    refreshRadar(); loadAlerts(); loadConditions();
-  }
+  if(tick2>=INTERVAL){tick2=0;document.getElementById('rbar').style.width='0%';refreshRadar();loadAlerts();loadConditions();}
 },1000);
-setInterval(loadAlerts, 60000);
+setInterval(loadAlerts,60000);
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-// Listen for station selection from popup buttons (which live outside the IIFE)
-document.addEventListener('selectVelStation', e => {
-  selectedVelStation = e.detail;
-  if (radarType !== 'velocity') {
-    setRadarType('velocity');
-  } else {
-    applyAllRadarLayers();
-    buildStationMarkers();
-    updateRadarTime();
-  }
+document.addEventListener('selectVelStation',e=>{
+  selectedVelStation=e.detail;
+  if(radarType!=='velocity'){setRadarType('velocity');}
+  else{applyAllRadarLayers();buildStationMarkers();buildStationLegend();updateRadarTime();}
   map.closePopup();
 });
 
@@ -946,12 +742,10 @@ loadConditions();
 buildSirens();
 buildCameras();
 
-})(); // IIFE — no globals, no export conflicts
+})();
 
-// selectVelStation must be global — called from Leaflet popup button
 function selectVelStation(stationId) {
-  // Delegate into the IIFE's closure via a custom event
-  document.dispatchEvent(new CustomEvent('selectVelStation', { detail: stationId }));
+  document.dispatchEvent(new CustomEvent('selectVelStation',{detail:stationId}));
 }
 </script>
 </body>
