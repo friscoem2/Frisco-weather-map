@@ -245,9 +245,17 @@ const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
 function makeWMS(url, layerName, opacity) {
   return L.tileLayer.wms(url, {
-    layers:layerName, format:'image/png', transparent:true,
-    opacity:opacity||0.75, version:'1.3.0', uppercase:true,
-    attribution:'NOAA/NWS MRMS'
+    layers: layerName,
+    format: 'image/png',
+    transparent: true,
+    opacity: opacity || 0.75,
+    version: '1.3.0',
+    uppercase: true,
+    // Prevent the browser from getting overwhelmed by rapid WMS tile churn.
+    updateWhenIdle: true,
+    updateWhenZooming: false,
+    keepBuffer: 1,
+    attribution: 'NOAA/NWS MRMS'
   });
 }
 
@@ -323,13 +331,35 @@ function getLayerName(station, type) {
   if (station.tdwr) {
     return type === 'reflectivity' ? `${station.id}_bref` : null;
   }
+
   if (type === 'reflectivity') {
     return `${station.id}_bref_raw`;
   }
+
+  // NOAA OpenGeo uses super-resolution base velocity names like kfws_sr_bvel.
   if (type === 'velocity') {
     return `${station.id}_sr_bvel`;
   }
+
   return null;
+}
+
+const MAX_ACTIVE_REFLECTIVITY_RADARS = 4;
+
+function getNearestReflectivityStations(limit = MAX_ACTIVE_REFLECTIVITY_RADARS) {
+  const center = map.getCenter();
+  const paddedBounds = map.getBounds().pad(1.5);
+
+  return ALL_STATIONS
+    .filter(s => !s.tdwr)
+    // Always allow the nearby primary DFW sites; only include distant test/aux sites if they are near the current map view.
+    .filter(s => !s.test || paddedBounds.contains([s.lat, s.lon]))
+    .map(s => ({
+      ...s,
+      dist: map.distance(center, L.latLng(s.lat, s.lon))
+    }))
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, limit);
 }
 
 // ── ALERT COLOR MAP ───────────────────────────────────────────────────────────
@@ -405,25 +435,36 @@ function applyAllRadarLayers() {
   radarLayers.forEach(l=>map.removeLayer(l));
   radarLayers=[];
 
-  if (radarType==='reflectivity') {
-    // CONUS composite base
-    const base = makeWMS(`${NWS_BASE}/conus/ows`,'conus_bref_qcd',0.6);
-    base.addTo(map); radarLayers.push(base);
-    // All stations — DFW primary + test stations
-    ALL_STATIONS.forEach(s=>{
-      const ln=getLayerName(s,'reflectivity');
+  if (radarType === 'reflectivity') {
+    // CONUS composite base. This gives broad coverage without loading every single radar site.
+    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.6);
+    base.addTo(map);
+    radarLayers.push(base);
+
+    // Load only the closest station-level reflectivity layers. Loading every NEXRAD site at once can exhaust browser resources.
+    getNearestReflectivityStations(4).forEach(s => {
+      const ln = getLayerName(s, 'reflectivity');
       if (!ln) return;
-      const l=makeWMS(`${NWS_BASE}/${s.id}/ows`,ln,0.78);
-      l.addTo(map); radarLayers.push(l);
+
+      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.78);
+      l.addTo(map);
+      radarLayers.push(l);
     });
   } else {
-    // Velocity — single selected station
-    const station=ALL_STATIONS.find(s=>s.id===selectedVelStation);
-    if (station&&!station.tdwr) {
-      const ln=getLayerName(station,'velocity');
-      const l=makeWMS(`${NWS_BASE}/${station.id}/ows`,ln,0.82);
-      l.addTo(map); radarLayers.push(l);
+    // Velocity — one selected station only. This avoids loading dozens of velocity products at once.
+    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
+
+    if (station && !station.tdwr) {
+      const ln = getLayerName(station, 'velocity');
+
+      if (ln) {
+        console.log('Loading velocity layer:', `${NWS_BASE}/${station.id}/ows`, ln);
+        const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
+        l.addTo(map);
+        radarLayers.push(l);
+      }
     }
+
     updateVelStationHUD();
   }
 }
@@ -521,19 +562,25 @@ function refreshRadar() {
 // ── ALERTS ────────────────────────────────────────────────────────────────────
 async function loadAlerts() {
   try {
-    const [natRes,txRes] = await Promise.all([
-      fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert',{headers:{'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)'}}),
-      fetch('https://api.weather.gov/alerts/active/area/TX',{headers:{'User-Agent':'FriscoEM/1.0 (friscoem2.github.io)'}})
-    ]);
-    const [natData,txData] = await Promise.all([natRes.json(),txRes.json()]);
-    const local=(txData.features||[]).filter(f=>{
-      const d=(f.properties.areaDesc||'').toLowerCase();
-      return d.includes('collin')||d.includes('dallas')||d.includes('denton')||d.includes('frisco');
+    // Browser JS cannot reliably set User-Agent headers for weather.gov.
+    // Keep this request regional instead of nationwide to reduce load and avoid CORS/preflight issues.
+    const txRes = await fetch('https://api.weather.gov/alerts/active/area/TX');
+    const txData = await txRes.json();
+
+    const local = (txData.features || []).filter(f => {
+      const d = (f.properties.areaDesc || '').toLowerCase();
+      return d.includes('collin') ||
+             d.includes('dallas') ||
+             d.includes('denton') ||
+             d.includes('tarrant') ||
+             d.includes('frisco');
     });
+
     renderAlerts(local);
-    renderAlertPolygons(natData.features||[]);
+    renderAlertPolygons(txData.features || []);
   } catch(e) {
-    document.getElementById('alert-list').innerHTML='<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
+    console.warn('NWS alerts unavailable:', e);
+    document.getElementById('alert-list').innerHTML = '<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
   }
 }
 
@@ -593,7 +640,7 @@ function renderAlertPolygons(all) {
 // ── CONDITIONS ────────────────────────────────────────────────────────────────
 async function loadConditions() {
   try {
-    const d=(await (await fetch('https://api.weather.gov/stations/KDFW/observations/latest',{headers:{'User-Agent':'FriscoEM/1.0'}})).json()).properties;
+    const d=(await (await fetch('https://api.weather.gov/stations/KDFW/observations/latest')).json()).properties;
     const tc=d.temperature?.value,tf=tc!=null?Math.round(tc*9/5+32):null;
     const ws=d.windSpeed?.value,wm=ws!=null?Math.round(ws*.621371):null;
     const wd=d.windDirection?.value,hum=d.relativeHumidity?.value;
