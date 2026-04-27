@@ -326,10 +326,11 @@ const map = L.map('map', {
 });
 L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-// Stadia Alidade Smooth Dark — works at all zoom levels, no key for personal use
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+// CartoDB Dark Matter — free, no API key required, full zoom support
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd',
   maxZoom: 20,
-  attribution: '© Stadia Maps © OSM'
+  attribution: '© CARTO © OSM contributors'
 }).addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
