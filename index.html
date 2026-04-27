@@ -777,48 +777,12 @@ function updateVelStationHUD() {
 }
 
 // ── LIGHTNING ────────────────────────────────────────────────────────────────
-// NOAA's old conus_ltng WMS layer is unreliable/not consistently available.
-// Use nowCOAST's ArcGIS REST lightning strike density image service instead.
-// This is a gridded lightning density product, not individual strike points.
-const LIGHTNING_SERVICE_URL = 'https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/sat_meteo_emulated_imagery_lightningstrikedensity_goes_time/MapServer';
-
-function createArcGISDynamicTileLayer(serviceUrl, options = {}) {
-  return new (L.GridLayer.extend({
-    createTile: function(coords, done) {
-      const tile = document.createElement('img');
-      const size = this.getTileSize();
-      const bounds = this._tileCoordsToBounds(coords);
-      const sw = map.options.crs.project(bounds.getSouthWest());
-      const ne = map.options.crs.project(bounds.getNorthEast());
-
-      const bbox = [sw.x, sw.y, ne.x, ne.y].join(',');
-      const params = new URLSearchParams({
-        f: 'image',
-        format: 'png32',
-        transparent: 'true',
-        bbox: bbox,
-        bboxSR: '3857',
-        imageSR: '3857',
-        size: size.x + ',' + size.y,
-        dpi: '96'
-      });
-
-      if (options.layers) params.set('layers', options.layers);
-      if (options.layerDefs) params.set('layerDefs', options.layerDefs);
-      if (options.time) params.set('time', options.time);
-
-      tile.alt = options.alt || '';
-      tile.crossOrigin = '';
-      tile.onload = function(){ done(null, tile); };
-      tile.onerror = function(){ done(null, tile); };
-      tile.src = serviceUrl + '/export?' + params.toString() + '&t=' + Date.now();
-
-      if (options.opacity != null) tile.style.opacity = options.opacity;
-      return tile;
-    }
-  }))(options);
-}
-
+// Important: nowCOAST's ArcGIS lightning service often fails from plain browser JS
+// because browsers cannot set the required User-Agent header. When that image
+// export fails, the map shows repeated broken-image alt text.
+//
+// This version uses the NOAA/NCEP OpenGeo WMS layer instead so it fails quietly
+// and does not paint broken labels across the map.
 function loadNWSLightning() {
   if (nwsLtngLayer) {
     map.removeLayer(nwsLtngLayer);
@@ -827,13 +791,15 @@ function loadNWSLightning() {
 
   if (!layersOn.lightning) return;
 
-  nwsLtngLayer = createArcGISDynamicTileLayer(LIGHTNING_SERVICE_URL, {
-    opacity: 0.78,
-    updateWhenIdle: true,
-    updateWhenZooming: false,
-    keepBuffer: 1,
-    alt: 'NOAA nowCOAST lightning strike density',
-    attribution: 'NOAA nowCOAST lightning density'
+  nwsLtngLayer = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_ltng', 0.75);
+
+  nwsLtngLayer.on('tileerror', function(e) {
+    // Keep the UI clean if NOAA's lightning layer is unavailable.
+    if (e && e.tile) {
+      e.tile.alt = '';
+      e.tile.style.display = 'none';
+    }
+    console.warn('NOAA lightning WMS tile unavailable. Hiding failed tile.');
   });
 
   nwsLtngLayer.addTo(map);
