@@ -959,7 +959,6 @@ const TEST_STATIONS = [
   { id:'kdfx', name:'KDFX', label:'Laughlin AFB TX', lat:29.273139, lon:-100.280330, test:true },
   { id:'kdyx', name:'KDYX', label:'Dyess AFB TX', lat:32.538500, lon:-99.254333, test:true },
   { id:'kewx', name:'KEWX', label:'Austin / San Antonio TX', lat:29.704056, lon:-98.028611, test:true },
-  { id:'kfws', name:'KFWS', label:'Dallas / Fort Worth TX', lat:32.573000, lon:-97.303150, test:true },
   { id:'kgrk', name:'KGRK', label:'Fort Hood TX', lat:30.721833, lon:-97.382944, test:true },
   { id:'khgx', name:'KHGX', label:'Houston TX', lat:29.471900, lon:-95.078733, test:true },
   { id:'klbb', name:'KLBB', label:'Lubbock TX', lat:33.654139, lon:-101.814160, test:true },
@@ -1422,13 +1421,13 @@ function buildStationMarkers() {
 
     const icon = L.divIcon({
       className:'',
-      html:`<div style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center">
+      html:`<div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
         <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid ${ringColor};background:${ringBg};${selGlow}"></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:500;letter-spacing:.4px;color:${ringColor};text-shadow:0 0 6px ${ringColor}88;position:relative;z-index:1;text-align:center;line-height:1.15;pointer-events:none">
-          ${station.name}<br><span style="font-size:6px;opacity:.65">${isTdwr?'TDWR':isTest?'TEST':'WSR'}</span>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.5px;color:${ringColor};text-shadow:0 0 6px ${ringColor}88;position:relative;z-index:1;text-align:center;line-height:1.15;pointer-events:none">
+          ${station.name}
         </div>
       </div>`,
-      iconSize:[36,36],iconAnchor:[18,18]
+      iconSize:[40,40],iconAnchor:[20,20]
     });
 
     const canSelectVel = !isTdwr;
