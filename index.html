@@ -163,7 +163,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 
 <div class="hud" id="hud-alerts">
   <div class="hud-head" id="hud-alerts-head">
-    <div class="hud-title"><div class="dot" id="alert-dot"></div>NWS ALERTS · DFW AREA</div>
+    <div class="hud-title"><div class="dot" id="alert-dot"></div>NWS ALERTS · LOCAL HUD / NATIONAL MAP</div>
     <div class="hud-tog" id="hud-alerts-tog">▾</div>
   </div>
   <div class="hud-body">
@@ -809,28 +809,114 @@ function refreshRadar() {
   updateRadarTime();
 }
 
+// ── ALERT FILTERS ─────────────────────────────────────────────────────────────
+// These are the national warning/watch products that will be drawn on the map.
+// The HUD remains focused on the local DFW area so it does not become noisy.
+
+const WATCHED_WARNING_TYPES = [
+  'Tornado Warning',
+  'Severe Thunderstorm Warning',
+  'Flash Flood Warning',
+  'Flood Warning',
+  'Hurricane Warning',
+  'Tropical Storm Warning',
+  'Special Marine Warning',
+  'Winter Storm Warning',
+  'Blizzard Warning',
+  'Ice Storm Warning'
+];
+
+const WATCHED_WATCH_TYPES = [
+  'Tornado Watch',
+  'Severe Thunderstorm Watch',
+  'Flash Flood Watch',
+  'Flood Watch',
+  'Hurricane Watch',
+  'Tropical Storm Watch',
+  'Winter Storm Watch'
+];
+
+const WATCHED_ALERT_TYPES = [
+  ...WATCHED_WARNING_TYPES,
+  ...WATCHED_WATCH_TYPES
+];
+
+function normalizeEventName(event) {
+  return (event || '').trim().toLowerCase();
+}
+
+function isWatchedAlertType(event) {
+  const e = normalizeEventName(event);
+  return WATCHED_ALERT_TYPES.some(type => e === type.toLowerCase());
+}
+
+function isWatchedWarning(event) {
+  const e = normalizeEventName(event);
+  return WATCHED_WARNING_TYPES.some(type => e === type.toLowerCase());
+}
+
+function isWatchedWatch(event) {
+  const e = normalizeEventName(event);
+  return WATCHED_WATCH_TYPES.some(type => e === type.toLowerCase());
+}
+
+function isLocalDFWAlert(feature) {
+  const d = (feature.properties?.areaDesc || '').toLowerCase();
+
+  return d.includes('collin') ||
+         d.includes('dallas') ||
+         d.includes('denton') ||
+         d.includes('tarrant') ||
+         d.includes('frisco');
+}
+
 // ── ALERTS ────────────────────────────────────────────────────────────────────
 async function loadAlerts() {
   try {
-    // Browser JS cannot reliably set User-Agent headers for weather.gov.
-    // Keep this request regional instead of nationwide to reduce load and avoid CORS/preflight issues.
-    const txRes = await fetch('https://api.weather.gov/alerts/active/area/TX');
-    const txData = await txRes.json();
+    let data;
 
-    const local = (txData.features || []).filter(f => {
-      const d = (f.properties.areaDesc || '').toLowerCase();
-      return d.includes('collin') ||
-             d.includes('dallas') ||
-             d.includes('denton') ||
-             d.includes('tarrant') ||
-             d.includes('frisco');
+    try {
+      // National active alerts.
+      // This allows the map to draw all watched warning/watch polygons nationwide.
+      const nationalRes = await fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert');
+
+      if (!nationalRes.ok) {
+        throw new Error(`National alerts request failed: ${nationalRes.status}`);
+      }
+
+      data = await nationalRes.json();
+    } catch (nationalErr) {
+      console.warn('National NWS alerts unavailable, falling back to Texas only:', nationalErr);
+
+      // Fallback keeps the Frisco/DFW map useful if weather.gov blocks or throttles the national request.
+      const txRes = await fetch('https://api.weather.gov/alerts/active/area/TX');
+
+      if (!txRes.ok) {
+        throw new Error(`Texas alerts request failed: ${txRes.status}`);
+      }
+
+      data = await txRes.json();
+    }
+
+    const allFeatures = data.features || [];
+
+    // Only keep the warning/watch products we actually support/color.
+    const watchedAlerts = allFeatures.filter(f => {
+      const event = f.properties?.event || '';
+      return f.geometry && isWatchedAlertType(event);
     });
 
+    // HUD remains local so it does not become noisy.
+    const local = watchedAlerts.filter(isLocalDFWAlert);
+
     renderAlerts(local);
-    renderAlertPolygons(txData.features || []);
+    renderAlertPolygons(watchedAlerts);
+
   } catch(e) {
     console.warn('NWS alerts unavailable:', e);
-    document.getElementById('alert-list').innerHTML = '<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
+
+    document.getElementById('alert-list').innerHTML =
+      '<div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0">ALERTS UNAVAILABLE</div>';
   }
 }
 
@@ -838,63 +924,89 @@ function renderAlerts(alerts) {
   const list=document.getElementById('alert-list');
   const dot=document.getElementById('alert-dot');
   const card=document.getElementById('hud-alerts');
+
   if (!alerts.length) {
-    list.innerHTML='<div class="no-alerts">✓ NO ACTIVE ALERTS</div>';
+    list.innerHTML='<div class="no-alerts">✓ NO ACTIVE LOCAL WATCHED ALERTS</div>';
     dot.className='dot g'; card.classList.remove('alert-active'); return;
   }
-  const hasWarn=alerts.some(a=>(a.properties.event||'').includes('Warning'));
-  const hasWatch=alerts.some(a=>(a.properties.event||'').includes('Watch'));
+
+  const hasWarn=alerts.some(a=>isWatchedWarning(a.properties?.event || ''));
+  const hasWatch=alerts.some(a=>isWatchedWatch(a.properties?.event || ''));
   dot.className=hasWarn?'dot r':hasWatch?'dot y':'dot';
   card.classList.toggle('alert-active',hasWarn);
+
   list.innerHTML=alerts.slice(0,6).map(f=>{
     const p=f.properties;
-    const isW=(p.event||'').includes('Warning');
-    const isA=(p.event||'').includes('Watch');
+    const isW=isWatchedWarning(p.event || '');
+    const isA=isWatchedWatch(p.event || '');
     const cls=isW?'W':isA?'A':'Y';
     const exp=p.expires?new Date(p.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'}):'—';
-    return `<div class="al-item ${cls}"><div class="al-event">${p.event||'ALERT'}</div><div class="al-head">${(p.headline||'').slice(0,90)}${(p.headline||'').length>90?'…':''}</div><div class="al-exp">EXP ${exp} CDT</div></div>`;
+    const col = alertPopupColor(p.event || '');
+
+    return `<div class="al-item ${cls}" style="border-color:${col};background:rgba(0,0,0,.22)">
+      <div class="al-event" style="color:${col}">${p.event||'ALERT'}</div>
+      <div class="al-head">${(p.headline||'').slice(0,90)}${(p.headline||'').length>90?'…':''}</div>
+      <div class="al-exp">EXP ${exp} CDT</div>
+    </div>`;
   }).join('');
 }
 
 function renderAlertPolygons(all) {
   if (warningLayer) map.removeLayer(warningLayer);
   if (watchLayer) map.removeLayer(watchLayer);
-  const warnings=[],watches=[];
+
+  const warnings=[];
+  const watches=[];
+
   all.forEach(f=>{
     if (!f.geometry) return;
-    const ev=(f.properties.event||'').toLowerCase();
-    if (ev.includes('warning')) warnings.push(f);
-    else if (ev.includes('watch')) watches.push(f);
+
+    const event=f.properties?.event || '';
+
+    if (isWatchedWarning(event)) {
+      warnings.push(f);
+    } else if (isWatchedWatch(event)) {
+      watches.push(f);
+    }
   });
+
   function makeLayer(features,layerOn) {
     if (!features.length||!layerOn) return null;
-return L.geoJSON({type:'FeatureCollection',features},{
-  style: f => alertStyle(f.properties.event),
-  onEachFeature:(f,l)=>{
-    const col=alertPopupColor(f.properties.event);
-    const exp=f.properties.expires
-      ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
 
-    l.bindPopup(`
-      <div style="font-family:'JetBrains Mono',monospace;max-width:260px">
-        <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">
-          ${f.properties.event||'ALERT'}
-        </div>
-        <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">
-          ${(f.properties.headline||'').slice(0,140)}
-        </div>
-        <div style="font-size:8.5px;color:var(--text-dim)">
-          EXPIRES ${exp}
-        </div>
-      </div>
-    `,{maxWidth:280});
+    return L.geoJSON({type:'FeatureCollection',features},{
+      style: f => alertStyle(f.properties.event),
+      onEachFeature:(f,l)=>{
+        const col=alertPopupColor(f.properties.event);
+        const exp=f.properties.expires
+          ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
+
+        l.bindPopup(`
+          <div style="font-family:'JetBrains Mono',monospace;max-width:280px">
+            <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">
+              ${f.properties.event||'ALERT'}
+            </div>
+            <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">
+              ${(f.properties.headline||'').slice(0,160)}
+            </div>
+            <div style="font-size:8.5px;color:var(--text-dim);line-height:1.35">
+              ${f.properties.areaDesc || ''}
+            </div>
+            <div style="font-size:8.5px;color:var(--text-dim);margin-top:4px">
+              EXPIRES ${exp}
+            </div>
+          </div>
+        `,{maxWidth:300});
+      }
+    });
   }
-});
-  }
+
   warningLayer=makeLayer(warnings,layersOn.warnings);
   if (warningLayer) warningLayer.addTo(map);
+
   watchLayer=makeLayer(watches,layersOn.watches);
   if (watchLayer) watchLayer.addTo(map);
+
+  console.log(`Loaded watched alerts: ${warnings.length} warnings, ${watches.length} watches`);
 }
 
 // ── CONDITIONS ────────────────────────────────────────────────────────────────
