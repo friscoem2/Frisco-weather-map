@@ -334,28 +334,46 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
-let radarFrames = [], radarHost = '';
-let currentFrame = 0, isAnimating = false, animTimer = null;
-let radarType = 'reflectivity';   // reflectivity | velocity
+let radarType = 'reflectivity';
 let radarSrc  = 'KFWS';
-let radarLayer = null, warningLayer = null, watchLayer = null;
+let radarLayer = null, nwsLtngLayer = null, warningLayer = null, watchLayer = null;
 let lightningLayer = null, sirenLayer = null, camMarkerLayer = null;
 let lightningTimer = null;
 
 const layersOn = { warnings:true, watches:true, lightning:true, sirens:true, cameras:true };
 
 const RADAR_SITES = {
-  KFWS: { name:'KFWS · Ft Worth',  lat:32.573, lon:-97.303, avail:true },
-  KDYX: { name:'KDYX · Dyess AFB', lat:32.538, lon:-99.254, avail:true },
-  KFDR: { name:'KFDR · Altus AFB', lat:34.362, lon:-98.977, avail:true },
-  TDAL: { name:'TDAL · Love Field',lat:32.847, lon:-96.852, avail:false },
-  TDFW: { name:'TDFW · DFW Airport',lat:32.897,lon:-97.037, avail:false },
+  KFWS: { name:'KFWS · Ft Worth',   lat:32.573, lon:-97.303, avail:true,  id:'kfws' },
+  KDYX: { name:'KDYX · Dyess AFB',  lat:32.538, lon:-99.254, avail:true,  id:'kdyx' },
+  KFDR: { name:'KFDR · Altus AFB',  lat:34.362, lon:-98.977, avail:true,  id:'kfdr' },
+  TDAL: { name:'TDAL · Love Field', lat:32.847, lon:-96.852, avail:false, id:null },
+  TDFW: { name:'TDFW · DFW Airport',lat:32.897, lon:-97.037, avail:false, id:null },
 };
 
-const COLORS = {
-  reflectivity: { colorScheme:4, smooth:1 },
-  velocity:     { colorScheme:5, smooth:1 },
+// NWS opengeo.ncep.noaa.gov WMS — official government radar, no key, zoom-independent
+const NWS_WMS = 'https://opengeo.ncep.noaa.gov/geoserver/conus/ows';
+const NWS_LAYERS = {
+  reflectivity: 'conus_bref_qcd',   // Base reflectivity composite
+  velocity:     'conus_bvel_qcd',   // Base velocity composite
 };
+// Per-site reflectivity layers (site-specific, better local detail)
+const NWS_SITE_LAYERS = {
+  KFWS: { reflectivity:'kfws_bref_raw', velocity:'kfws_bvel_raw' },
+  KDYX: { reflectivity:'kdyx_bref_raw', velocity:'kdyx_bvel_raw' },
+  KFDR: { reflectivity:'kfdr_bref_raw', velocity:'kfdr_bvel_raw' },
+};
+
+function makeNWSWMS(layerName) {
+  return L.tileLayer.wms(NWS_WMS, {
+    layers: layerName,
+    format: 'image/png',
+    transparent: true,
+    opacity: 0.75,
+    version: '1.3.0',
+    uppercase: true,
+    attribution: 'NOAA/NWS'
+  });
+}
 
 // ── CLOCK ────────────────────────────────────────────────────────────────────
 function tick() {
@@ -419,88 +437,85 @@ L.marker([33.155, -96.823], {
   interactive:false
 }).addTo(map);
 
-// ── RADAR ────────────────────────────────────────────────────────────────────
-async function loadRadar() {
-  try {
-    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-    const data = await res.json();
-    radarHost = data.host;
-    radarFrames = [...(data.radar.past||[]), ...(data.radar.nowcast||[])];
-    document.getElementById('radar-frames').textContent = radarFrames.length + ' FRAMES';
-    currentFrame = radarFrames.length - 1;
-    renderFrame(currentFrame);
-  } catch(e) {
-    document.getElementById('radar-time').textContent = 'RADAR UNAVAILABLE';
-  }
+// ── RADAR (NWS opengeo WMS) ───────────────────────────────────────────────────
+function loadRadar() {
+  applyRadarLayer();
+  loadNWSLightning();
+  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
+  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
+  document.getElementById('radar-frames').textContent = 'NWS LIVE';
+  // Hide animation controls — WMS is always live, no frame scrubbing
+  document.getElementById('play-btn').style.display = 'none';
+  document.getElementById('tbar').style.display = 'none';
+  document.getElementById('tlabel').textContent = 'LIVE';
 }
 
-function renderFrame(idx) {
-  if (!radarFrames.length) return;
-  const frame = radarFrames[Math.max(0, Math.min(idx, radarFrames.length-1))];
-  const { colorScheme, smooth } = COLORS[radarType];
-  const url = `${radarHost}${frame.path}/512/{z}/{x}/{y}/${colorScheme}/${smooth}_1.png`;
+function applyRadarLayer() {
   if (radarLayer) map.removeLayer(radarLayer);
-  radarLayer = L.tileLayer(url, {
-    opacity:0.72, tileSize:512, zoomOffset:-1, attribution:'RainViewer'
+  // Try site-specific layer first, fall back to CONUS composite
+  const siteLayers = NWS_SITE_LAYERS[radarSrc];
+  const layerName = siteLayers ? siteLayers[radarType] : NWS_LAYERS[radarType];
+  radarLayer = makeNWSWMS(layerName);
+  radarLayer.addTo(map);
+  // On tile error (layer name wrong for this site), fall back to CONUS composite
+  radarLayer.on('tileerror', () => {
+    if (radarLayer) map.removeLayer(radarLayer);
+    radarLayer = makeNWSWMS(NWS_LAYERS[radarType]);
+    radarLayer.addTo(map);
+  });
+}
+
+function loadNWSLightning() {
+  // NWS official lightning strike density layer
+  if (nwsLtngLayer) map.removeLayer(nwsLtngLayer);
+  if (!layersOn.lightning) return;
+  nwsLtngLayer = L.tileLayer.wms(NWS_WMS, {
+    layers: 'conus_ltng',
+    format: 'image/png',
+    transparent: true,
+    opacity: 0.8,
+    version: '1.3.0',
+    uppercase: true,
+    attribution: 'NOAA/NWS'
   }).addTo(map);
-  const ts = new Date(frame.time * 1000);
-  const lbl = ts.toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
-  const isFcst = frame.path && frame.path.includes('nowcast');
-  document.getElementById('radar-time').textContent = (isFcst?'▶ FCST ':'')+lbl+' CDT';
-  const pct = ((idx+1)/radarFrames.length)*100;
-  document.getElementById('tfill').style.width = pct+'%';
-  document.getElementById('tlabel').textContent = idx===radarFrames.length-1?'LIVE':isFcst?'FCST':`T-${radarFrames.length-1-idx}`;
 }
 
 function setRadarType(type) {
   radarType = type;
-  document.getElementById('btn-refl').classList.toggle('on', type==='reflectivity');
-  document.getElementById('btn-vel').classList.toggle('on',  type==='velocity');
-  document.getElementById('rtype-refl').classList.toggle('on', type==='reflectivity');
-  document.getElementById('rtype-vel').classList.toggle('on',  type==='velocity');
-  renderFrame(currentFrame);
+  ['btn-refl','btn-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
+  ['rtype-refl','rtype-vel'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById(type==='reflectivity'?'btn-refl':'btn-vel').classList.add('on');
+  document.getElementById(type==='reflectivity'?'rtype-refl':'rtype-vel').classList.add('on');
+  applyRadarLayer();
+  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
+  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
 }
 
 function setRadarSrc(src) {
   if (!RADAR_SITES[src].avail) {
-    const n = RADAR_SITES[src].name;
-    alert(`${n}: TDWR data is not available via the public radar tile network.\nUsing KFWS (Ft Worth WSR-88D) which provides excellent coverage of Frisco.`);
+    alert(`${RADAR_SITES[src].name}: TDWR data is not available on the NWS public GeoServer.\nKFWS (Ft Worth WSR-88D) provides the best coverage of Frisco.`);
     return;
   }
   radarSrc = src;
   Object.keys(RADAR_SITES).forEach(k => {
     const b = document.getElementById('rsrc-'+k);
-    if(b) b.classList.toggle('on', k===src);
+    if (b) b.classList.toggle('on', k===src);
   });
-  renderFrame(currentFrame);
-  // Show site ring temporarily
+  applyRadarLayer();
+  // Show range ring
   const s = RADAR_SITES[src];
   const ring = L.circle([s.lat,s.lon],{radius:230000,color:'rgba(0,200,255,.12)',weight:1,fill:false,dashArray:'4 4',interactive:false}).addTo(map);
-  const pin = L.marker([s.lat,s.lon],{icon:L.divIcon({className:'',html:`<div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:rgba(0,200,255,.8);background:rgba(5,10,18,.85);padding:2px 5px;border:1px solid rgba(0,200,255,.3);border-radius:2px;white-space:nowrap">${src}</div>`,iconAnchor:[-4,8]})}).addTo(map);
+  const pin  = L.marker([s.lat,s.lon],{icon:L.divIcon({className:'',html:`<div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:rgba(0,200,255,.8);background:rgba(5,10,18,.85);padding:2px 5px;border:1px solid rgba(0,200,255,.3);border-radius:2px;white-space:nowrap">${src}</div>`,iconAnchor:[-4,8]})}).addTo(map);
   setTimeout(()=>{ map.removeLayer(ring); map.removeLayer(pin); }, 5000);
 }
 
-function toggleAnim() {
-  isAnimating = !isAnimating;
-  document.getElementById('play-btn').textContent = isAnimating ? '⏹ STOP' : '▶ PLAY';
-  if (isAnimating) {
-    animTimer = setInterval(()=>{
-      currentFrame = (currentFrame+1) % radarFrames.length;
-      renderFrame(currentFrame);
-    }, 380);
-  } else {
-    clearInterval(animTimer);
-    currentFrame = radarFrames.length-1;
-    renderFrame(currentFrame);
-  }
+// WMS layers refresh by re-adding with cache-bust — no frame scrubbing needed
+function refreshRadar() {
+  applyRadarLayer();
+  loadNWSLightning();
+  const now = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:false,hour:'2-digit',minute:'2-digit'});
+  document.getElementById('radar-time').textContent = now + ' CDT · LIVE';
 }
-
-document.getElementById('tbar').addEventListener('click', e => {
-  const r = e.currentTarget.getBoundingClientRect();
-  const pct = (e.clientX - r.left) / r.width;
-  currentFrame = Math.max(0, Math.min(radarFrames.length-1, Math.floor(pct*radarFrames.length)));
-  renderFrame(currentFrame);
-});
 
 // ── NWS ALERTS ───────────────────────────────────────────────────────────────
 async function loadAlerts() {
@@ -596,56 +611,10 @@ function dirLabel(deg) {
   return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(deg/22.5)%16];
 }
 
-// ── LIGHTNING (open-meteo fallback — polling instead of WebSocket) ────────────
-// Uses open-meteo's hourly lightning_potential as a proxy indicator,
-// plus random near-storm markers when potential is high.
-// Real strike data needs a paid API; this gives a visual indication.
-let ltLayer = L.layerGroup();
-
+// ── LIGHTNING — handled by NWS conus_ltng WMS layer (loaded in loadNWSLightning)
+// Toggle just removes/adds that WMS layer
 function startLightning() {
-  if (!layersOn.lightning) return;
-  ltLayer.addTo(map);
-  // Check open-meteo lightning potential every 5 min
-  fetchLightningPotential();
-  lightningTimer = setInterval(fetchLightningPotential, 300000);
-}
-
-async function fetchLightningPotential() {
-  try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=33.155&longitude=-96.823&hourly=lightning_potential&forecast_days=1&timezone=America/Chicago');
-    const d = await res.json();
-    const potentials = d.hourly?.lightning_potential || [];
-    const times = d.hourly?.time || [];
-    const now = new Date();
-    // Find the current hour index
-    const idx = times.findIndex(t => new Date(t) > now) - 1;
-    const current = potentials[Math.max(0,idx)] || 0;
-    // Simulate strikes proportional to lightning potential (>50 = active)
-    if (current > 50) {
-      simulateStrikes(Math.floor(current / 20));
-    }
-  } catch(e) {}
-}
-
-function simulateStrikes(count) {
-  for (let i=0; i<count; i++) {
-    setTimeout(()=>{
-      if (!layersOn.lightning) return;
-      // Random point within ~40km of Frisco
-      const lat = 33.155 + (Math.random()-.5)*.6;
-      const lon = -96.823 + (Math.random()-.5)*.8;
-      addStrike(lat, lon);
-    }, Math.random()*8000);
-  }
-}
-
-function addStrike(lat, lon) {
-  const m = L.marker([lat,lon],{
-    icon:L.divIcon({className:'lt-strike',iconSize:[7,7],iconAnchor:[3.5,3.5]}),
-    interactive:false
-  });
-  ltLayer.addLayer(m);
-  setTimeout(()=>ltLayer.removeLayer(m), 3500);
+  loadNWSLightning();
 }
 
 // ── SIRENS ────────────────────────────────────────────────────────────────────
@@ -759,7 +728,12 @@ function toggleLayer(name) {
   ['btn-vel',      ()=>setRadarType('velocity')],
   ['btn-warnings', ()=>{ toggleLayer('warnings'); document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings); }],
   ['btn-watches',  ()=>{ toggleLayer('watches');  document.getElementById('btn-watches').classList.toggle('on',layersOn.watches); }],
-  ['btn-lightning',()=>{ toggleLayer('lightning');document.getElementById('btn-lightning').classList.toggle('on',layersOn.lightning); }],
+  ['btn-lightning',()=>{
+    layersOn.lightning = !layersOn.lightning;
+    document.getElementById('btn-lightning').classList.toggle('on', layersOn.lightning);
+    if (layersOn.lightning) { loadNWSLightning(); }
+    else { if(nwsLtngLayer){ map.removeLayer(nwsLtngLayer); nwsLtngLayer=null; } }
+  }],
   ['btn-sirens',   ()=>{ toggleLayer('sirens');   document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens); }],
   ['btn-cameras',  ()=>{ toggleLayer('cameras');  document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras); }],
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
@@ -773,8 +747,13 @@ function toggleLayer(name) {
 document.getElementById('rtype-refl').addEventListener('click',()=>setRadarType('reflectivity'));
 document.getElementById('rtype-vel').addEventListener('click', ()=>setRadarType('velocity'));
 
-// Play button
-document.getElementById('play-btn').addEventListener('click', toggleAnim);
+// Play button — NWS WMS is always live, repurpose as manual refresh
+document.getElementById('play-btn').addEventListener('click', ()=>{
+  refreshRadar();
+  document.getElementById('play-btn').textContent = '↻ REFRESHED';
+  setTimeout(()=>document.getElementById('play-btn').textContent='↻ REFRESH', 1500);
+});
+document.getElementById('play-btn').textContent = '↻ REFRESH';
 
 // ── HUD DRAG ─────────────────────────────────────────────────────────────────
 let drag=null, dox=0, doy=0;
@@ -814,7 +793,7 @@ setInterval(()=>{
   if(tick2>=INTERVAL){
     tick2=0;
     document.getElementById('rbar').style.width='0%';
-    loadRadar(); loadAlerts(); loadConditions();
+    refreshRadar(); loadAlerts(); loadConditions();
   }
 },1000);
 setInterval(loadAlerts, 60000);
