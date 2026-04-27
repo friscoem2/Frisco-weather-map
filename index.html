@@ -95,6 +95,65 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
 .station-tag.wsr{border-color:rgba(0,200,255,.4);color:rgba(0,200,255,.7)}
 .station-tag.tdwr{border-color:rgba(255,180,0,.4);color:rgba(255,180,0,.7)}
 .station-tag.test{border-color:rgba(160,120,255,.5);color:rgba(160,120,255,.8)}
+
+/* CITY LAYERS MENU */
+#hud-citylayers{
+  top:62px;
+  left:50%;
+  transform:translateX(-50%);
+  min-width:280px;
+  max-width:340px;
+}
+.city-layer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.city-layer-btn{
+  font-family:var(--fm);
+  font-size:8.5px;
+  letter-spacing:.7px;
+  padding:7px 6px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:rgba(0,170,240,.04);
+  color:var(--text-dim);
+  cursor:pointer;
+  text-align:center;
+  transition:all .15s;
+  text-transform:uppercase;
+}
+.city-layer-btn:hover{
+  border-color:var(--border-hi);
+  color:var(--text);
+  background:rgba(0,170,240,.08);
+}
+.city-layer-btn.on{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:rgba(0,200,255,.11);
+  box-shadow:0 0 8px rgba(0,200,255,.16);
+}
+.city-layer-btn.fire.on{
+  border-color:#ff3b30;
+  color:#ff6b6b;
+  background:rgba(255,59,48,.10);
+}
+.city-layer-btn.pd.on{
+  border-color:#007aff;
+  color:#66b2ff;
+  background:rgba(0,122,255,.10);
+}
+.city-layer-note{
+  font-family:var(--fm);
+  font-size:8px;
+  color:var(--text-dim);
+  line-height:1.4;
+  margin-top:8px;
+  border-top:1px solid var(--border);
+  padding-top:7px;
+}
+
 #hud-cam{bottom:20px;right:12px;min-width:270px;max-width:300px}
 .cam-item{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--border);border-radius:3px;background:rgba(0,0,0,.2);cursor:pointer;transition:all .15s;margin-bottom:5px}
 .cam-item:last-child{margin-bottom:0}
@@ -137,8 +196,8 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
     <div class="tb-div"></div>
     <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
     <button class="lbtn on warn" id="btn-watches"  >WATCHES</button>
-    <button class="lbtn on"      id="btn-sirens"   >SIRENS</button>
-    <button class="lbtn on"      id="btn-cameras"  >CAMERAS</button>
+    <div class="tb-div"></div>
+    <button class="lbtn on"      id="btn-citylayers">CITY LAYERS</button>
   </div>
   <div id="clock">--:--:-- CDT</div>
 </div>
@@ -200,6 +259,28 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:var(--fd);backgro
   </div>
 </div>
 
+
+<div class="hud" id="hud-citylayers">
+  <div class="hud-head" id="hud-citylayers-head">
+    <div class="hud-title"><div class="dot g"></div>CITY LAYERS</div>
+    <div class="hud-tog" id="hud-citylayers-tog">▾</div>
+  </div>
+  <div class="hud-body">
+    <div class="city-layer-grid">
+      <button class="city-layer-btn on"   id="btn-citylimits">CITY LIMITS</button>
+      <button class="city-layer-btn on"   id="btn-sirens">SIRENS</button>
+      <button class="city-layer-btn on"   id="btn-cameras">CAMERAS</button>
+      <button class="city-layer-btn fire on" id="btn-firestations">FIRE STA.</button>
+      <button class="city-layer-btn fire" id="btn-firedistricts">FIRE DIST.</button>
+      <button class="city-layer-btn pd"   id="btn-policebeats">PD BEATS</button>
+    </div>
+    <div class="city-layer-note">
+      Fire stations, fire districts, and police beats load from Frisco public ArcGIS services.
+      Districts and beats are off by default to keep the map clean.
+    </div>
+  </div>
+</div>
+
 <div class="hud" id="hud-cam">
   <div class="hud-head" id="hud-cam-head">
     <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS · DAL/FTW</div>
@@ -236,10 +317,12 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 let radarType = 'reflectivity';
 let radarLayers = [];
 let warningLayer = null, watchLayer = null;
+let cityLimitLayer = null;
+let fireStationLayer = null, fireDistrictLayer = null, policeBeatLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
 let selectedVelStation = 'kfws';
 let stationMarkerLayer = null;
-const layersOn = { warnings:true, watches:true, sirens:true, cameras:true };
+const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false, policeBeats:false };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 
 function makeWMS(url, layerName, opacity) {
@@ -656,14 +739,42 @@ async function loadFriscoBoundary() {
       + '?where=GEOID%3D%274827684%27&outFields=NAME,GEOID&outSR=4326&f=geojson&returnGeometry=true';
     const res = await fetch(url);
     const data = await res.json();
-    if (data.features&&data.features.length) {
-      L.geoJSON(data,{style:{color:'rgba(0,200,255,0.75)',weight:1.5,fillColor:'rgba(0,200,255,0.03)',fillOpacity:1,dashArray:'6 4',interactive:false}}).addTo(map);
+
+    if (data.features && data.features.length) {
+      cityLimitLayer = L.geoJSON(data, {
+        style: {
+          color:'rgba(0,200,255,0.75)',
+          weight:1.5,
+          fillColor:'rgba(0,200,255,0.03)',
+          fillOpacity:1,
+          dashArray:'6 4',
+          interactive:false
+        }
+      });
+
+      if (layersOn.cityLimits) cityLimitLayer.addTo(map);
+      return;
     }
-  } catch(e) { loadFallbackBoundary(); }
+
+    loadFallbackBoundary();
+  } catch(e) {
+    loadFallbackBoundary();
+  }
 }
+
 function loadFallbackBoundary() {
   const coords=[[-96.9298,33.2075],[-96.8954,33.2211],[-96.8617,33.2211],[-96.8198,33.2211],[-96.7853,33.2075],[-96.7509,33.1939],[-96.7337,33.1735],[-96.7165,33.1462],[-96.7165,33.1189],[-96.7337,33.0984],[-96.7681,33.0848],[-96.8026,33.0780],[-96.8370,33.0780],[-96.8715,33.0848],[-96.9059,33.0984],[-96.9231,33.1189],[-96.9404,33.1462],[-96.9404,33.1735],[-96.9298,33.2075]];
-  L.polygon(coords.map(c=>[c[1],c[0]]),{color:'rgba(0,200,255,0.75)',weight:1.5,fillColor:'rgba(0,200,255,0.03)',fillOpacity:1,dashArray:'6 4',interactive:false}).addTo(map);
+
+  cityLimitLayer = L.polygon(coords.map(c=>[c[1],c[0]]), {
+    color:'rgba(0,200,255,0.75)',
+    weight:1.5,
+    fillColor:'rgba(0,200,255,0.03)',
+    fillOpacity:1,
+    dashArray:'6 4',
+    interactive:false
+  });
+
+  if (layersOn.cityLimits) cityLimitLayer.addTo(map);
 }
 loadFriscoBoundary();
 L.marker([33.155,-96.823],{icon:L.divIcon({className:'',html:'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:3px;color:rgba(0,200,255,.4);pointer-events:none;white-space:nowrap;text-shadow:0 0 8px rgba(0,200,255,.25)">FRISCO TX</div>',iconAnchor:[35,8]}),interactive:false}).addTo(map);
@@ -774,13 +885,6 @@ function updateVelStationHUD() {
   if (el&&station) el.textContent=station.name+' · '+station.label;
 }
 
-// ── LIGHTNING ────────────────────────────────────────────────────────────────
-// Important: nowCOAST's ArcGIS lightning service often fails from plain browser JS
-// because browsers cannot set the required User-Agent header. When that image
-// export fails, the map shows repeated broken-image alt text.
-//
-// This version uses the NOAA/NCEP OpenGeo WMS layer instead so it fails quietly
-// and does not paint broken labels across the map.
 
 function setRadarType(type) {
   radarType=type;
@@ -1025,6 +1129,130 @@ function dirLabel(deg) {
   return['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(deg/22.5)%16];
 }
 
+
+// ── FIRE STATIONS, FIRE DISTRICTS, POLICE BEATS ───────────────────────────────
+// All from Frisco's public ArcGIS REST API — same MapServer as Warning Sirens
+const CITY_SERVICES_BASE = 'https://maps.friscotexas.gov/gis/rest/services/Public/External_City_Services/MapServer';
+
+// Styles
+const FIRE_STATION_STYLE = {
+  icon: `<div style="
+    width:14px;height:14px;background:#ff3b30;border:2px solid #ff6b6b;
+    border-radius:3px;box-shadow:0 0 6px rgba(255,59,48,.5);
+    display:flex;align-items:center;justify-content:center;
+    font-size:8px;color:#fff;font-weight:700;line-height:1;
+  ">F</div>`
+};
+
+const FIRE_DISTRICT_STYLE = {
+  color:       '#ff3b30',
+  weight:      1.5,
+  fillColor:   '#ff3b30',
+  fillOpacity: 0.06,
+  dashArray:   '4 3'
+};
+
+const POLICE_BEAT_STYLE = {
+  color:       '#007aff',
+  weight:      1.5,
+  fillColor:   '#007aff',
+  fillOpacity: 0.06,
+  dashArray:   '4 3'
+};
+
+async function buildFireStations() {
+  try {
+    const url = `${CITY_SERVICES_BASE}/2/query?f=geojson&where=1%3D1&outFields=NAME%2CADDRESS%2CWEBLINK&outSR=4326`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    fireStationLayer = L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        return L.marker(latlng, {
+          icon: L.divIcon({
+            className: '',
+            html: FIRE_STATION_STYLE.icon,
+            iconSize:   [14, 14],
+            iconAnchor: [7, 7]
+          }),
+          zIndexOffset: 400
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties || {};
+        const link = p.WEBLINK
+          ? `<br><a href="${p.WEBLINK}" target="_blank" style="color:var(--accent);font-size:9px">More info →</a>`
+          : '';
+        layer.bindPopup(`
+          <div style="font-family:'JetBrains Mono',monospace">
+            <div style="color:#ff3b30;font-size:11px;font-weight:600;margin-bottom:3px">🔴 ${p.NAME || 'Fire Station'}</div>
+            <div style="font-size:9.5px;color:var(--text-dim)">${p.ADDRESS || ''}</div>
+            ${link}
+          </div>
+        `);
+      }
+    });
+
+    if (layersOn.fireStations) fireStationLayer.addTo(map);
+  } catch(e) {
+    console.error('Fire stations load error:', e);
+  }
+}
+
+async function buildFireDistricts() {
+  try {
+    const url = `${CITY_SERVICES_BASE}/3/query?f=geojson&where=1%3D1&outFields=NAME&outSR=4326`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    fireDistrictLayer = L.geoJSON(data, {
+      style: FIRE_DISTRICT_STYLE,
+      onEachFeature: (feature, layer) => {
+        const name = (feature.properties && feature.properties.NAME) || 'Fire District';
+        layer.bindPopup(`
+          <div style="font-family:'JetBrains Mono',monospace">
+            <div style="color:#ff3b30;font-size:11px;font-weight:600">${name}</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Frisco Fire District</div>
+          </div>
+        `);
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.15 }));
+        layer.on('mouseout',  () => layer.setStyle({ fillOpacity: FIRE_DISTRICT_STYLE.fillOpacity }));
+      }
+    });
+
+    if (layersOn.fireDistricts) fireDistrictLayer.addTo(map);
+  } catch(e) {
+    console.error('Fire districts load error:', e);
+  }
+}
+
+async function buildPoliceBeats() {
+  try {
+    const url = `${CITY_SERVICES_BASE}/5/query?f=geojson&where=1%3D1&outFields=NAME&outSR=4326`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    policeBeatLayer = L.geoJSON(data, {
+      style: POLICE_BEAT_STYLE,
+      onEachFeature: (feature, layer) => {
+        const name = (feature.properties && feature.properties.NAME) || 'Police Beat';
+        layer.bindPopup(`
+          <div style="font-family:'JetBrains Mono',monospace">
+            <div style="color:#007aff;font-size:11px;font-weight:600">${name}</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Frisco Police Beat</div>
+          </div>
+        `);
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.15 }));
+        layer.on('mouseout',  () => layer.setStyle({ fillOpacity: POLICE_BEAT_STYLE.fillOpacity }));
+      }
+    });
+
+    if (layersOn.policeBeats) policeBeatLayer.addTo(map);
+  } catch(e) {
+    console.error('Police beats load error:', e);
+  }
+}
+
 // ── SIRENS ────────────────────────────────────────────────────────────────────
 const SIRENS = [
   {id:'1001',lat:33.212666,lon:-96.754569,name:'Red Bud Estates'},
@@ -1127,6 +1355,10 @@ function toggleLayer(name) {
   layersOn[name]=!layersOn[name];
   const on=layersOn[name];
   switch(name) {
+    case 'cityLimits': if(cityLimitLayer) on ? cityLimitLayer.addTo(map) : map.removeLayer(cityLimitLayer); break;
+    case 'fireStations': if(fireStationLayer) on ? fireStationLayer.addTo(map) : map.removeLayer(fireStationLayer); break;
+    case 'fireDistricts': if(fireDistrictLayer) on ? fireDistrictLayer.addTo(map) : map.removeLayer(fireDistrictLayer); break;
+    case 'policeBeats': if(policeBeatLayer) on ? policeBeatLayer.addTo(map) : map.removeLayer(policeBeatLayer); break;
     case 'warnings': if(warningLayer) on?warningLayer.addTo(map):map.removeLayer(warningLayer); break;
     case 'watches':  if(watchLayer)   on?watchLayer.addTo(map):map.removeLayer(watchLayer); break;
     case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
@@ -1142,8 +1374,20 @@ function toggleLayer(name) {
   ['btn-vel',      ()=>setRadarType('velocity')],
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
-  ['btn-sirens',  ()=>{toggleLayer('sirens');  document.getElementById('btn-sirens').classList.toggle('on',layersOn.sirens);}],
-  ['btn-cameras', ()=>{toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on',layersOn.cameras);}],
+
+  ['btn-citylayers', () => {
+    const card = document.getElementById('hud-citylayers');
+    const isHidden = card.style.display === 'none';
+    card.style.display = isHidden ? '' : 'none';
+    document.getElementById('btn-citylayers').classList.toggle('on', isHidden);
+  }],
+  ['btn-citylimits', () => { toggleLayer('cityLimits'); document.getElementById('btn-citylimits').classList.toggle('on', layersOn.cityLimits); }],
+  ['btn-sirens', () => { toggleLayer('sirens'); document.getElementById('btn-sirens').classList.toggle('on', layersOn.sirens); }],
+  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); }],
+  ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
+  ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
+  ['btn-policebeats', () => { toggleLayer('policeBeats'); document.getElementById('btn-policebeats').classList.toggle('on', layersOn.policeBeats); }],
+
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
 document.getElementById('rtype-refl').addEventListener('click',()=>setRadarType('reflectivity'));
@@ -1157,7 +1401,7 @@ document.getElementById('play-btn').textContent='↻ REFRESH';
 
 // ── HUD DRAG ──────────────────────────────────────────────────────────────────
 let drag=null,dox=0,doy=0;
-['hud-cond','hud-alerts','hud-radar','hud-cam'].forEach(id=>{
+['hud-cond','hud-alerts','hud-radar','hud-citylayers','hud-cam'].forEach(id=>{
   document.getElementById(id+'-head').addEventListener('mousedown',e=>{
     drag=document.getElementById(id);
     const r=drag.getBoundingClientRect();
@@ -1173,7 +1417,7 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('mouseup',()=>drag=null);
 
-['cond','alerts','radar','cam'].forEach(id=>{
+['cond','alerts','radar','citylayers','cam'].forEach(id=>{
   document.getElementById('hud-'+id+'-tog').addEventListener('click',()=>{
     const card=document.getElementById('hud-'+id);
     card.classList.toggle('collapsed');
@@ -1203,6 +1447,9 @@ loadAlerts();
 loadConditions();
 buildSirens();
 buildCameras();
+buildFireStations();
+buildFireDistricts();
+buildPoliceBeats();
 
 })();
 
