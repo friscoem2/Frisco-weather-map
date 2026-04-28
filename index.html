@@ -959,6 +959,7 @@ const TEST_STATIONS = [
   { id:'kdfx', name:'KDFX', label:'Laughlin AFB TX', lat:29.273139, lon:-100.280330, test:true },
   { id:'kdyx', name:'KDYX', label:'Dyess AFB TX', lat:32.538500, lon:-99.254333, test:true },
   { id:'kewx', name:'KEWX', label:'Austin / San Antonio TX', lat:29.704056, lon:-98.028611, test:true },
+  { id:'kfws', name:'KFWS', label:'Dallas / Fort Worth TX', lat:32.573000, lon:-97.303150, test:true },
   { id:'kgrk', name:'KGRK', label:'Fort Hood TX', lat:30.721833, lon:-97.382944, test:true },
   { id:'khgx', name:'KHGX', label:'Houston TX', lat:29.471900, lon:-95.078733, test:true },
   { id:'klbb', name:'KLBB', label:'Lubbock TX', lat:33.654139, lon:-101.814160, test:true },
@@ -1584,22 +1585,30 @@ const WATCHED_ALERT_TYPES = [
 ];
 
 function normalizeEventName(event) {
-  return (event || '').trim().toLowerCase();
+  return (event || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function matchesAlertType(event, types) {
+  const e = normalizeEventName(event);
+
+  return types.some(type => {
+    const t = normalizeEventName(type);
+
+    // Prefer exact match, but allow NWS variants that append details.
+    return e === t || e.startsWith(t + ' ');
+  });
 }
 
 function isWatchedAlertType(event) {
-  const e = normalizeEventName(event);
-  return WATCHED_ALERT_TYPES.some(type => e === type.toLowerCase());
+  return matchesAlertType(event, WATCHED_ALERT_TYPES);
 }
 
 function isWatchedWarning(event) {
-  const e = normalizeEventName(event);
-  return WATCHED_WARNING_TYPES.some(type => e === type.toLowerCase());
+  return matchesAlertType(event, WATCHED_WARNING_TYPES);
 }
 
 function isWatchedWatch(event) {
-  const e = normalizeEventName(event);
-  return WATCHED_WATCH_TYPES.some(type => e === type.toLowerCase());
+  return matchesAlertType(event, WATCHED_WATCH_TYPES);
 }
 
 function isLocalDFWAlert(feature) {
@@ -1682,7 +1691,7 @@ async function loadAlerts() {
     try {
       // National active alerts.
       // This allows the map to draw all watched warning/watch polygons nationwide.
-      const nationalRes = await fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert');
+      const nationalRes = await fetch('https://api.weather.gov/alerts/active?status=actual');
 
       if (!nationalRes.ok) {
         throw new Error(`National alerts request failed: ${nationalRes.status}`);
@@ -1707,14 +1716,25 @@ async function loadAlerts() {
     // Only keep the warning/watch products we actually support/color.
     const watchedAlerts = allFeatures.filter(f => {
       const event = f.properties?.event || '';
-      return f.geometry && isWatchedAlertType(event);
+      return isWatchedAlertType(event);
     });
+
+    const watchedPolygonAlerts = watchedAlerts.filter(f => !!f.geometry);
 
     // HUD remains local so it does not become noisy.
     const local = watchedAlerts.filter(isLocalDFWAlert);
 
+    console.log('NWS watched alerts:', {
+      total: allFeatures.length,
+      watched: watchedAlerts.length,
+      polygons: watchedPolygonAlerts.length,
+      local: local.length,
+      watches: watchedAlerts.filter(f => isWatchedWatch(f.properties?.event || '')).length,
+      warnings: watchedAlerts.filter(f => isWatchedWarning(f.properties?.event || '')).length
+    });
+
     renderAlerts(local);
-    renderAlertPolygons(watchedAlerts);
+    renderAlertPolygons(watchedPolygonAlerts);
 
   } catch(e) {
     console.warn('NWS alerts unavailable:', e);
