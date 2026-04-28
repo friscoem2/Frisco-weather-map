@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Frisco E.M.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -541,6 +541,431 @@ body.drawer-mode #right-stack{
   text-transform:uppercase;
 }
 
+
+/* ALERT POLYGON LOADING INDICATOR */
+#alert-poly-loader{
+  position:absolute;
+  right:12px;
+  top:286px;
+  z-index:910;
+  display:none;
+  width:310px;
+  background:rgba(5,10,18,.88);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:7px 9px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 12px rgba(0,0,0,.28);
+}
+#alert-poly-loader.active{
+  display:block;
+}
+.alert-load-label{
+  font-family:var(--fm);
+  font-size:8px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:5px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.alert-load-track{
+  height:3px;
+  overflow:hidden;
+  border-radius:2px;
+  background:rgba(0,170,240,.12);
+}
+.alert-load-bar{
+  height:100%;
+  width:35%;
+  border-radius:2px;
+  background:linear-gradient(90deg, transparent, var(--watch), transparent);
+  animation:alertLoadMove 1.05s linear infinite;
+}
+@keyframes alertLoadMove{
+  0%{transform:translateX(-110%)}
+  100%{transform:translateX(310%)}
+}
+
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 760px), (pointer: coarse) {
+  html, body {
+    touch-action: none;
+  }
+
+  #topbar {
+    height: auto;
+    min-height: 50px;
+    padding: 6px 8px;
+    gap: 7px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-size: 14px;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    padding-top: 4px;
+  }
+
+  .tb-div {
+    display: none;
+  }
+
+  .layer-btns {
+    order: 3;
+    width: 100%;
+    gap: 5px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lbtn {
+    font-size: 9px;
+    padding: 6px 9px;
+    flex: 0 0 auto;
+  }
+
+  .top-refresh {
+    margin-left: auto;
+    gap: 5px;
+    font-size: 8px;
+    padding-top: 1px;
+  }
+
+  .top-refresh-btn {
+    font-size: 8px;
+    padding: 5px 7px;
+  }
+
+  .last-refresh {
+    display: none;
+  }
+
+  #clock {
+    font-size: 10px;
+    padding-top: 5px;
+  }
+
+  #map {
+    top: 86px;
+  }
+
+  #compare-map {
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    border-left: none;
+    border-top: 1px solid rgba(0,200,255,.35);
+  }
+
+  body.split-view #map {
+    left: 0;
+    right: 0;
+    top: 86px;
+    bottom: auto;
+    width: 100%;
+    height: calc(50% - 43px);
+  }
+
+  body.split-view #compare-map {
+    display: block;
+    top: 50%;
+    height: 50%;
+  }
+
+  .split-label {
+    font-size: 8px;
+    padding: 4px 6px;
+    top: 94px;
+  }
+
+  #left-map-label {
+    left: 8px;
+  }
+
+  #right-map-label {
+    top: calc(50% + 8px);
+    right: 8px;
+  }
+
+  #hud-cond {
+    top: 96px;
+    left: 8px;
+    min-width: 184px;
+    max-width: calc(100vw - 16px);
+  }
+
+  #hud-alerts {
+    top: 96px;
+    right: 8px;
+    left: auto;
+    min-width: 210px;
+    max-width: calc(100vw - 16px);
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  .hud-head {
+    padding: 8px 10px;
+  }
+
+  .hud-title {
+    font-size: 8.2px;
+    letter-spacing: 1.5px;
+  }
+
+  .hud-body {
+    padding: 8px 9px;
+  }
+
+  .cg {
+    gap: 6px;
+  }
+
+  .ci .val {
+    font-size: 18px;
+  }
+
+  .ci .val sup {
+    font-size: 10px;
+  }
+
+  .cond-desc {
+    font-size: 8.5px;
+  }
+
+  .al-head {
+    font-size: 10.5px;
+  }
+
+  .al-description {
+    max-height: 120px;
+  }
+
+  #alert-poly-loader {
+    right: 8px;
+    top: auto;
+    bottom: 78px;
+    width: min(320px, calc(100vw - 16px));
+  }
+
+  #right-drawer {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: min(72vh, 610px);
+    transform: translateY(calc(100% + 18px));
+  }
+
+  #right-drawer.open {
+    transform: translateY(0);
+  }
+
+  #right-drawer .drawer-shell {
+    border-radius: 12px 12px 0 0;
+    border-left: 1px solid var(--border-hi);
+    border-right: 1px solid var(--border-hi);
+  }
+
+  .drawer-top {
+    padding: 10px 12px;
+  }
+
+  .drawer-title {
+    font-size: 10px;
+  }
+
+  .drawer-close {
+    font-size: 9px;
+    padding: 5px 9px;
+  }
+
+  #right-stack {
+    padding: 8px;
+  }
+
+  #right-stack .hud-body {
+    max-height: 47vh;
+  }
+
+  #hud-radar,
+  #hud-citylayers,
+  #hud-cam {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .rtype-btn {
+    font-size: 9px;
+    padding: 7px 5px;
+  }
+
+  .station-tag {
+    font-size: 8.8px;
+    padding: 5px 7px;
+    margin: 3px 3px 0 0;
+  }
+
+  .city-layer-grid {
+    gap: 6px;
+  }
+
+  .city-layer-btn {
+    font-size: 8.5px;
+    padding: 9px 6px;
+  }
+
+  .cam-item {
+    padding: 8px;
+  }
+
+  .cam-thumb {
+    width: 56px;
+    height: 36px;
+  }
+
+  .cam-name {
+    font-size: 9.5px;
+  }
+
+  .cam-modal-inner {
+    width: calc(100vw - 18px);
+    max-width: none;
+    padding: 10px;
+  }
+
+  .leaflet-control-zoom {
+    margin-bottom: 14px !important;
+  }
+
+  .leaflet-control-zoom a {
+    width: 34px !important;
+    height: 34px !important;
+    line-height: 34px !important;
+  }
+
+  .mirror-cursor-dot {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  #hud-cond {
+    display: none;
+  }
+
+  #hud-alerts {
+    top: 94px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  #hud-alerts.collapsed {
+    width: auto;
+  }
+
+  .al-item {
+    padding: 6px 7px;
+  }
+
+  .al-full {
+    font-size: 8px;
+  }
+
+  .al-meta {
+    grid-template-columns: 62px 1fr;
+    gap: 3px 6px;
+  }
+
+  body.split-view #map {
+    height: calc(50% - 43px);
+  }
+
+  #right-drawer {
+    height: 76vh;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+  #topbar {
+    min-height: 44px;
+    padding: 4px 8px;
+  }
+
+  .layer-btns {
+    order: 0;
+    width: auto;
+    flex: 1;
+  }
+
+  #map {
+    top: 50px;
+  }
+
+  body.split-view #map {
+    top: 50px;
+    left: 0;
+    right: auto;
+    width: 50%;
+    height: calc(100% - 50px);
+  }
+
+  body.split-view #compare-map {
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: 50%;
+    height: calc(100% - 50px);
+    border-left: 1px solid rgba(0,200,255,.35);
+    border-top: none;
+  }
+
+  #left-map-label {
+    top: 58px;
+  }
+
+  #right-map-label {
+    top: 58px;
+  }
+
+  #hud-alerts {
+    top: 56px;
+  }
+
+  #right-drawer {
+    top: 50px;
+    right: 0;
+    left: auto;
+    bottom: 0;
+    width: min(360px, 86vw);
+    height: auto;
+    transform: translateX(calc(100% + 18px));
+  }
+
+  #right-drawer.open {
+    transform: translateX(0);
+  }
+
+  #right-drawer .drawer-shell {
+    border-radius: 8px 0 0 8px;
+  }
+}
+
 </style>
 </head>
 <body class="drawer-mode">
@@ -592,6 +1017,14 @@ body.drawer-mode #right-stack{
   <div class="hud-body">
     <div id="alert-list"><div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0;letter-spacing:1px">FETCHING ALERTS…</div></div>
   </div>
+</div>
+
+<div id="alert-poly-loader">
+  <div class="alert-load-label">
+    <span id="alert-load-text">LOADING WATCH COUNTY SHADING</span>
+    <span>WATCHES</span>
+  </div>
+  <div class="alert-load-track"><div class="alert-load-bar"></div></div>
 </div>
 
 
@@ -683,7 +1116,19 @@ body.drawer-mode #right-stack{
 (function() {
 'use strict';
 
-const map = L.map('map', { center:[33.155,-96.823], zoom:12, zoomControl:false, attributionControl:true });
+const map = L.map('map', {
+  center:[33.155,-96.823],
+  zoom:12,
+  zoomControl:false,
+  attributionControl:true,
+  tap:true,
+  touchZoom:true,
+  doubleClickZoom:true,
+  dragging:true,
+  inertia:true,
+  zoomSnap:0.25,
+  zoomDelta:0.5
+});
 L.control.zoom({ position:'bottomleft' }).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   subdomains:'abcd', maxZoom:20, className:'basemap-tile', attribution:'© CARTO © OSM contributors'
@@ -703,6 +1148,9 @@ let warningLayer = null, watchLayer = null;
 let localAlertFeatures = [];
 let alertFeatureIndex = new Map();
 let alertLayerIndex = new Map();
+const countyGeometryCache = new Map();
+let alertPolygonRenderToken = 0;
+let currentWatchedAlerts = [];
 let cityLimitLayer = null;
 let fireStationLayer = null, fireDistrictLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
@@ -771,7 +1219,14 @@ function initCompareMap() {
     center: map.getCenter(),
     zoom: map.getZoom(),
     zoomControl: false,
-    attributionControl: false
+    attributionControl: false,
+    tap: true,
+    touchZoom: true,
+    doubleClickZoom: true,
+    dragging: true,
+    inertia: true,
+    zoomSnap: 0.25,
+    zoomDelta: 0.5
   });
 
   L.control.zoom({ position:'bottomright' }).addTo(compareMap);
@@ -864,6 +1319,7 @@ function setSplitView(active) {
 
   setTimeout(() => {
     map.invalidateSize();
+    refreshMapSizesSoon();
 
     if (active) {
       initCompareMap();
@@ -903,6 +1359,27 @@ map.on('moveend zoomend', () => {
 
 map.on('mousemove', e => updateMirrorCursor('main', e.latlng));
 map.on('mouseout', hideMirrorCursors);
+
+
+
+// ── MOBILE LAYOUT HELPERS ────────────────────────────────────────────────────
+const isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+if (isCoarsePointer) document.body.classList.add('touch-device');
+
+function refreshMapSizesSoon() {
+  setTimeout(() => {
+    map.invalidateSize();
+    if (compareMap) compareMap.invalidateSize();
+    if (splitViewActive) syncCompareToMain();
+  }, 260);
+}
+
+window.addEventListener('resize', refreshMapSizesSoon);
+window.addEventListener('orientationchange', refreshMapSizesSoon);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', refreshMapSizesSoon);
+}
 
 
 // ── STATIONS ─────────────────────────────────────────────────────────────────
@@ -1720,6 +2197,7 @@ async function loadAlerts() {
     });
 
     const watchedPolygonAlerts = watchedAlerts.filter(f => !!f.geometry);
+    currentWatchedAlerts = watchedAlerts;
 
     // HUD remains local so it does not become noisy.
     const local = watchedAlerts.filter(isLocalDFWAlert);
@@ -1734,7 +2212,7 @@ async function loadAlerts() {
     });
 
     renderAlerts(local);
-    renderAlertPolygons(watchedPolygonAlerts);
+    await renderAlertPolygons(watchedAlerts);
 
   } catch(e) {
     console.warn('NWS alerts unavailable:', e);
@@ -1930,68 +2408,209 @@ function renderAlerts(alerts) {
   wireAlertCardInteractions();
 }
 
-function renderAlertPolygons(all) {
-  alertLayerIndex.clear();
-  if (warningLayer) map.removeLayer(warningLayer);
-  if (watchLayer) map.removeLayer(watchLayer);
 
-  const warnings=[];
-  const watches=[];
 
-  all.forEach(f=>{
-    if (!f.geometry) return;
+function setAlertPolygonLoading(active, text = 'LOADING WATCH COUNTY SHADING') {
+  const el = document.getElementById('alert-poly-loader');
+  const label = document.getElementById('alert-load-text');
+  if (!el) return;
 
-    const event=f.properties?.event || '';
+  if (label) label.textContent = text;
+  el.classList.toggle('active', !!active);
+}
 
-    if (isWatchedWarning(event)) {
-      warnings.push(f);
-    } else if (isWatchedWatch(event)) {
-      watches.push(f);
+function clearAlertPolygonLayers() {
+  if (warningLayer) {
+    map.removeLayer(warningLayer);
+    warningLayer = null;
+  }
+
+  if (watchLayer) {
+    map.removeLayer(watchLayer);
+    watchLayer = null;
+  }
+}
+
+function getCountyGeoidsFromAlert(feature) {
+  const sameCodes = feature.properties?.geocode?.SAME || [];
+
+  if (!Array.isArray(sameCodes)) return [];
+
+  // SAME: 0 + state FIPS + county FIPS.
+  // Example: Collin TX SAME 048085 -> Census GEOID 48085.
+  return sameCodes
+    .map(code => String(code).trim())
+    .filter(code => /^0\d{5}$/.test(code))
+    .map(code => code.slice(1));
+}
+
+async function fetchCountyFeatureByGeoid(geoid) {
+  if (countyGeometryCache.has(geoid)) {
+    return countyGeometryCache.get(geoid);
+  }
+
+  const url =
+    'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1/query'
+    + `?where=GEOID%3D%27${encodeURIComponent(geoid)}%27`
+    + '&outFields=NAME,GEOID,STATE,COUNTY'
+    + '&outSR=4326'
+    + '&f=geojson'
+    + '&returnGeometry=true';
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const feature = data.features && data.features.length ? data.features[0] : null;
+
+    countyGeometryCache.set(geoid, feature);
+    return feature;
+  } catch (e) {
+    console.warn('County geometry unavailable for GEOID:', geoid, e);
+    countyGeometryCache.set(geoid, null);
+    return null;
+  }
+}
+
+async function buildWatchCountyFallbackFeatures(alertFeatures) {
+  const out = [];
+
+  for (const alert of alertFeatures || []) {
+    const event = alert.properties?.event || '';
+
+    // Important: warnings stay exactly as NWS provides them.
+    // County fallback is only for WATCHES that do not have native geometry.
+    if (!isWatchedWatch(event)) continue;
+    if (alert.geometry) continue;
+
+    const geoids = getCountyGeoidsFromAlert(alert);
+    if (!geoids.length) continue;
+
+    for (const geoid of geoids) {
+      const countyFeature = await fetchCountyFeatureByGeoid(geoid);
+      if (!countyFeature || !countyFeature.geometry) continue;
+
+      out.push({
+        type: 'Feature',
+        geometry: countyFeature.geometry,
+        properties: {
+          ...(alert.properties || {}),
+          fallbackCounty: true,
+          fallbackCountyName: countyFeature.properties?.NAME || '',
+          fallbackCountyGeoid: geoid
+        },
+        id: `${getAlertId(alert)}-watch-county-${geoid}`
+      });
     }
-  });
+  }
 
-  function makeLayer(features,layerOn) {
-    if (!features.length||!layerOn) return null;
+  return out;
+}
 
-    return L.geoJSON({type:'FeatureCollection',features},{
+
+async function renderAlertPolygons(all) {
+  const token = ++alertPolygonRenderToken;
+  alertLayerIndex.clear();
+
+  clearAlertPolygonLayers();
+
+  const watched = all || [];
+  const nativeAlerts = watched.filter(f => !!f.geometry);
+
+  // Warnings stay as native NWS polygons only.
+  const warnings = nativeAlerts.filter(f => isWatchedWarning(f.properties?.event || ''));
+
+  // For watches, use exactly ONE source:
+  // - If the watch has native geometry, use it.
+  // - If not, build county fallback polygons from SAME codes.
+  // This avoids double watch layers where one can be toggled and one cannot.
+  const nativeWatches = nativeAlerts.filter(f => isWatchedWatch(f.properties?.event || ''));
+  const watchAlertsMissingGeometry = watched.filter(f =>
+    isWatchedWatch(f.properties?.event || '') && !f.geometry
+  );
+
+  let watchCountyFallbacks = [];
+
+  if (watchAlertsMissingGeometry.length) {
+    setAlertPolygonLoading(true, 'LOADING WATCH COUNTY SHADING');
+
+    try {
+      watchCountyFallbacks = await buildWatchCountyFallbackFeatures(watchAlertsMissingGeometry);
+    } finally {
+      if (token === alertPolygonRenderToken) {
+        setAlertPolygonLoading(false);
+      }
+    }
+  } else {
+    setAlertPolygonLoading(false);
+  }
+
+  // If a watch has native geometry, do not also build fallback for that same watch.
+  const watches = [...nativeWatches, ...watchCountyFallbacks];
+
+  if (token !== alertPolygonRenderToken) {
+    return;
+  }
+
+  function makeLayer(features, layerOn, paneName) {
+    if (!features.length || !layerOn) return null;
+
+    return L.geoJSON({ type:'FeatureCollection', features }, {
+      pane: paneName,
       style: f => alertStyle(f.properties.event),
-      onEachFeature:(f,l)=>{
+
+      onEachFeature: (f, l) => {
         const alertId = getAlertId(f);
         alertFeatureIndex.set(alertId, f);
         alertLayerIndex.set(alertId, l);
-        const col=alertPopupColor(f.properties.event);
-        const exp=f.properties.expires
-          ?new Date(f.properties.expires).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour12:true,hour:'numeric',minute:'2-digit'})+' CDT':'—';
+
+        const col = alertPopupColor(f.properties.event);
+        const exp = f.properties.expires
+          ? new Date(f.properties.expires).toLocaleTimeString('en-US', {
+              timeZone:'America/Chicago',
+              hour12:true,
+              hour:'numeric',
+              minute:'2-digit'
+            }) + ' CDT'
+          : '—';
+
+        const fallbackLine = f.properties.fallbackCounty
+          ? `County watch shading: ${f.properties.fallbackCountyName || 'County'}<br>`
+          : '';
 
         l.bindPopup(`
           <div style="font-family:'JetBrains Mono',monospace;max-width:280px">
             <div style="color:${col};font-size:10.5px;font-weight:600;margin-bottom:3px">
-              ${f.properties.event||'ALERT'}
+              ${f.properties.event || 'ALERT'}
             </div>
             <div style="font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-bottom:4px">
-              ${(f.properties.headline||'').slice(0,160)}
+              ${(f.properties.headline || '').slice(0,160)}
             </div>
             <div style="font-size:8.5px;color:var(--text-dim);line-height:1.35">
-              ${f.properties.areaDesc || ''}
+              ${fallbackLine}${f.properties.areaDesc || ''}
             </div>
             <div style="font-size:8.5px;color:var(--text-dim);margin-top:4px">
               EXPIRES ${exp}
             </div>
           </div>
-        `,{maxWidth:300});
+        `, { maxWidth:300 });
       }
     });
   }
 
-  warningLayer=makeLayer(warnings,layersOn.warnings);
+  warningLayer = makeLayer(warnings, layersOn.warnings, 'overlayPane');
   if (warningLayer) warningLayer.addTo(map);
 
-  watchLayer=makeLayer(watches,layersOn.watches);
+  watchLayer = makeLayer(watches, layersOn.watches, 'overlayPane');
   if (watchLayer) watchLayer.addTo(map);
 
   if (localAlertFeatures && localAlertFeatures.length) renderAlerts(localAlertFeatures);
 
-  console.log(`Loaded watched alerts: ${warnings.length} warnings, ${watches.length} watches`);
+  console.log('Loaded alert polygons:', {
+    nativeWarnings: warnings.length,
+    nativeWatches: nativeWatches.length,
+    fallbackWatchCounties: watchCountyFallbacks.length,
+    finalWatchFeatures: watches.length
+  });
 }
 
 // ── CONDITIONS ────────────────────────────────────────────────────────────────
