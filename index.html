@@ -137,6 +137,21 @@ body.split-view #right-map-label{
 .ci .val sup{font-size:12px;color:var(--text-dim);font-weight:400}
 .cond-desc{font-family:var(--fm);font-size:9.5px;color:var(--text-dim);margin-top:7px;letter-spacing:.5px}
 #hud-alerts{top:62px;right:12px;min-width:260px;max-width:310px}
+#hud-alerts .hud-body{max-height:calc(100vh - 132px);overflow-y:auto}
+#hud-alerts .al-item.expanded{max-height:calc(100vh - 164px);overflow-y:auto}
+#hud-radar{
+  position:absolute;
+  left:12px;
+  bottom:20px;
+  z-index:900;
+  min-width:270px;
+  max-width:310px;
+}
+#hud-radar .hud-head{cursor:move}
+#hud-radar.loop-active{
+  border-color:var(--accent);
+  box-shadow:var(--glow);
+}
 .al-item{border-left:3px solid var(--border);padding:6px 8px;border-radius:0 3px 3px 0;background:rgba(0,0,0,.2);margin-bottom:5px}
 .al-item:last-child{margin-bottom:0}
 .al-item.W{border-color:var(--danger);background:rgba(255,23,68,.07)}
@@ -158,6 +173,11 @@ body.split-view #right-map-label{
 .play-btn:hover{background:rgba(0,200,255,.14);border-color:var(--border-hi)}
 .tlabel{font-family:var(--fm);font-size:9px;color:var(--text-dim);white-space:nowrap}
 .radar-status{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);display:flex;justify-content:space-between}
+.loop-load-wrap{display:none;margin:7px 0 4px}
+.loop-load-wrap.active{display:block}
+.loop-load-label{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;font-family:var(--fm);font-size:8px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
+.loop-load-track{height:5px;overflow:hidden;border-radius:999px;background:rgba(0,170,240,.12);border:1px solid rgba(0,170,240,.14)}
+.loop-load-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, rgba(0,200,255,.25), var(--accent));box-shadow:0 0 10px rgba(0,200,255,.35);transition:width .18s ease}
 /* station legend in HUD */
 .station-tag{display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:.5px;padding:2px 5px;border-radius:2px;border:1px solid;margin:2px 2px 0 0;text-transform:uppercase;cursor:pointer;transition:all .15s}
 .station-tag.wsr{border-color:rgba(0,200,255,.4);color:rgba(0,200,255,.7)}
@@ -201,6 +221,7 @@ body.split-view #right-map-label{
 
 #hud-radar,
 #hud-citylayers,
+#hud-stations,
 #hud-cam{min-width:270px;max-width:300px}
 
 /* CITY LAYERS MENU */
@@ -544,13 +565,15 @@ body.drawer-mode #right-stack{
 
 /* ALERT POLYGON LOADING INDICATOR */
 #alert-poly-loader{
-  position:absolute;
-  right:12px;
-  top:286px;
-  z-index:910;
+  position:fixed;
+  left:50%;
+  right:auto;
+  top:56px;
+  transform:translateX(-50%);
+  z-index:995;
   display:none;
-  width:310px;
-  background:rgba(5,10,18,.88);
+  width:min(430px, calc(100vw - 24px));
+  background:rgba(5,10,18,.90);
   border:1px solid var(--border);
   border-radius:4px;
   padding:7px 9px;
@@ -697,6 +720,7 @@ body.drawer-mode #right-stack{
     top: calc(50% + 8px);
     right: 8px;
   }
+  .split-product-toggle{top:calc(50% + 36px);left:8px;right:auto}
 
   #hud-cond {
     top: 96px;
@@ -712,6 +736,15 @@ body.drawer-mode #right-stack{
     min-width: 210px;
     max-width: calc(100vw - 16px);
     width: min(340px, calc(100vw - 16px));
+  }
+
+  #hud-radar {
+    left: 8px;
+    right: auto;
+    bottom: 78px;
+    min-width: 230px;
+    max-width: calc(100vw - 16px);
+    width: min(330px, calc(100vw - 16px));
   }
 
   .hud-head {
@@ -752,10 +785,12 @@ body.drawer-mode #right-stack{
   }
 
   #alert-poly-loader {
-    right: 8px;
-    top: auto;
-    bottom: 78px;
-    width: min(320px, calc(100vw - 16px));
+    left: 50%;
+    right: auto;
+    top: 92px;
+    bottom: auto;
+    transform: translateX(-50%);
+    width: min(360px, calc(100vw - 16px));
   }
 
   #right-drawer {
@@ -801,6 +836,7 @@ body.drawer-mode #right-stack{
 
   #hud-radar,
   #hud-citylayers,
+  #hud-stations,
   #hud-cam {
     min-width: 0;
     max-width: none;
@@ -870,6 +906,14 @@ body.drawer-mode #right-stack{
     top: 94px;
     left: 8px;
     right: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  #hud-radar {
+    left: 8px;
+    right: 8px;
+    bottom: 72px;
     width: auto;
     max-width: none;
   }
@@ -947,6 +991,10 @@ body.drawer-mode #right-stack{
     top: 56px;
   }
 
+  #alert-poly-loader {
+    top: 56px;
+  }
+
   #right-drawer {
     top: 50px;
     right: 0;
@@ -966,21 +1014,57 @@ body.drawer-mode #right-stack{
   }
 }
 
+/* RADAR PRODUCT + HYDROMETEOR LEGEND */
+.rtype-row.products{grid-template-columns:1fr 1fr;display:grid}
+.rtype-btn.has-help{position:relative}
+.rtype-btn.has-help{cursor:default}.radar-help-popover{display:none;position:absolute;z-index:2100;width:min(300px,calc(100vw - 28px));background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:5px;box-shadow:0 0 18px rgba(0,0,0,.45),var(--glow);backdrop-filter:blur(16px);padding:9px 10px;font-family:var(--fm);font-size:8.6px;line-height:1.45;color:var(--text);letter-spacing:.2px;pointer-events:none}.radar-help-popover.open{display:block}.radar-help-title{font-size:8px;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}.radar-help-popover b{color:var(--text-hi)}
+.split-product-toggle{display:none;position:absolute;left:calc(50% + 12px);top:88px;z-index:860;background:rgba(5,10,18,.86);border:1px solid var(--border);border-radius:4px;padding:4px;gap:4px;backdrop-filter:blur(12px)}
+body.split-view .split-product-toggle{display:flex}
+.split-product-btn{font-family:var(--fm);font-size:8.5px;letter-spacing:.8px;padding:5px 8px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.04);color:var(--text-dim);cursor:pointer;text-transform:uppercase}
+.split-product-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.11);box-shadow:0 0 8px rgba(0,200,255,.16)}
+.hydro-legend{display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px;max-height:260px;overflow:auto}
+.hydro-legend.active{display:block}
+.hydro-note{font-family:var(--fm);font-size:8px;line-height:1.45;color:var(--text-dim);margin-bottom:7px}
+.hydro-grid{display:grid;grid-template-columns:1fr;gap:3px}
+.hydro-key{display:grid;grid-template-columns:14px 28px 1fr auto;align-items:center;gap:5px;font-family:var(--fm);font-size:7.8px;color:var(--text);border:1px solid rgba(0,170,240,.10);border-radius:3px;padding:3px 4px;background:rgba(0,0,0,.14)}
+.hydro-key:hover{border-color:var(--border-hi);background:rgba(0,170,240,.07)}
+.hydro-swatch{width:12px;height:9px;border-radius:2px;border:1px solid rgba(255,255,255,.20);flex-shrink:0}.hydro-code{color:var(--accent);font-weight:600}.hydro-class{color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hydro-help{color:var(--text-dim);font-size:7.4px;text-transform:uppercase;letter-spacing:.8px}.hydro-key.dim{color:var(--text-dim)}
+.hydro-hover-pop{display:none;position:fixed;z-index:2400;max-width:min(310px,calc(100vw - 24px));background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:5px;box-shadow:0 0 18px rgba(0,0,0,.45),var(--glow);backdrop-filter:blur(16px);padding:8px 9px;font-family:var(--fm);font-size:8.4px;line-height:1.45;color:var(--text);pointer-events:none}.hydro-hover-pop.open{display:block}.hydro-hover-title{color:var(--accent);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}.hydro-map-tip{display:none;position:fixed;z-index:2350;max-width:260px;background:rgba(5,10,18,.94);border:1px solid var(--border-hi);border-radius:4px;padding:6px 8px;box-shadow:0 0 14px rgba(0,0,0,.4);font-family:var(--fm);font-size:8px;line-height:1.35;color:var(--text);pointer-events:none}.hydro-map-tip.open{display:block}.hydro-map-tip b{color:var(--accent)}
+.hydro-inspect-row{display:flex;gap:6px;align-items:center;margin:0 0 7px}.hydro-inspect-btn{font-family:var(--fm);font-size:8.5px;letter-spacing:.8px;padding:5px 8px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.05);color:var(--text-dim);cursor:pointer;text-transform:uppercase;transition:all .15s}.hydro-inspect-btn:hover{border-color:var(--border-hi);color:var(--text)}.hydro-inspect-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.12);box-shadow:0 0 8px rgba(0,200,255,.16)}.hydro-inspect-status{font-family:var(--fm);font-size:7.8px;line-height:1.35;color:var(--text-dim)}#hydro-inspect-overlay{display:none;position:absolute;inset:0;z-index:845;cursor:crosshair;pointer-events:none;background:transparent}body.hydro-inspect #hydro-inspect-overlay{display:block;pointer-events:auto}body.hydro-inspect #map,body.hydro-inspect #compare-map{cursor:crosshair!important}
+/* RIVER / FLOOD GAUGE LAYER */
+.gauge-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,0,0,.75);box-shadow:0 0 8px rgba(0,0,0,.55),0 0 10px currentColor;background:currentColor}
+.gauge-dot.major{color:#cc33ff}.gauge-dot.moderate{color:#ff3333}.gauge-dot.minor{color:#ff9900}.gauge-dot.action{color:#ffea00}.gauge-dot.no_flooding{color:#00e676}.gauge-dot.not_defined{color:#72afe9}.gauge-dot.low_threshold{color:#906320}.gauge-dot.obs_not_current{color:#bdbebb}.gauge-dot.out_of_service{color:#666}
+.river-gauge-list{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);line-height:1.45}
+.river-key-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 6px;margin-top:7px;border-top:1px solid var(--border);padding-top:7px}.river-key{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:8px;color:var(--text)}.river-key span:first-child{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.75)}
+.menu-toggle-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}.menu-toggle-btn{flex:1;font-family:var(--fm);font-size:8.5px;letter-spacing:.75px;padding:6px 7px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.05);color:var(--text-dim);cursor:pointer;text-align:center;text-transform:uppercase;transition:all .15s}.menu-toggle-btn:hover{border-color:var(--border-hi);color:var(--text)}.menu-toggle-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.12);box-shadow:0 0 8px rgba(0,200,255,.16)}.menu-toggle-btn.warn.on{border-color:var(--watch);color:var(--watch);background:rgba(255,234,0,.10)}.station-status{font-family:var(--fm);font-size:8.3px;color:var(--text-dim);line-height:1.45;margin:6px 0 7px;border-top:1px solid var(--border);padding-top:7px}
+#river-panel{display:none;position:fixed;right:18px;top:64px;bottom:20px;width:min(470px,calc(100vw - 36px));z-index:1600;background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:6px;box-shadow:0 0 28px rgba(0,0,0,.55),var(--glow);backdrop-filter:blur(18px);overflow:hidden}#river-panel.open{display:flex;flex-direction:column}.river-panel-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:rgba(0,170,240,.04)}.river-panel-title{font-family:var(--fm);font-size:10px;letter-spacing:1.7px;color:var(--accent);text-transform:uppercase;line-height:1.3}.river-panel-close{font-family:var(--fm);font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:pointer}.river-panel-close:hover{border-color:var(--danger);color:var(--danger)}.river-panel-meta{padding:8px 12px;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:8.5px;color:var(--text-dim);line-height:1.45}.river-panel-meta b{color:var(--text)}.river-panel-frame{flex:1;width:100%;border:0;background:#02060a}.river-panel-loading{font-family:var(--fm);font-size:10px;color:var(--text-dim);padding:14px;text-align:center;letter-spacing:1px}
+
+
+@media (max-width:760px), (pointer:coarse){
+  #hud-alerts .hud-body{max-height:calc(100vh - 150px);overflow-y:auto}
+  #hud-alerts .al-item.expanded{max-height:calc(100vh - 178px);overflow-y:auto}
+}
 </style>
 </head>
 <body class="drawer-mode">
 <div id="map"></div>
 <div id="compare-map"></div>
+<div id="hydro-inspect-overlay" aria-hidden="true"></div>
 <div class="split-label" id="left-map-label">REFLECTIVITY</div>
-<div class="split-label" id="right-map-label">VELOCITY · <span id="split-vel-label">KFWS</span></div>
+<div class="split-label" id="right-map-label"><span id="split-product-label">VELOCITY</span> · <span id="split-vel-label">KFWS</span></div>
+<div class="split-product-toggle" id="split-product-toggle">
+  <button class="split-product-btn on" id="split-btn-velocity">Velocity</button>
+  <button class="split-product-btn" id="split-btn-hydro">Hydro Class</button>
+</div>
 <div id="rbar"></div>
+<div class="radar-help-popover" id="radar-help-popover" aria-hidden="true"></div>
+<div class="hydro-hover-pop" id="hydro-hover-pop" aria-hidden="true"></div>
+<div class="hydro-map-tip" id="hydro-map-tip" aria-hidden="true"></div>
 
 <div id="topbar">
   <div class="logo">FRISCO E.M.</div>
   <div class="tb-div"></div>
   <div class="layer-btns">
-    <button class="lbtn on"      id="btn-refl"     >REFLECTIVITY</button>
-    <button class="lbtn"         id="btn-vel"      >VELOCITY</button>
     <button class="lbtn"         id="btn-split"    >SPLIT</button>
     <div class="tb-div"></div>
     <button class="lbtn on warn" id="btn-warnings" >WARNINGS</button>
@@ -1019,6 +1103,51 @@ body.drawer-mode #right-stack{
   </div>
 </div>
 
+
+<div class="hud" id="hud-radar">
+  <div class="hud-head" id="hud-radar-head">
+    <div class="hud-title"><div class="dot"></div>RADAR CONTROL</div>
+    <div class="hud-tog" id="hud-radar-tog">▾</div>
+  </div>
+  <div class="hud-body">
+    <div class="rtype-row products">
+      <button class="rtype-btn has-help on" id="rtype-refl" data-help="base">BASE REFL</button>
+      <button class="rtype-btn has-help"    id="rtype-comp" data-help="comp">COMP REFL</button>
+      <button class="rtype-btn"    id="rtype-hydro">HYDRO CLASS</button>
+      <button class="rtype-btn"    id="rtype-vel">VELOCITY</button>
+    </div>
+    <div id="vel-station-row" style="display:none;margin-bottom:8px">
+      <div style="font-family:var(--fm);font-size:8.5px;color:var(--text-dim);letter-spacing:1px;margin-bottom:3px">VELOCITY SOURCE</div>
+      <div style="font-family:var(--fm);font-size:10px;color:var(--accent)" id="vel-station-label">KFWS · Ft Worth TX</div>
+      <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);margin-top:2px">Click a radar marker on the map to switch</div>
+    </div>
+    <div class="timeline-row" id="refl-loop-row">
+      <button class="play-btn" id="refl-loop-play">▶ LOOP</button>
+      <button class="play-btn" id="refl-loop-live">LIVE</button>
+      <span class="tlabel" id="refl-loop-label">LIVE UNTIL PLAY</span>
+    </div>
+    <div class="loop-load-wrap" id="refl-loop-loader" aria-hidden="true">
+      <div class="loop-load-label">
+        <span id="refl-loop-loader-text">LOADING REFLECTIVITY FRAMES</span>
+        <span id="refl-loop-loader-pct">0%</span>
+      </div>
+      <div class="loop-load-track"><div class="loop-load-fill" id="refl-loop-loader-bar"></div></div>
+    </div>
+    <div class="radar-status">
+      <span id="radar-time">Loading radar…</span>
+      <span id="radar-frames">—</span>
+    </div>
+    <div class="hydro-legend" id="hydro-legend">
+      <div class="hydro-note">Hydrometeor Classification estimates what the radar echo is most likely seeing. Hover any key row for a plain-language meaning. Use it as context, not ground truth.</div>
+      <div class="hydro-inspect-row">
+        <button class="hydro-inspect-btn" id="hydro-inspect-btn">INSPECT</button>
+        <div class="hydro-inspect-status" id="hydro-inspect-status">Turn on Inspect to lock the map, then click a Hydro Class color to identify it.</div>
+      </div>
+      <div class="hydro-grid" id="hydro-grid"></div>
+    </div>    </div>
+  </div>
+</div>
+
 <div id="alert-poly-loader">
   <div class="alert-load-label">
     <span id="alert-load-text">LOADING WATCH COUNTY SHADING</span>
@@ -1036,31 +1165,6 @@ body.drawer-mode #right-stack{
       <div class="drawer-close" id="drawer-close">CLOSE</div>
     </div>
 <div id="right-stack">
-<div class="hud" id="hud-radar">
-  <div class="hud-head" id="hud-radar-head">
-    <div class="hud-title"><div class="dot"></div>RADAR CONTROL</div>
-    <div class="hud-tog" id="hud-radar-tog">▾</div>
-  </div>
-  <div class="hud-body">
-    <div class="rtype-row">
-      <button class="rtype-btn on" id="rtype-refl">REFLECTIVITY</button>
-      <button class="rtype-btn"    id="rtype-vel">VELOCITY</button>
-    </div>
-    <div id="vel-station-row" style="display:none;margin-bottom:8px">
-      <div style="font-family:var(--fm);font-size:8.5px;color:var(--text-dim);letter-spacing:1px;margin-bottom:3px">VELOCITY SOURCE</div>
-      <div style="font-family:var(--fm);font-size:10px;color:var(--accent)" id="vel-station-label">KFWS · Ft Worth TX</div>
-      <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);margin-top:2px">Click a radar marker on the map to switch</div>
-    </div>
-    <div class="radar-status">
-      <span id="radar-time">Loading radar…</span>
-      <span id="radar-frames">—</span>
-    </div>
-    <div style="margin-top:7px;border-top:1px solid var(--border);padding-top:7px">
-      <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:5px">ACTIVE STATIONS</div>
-      <div id="station-legend"></div>
-    </div>
-  </div>
-</div>
 <div class="hud collapsed" id="hud-citylayers">
   <div class="hud-head" id="hud-citylayers-head">
     <div class="hud-title"><div class="dot g"></div>CITY LAYERS</div>
@@ -1076,8 +1180,34 @@ body.drawer-mode #right-stack{
     </div>
     <div class="city-layer-note">
       Fire stations and fire districts load from Frisco public ArcGIS services.
-      Fire districts are off by default to keep the map clean.
+      River/flood gauges live in their own Tools panel with the legend and toggle.
     </div>
+  </div>
+</div>
+<div class="hud collapsed" id="hud-stations">
+  <div class="hud-head" id="hud-stations-head">
+    <div class="hud-title"><div class="dot"></div>ACTIVE STATIONS</div>
+    <div class="hud-tog" id="hud-stations-tog">▸</div>
+  </div>
+  <div class="hud-body">
+    <div class="menu-toggle-row">
+      <button class="menu-toggle-btn on" id="btn-dopplerstations">DOPPLER STATIONS</button>
+      <button class="menu-toggle-btn" id="btn-stationreload">↻ RELOAD</button>
+    </div>
+    <div style="font-family:var(--fm);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:5px">CLICK A STATION TO VIEW VELOCITY</div>
+    <div class="station-status" id="station-status">Loading live NWS Doppler station list…</div>
+    <div id="station-legend"></div>
+  </div>
+</div>
+<div class="hud collapsed" id="hud-rivergauges">
+  <div class="hud-head" id="hud-rivergauges-head"><div class="hud-title"><div class="dot y"></div>RIVER / FLOOD GAUGES</div><div class="hud-tog" id="hud-rivergauges-tog">▸</div></div>
+  <div class="hud-body">
+    <div class="menu-toggle-row">
+      <button class="menu-toggle-btn warn" id="btn-rivergauges">SHOW GAUGES</button>
+      <button class="menu-toggle-btn" id="btn-riverreload">↻ RELOAD</button>
+    </div>
+    <div class="river-gauge-list" id="river-gauge-status">River/flood gauge layer is off. Toggle gauges here to load NWPS nodes in the current map view nationwide. Hydrograph data loads only when you click a node.</div>
+    <div class="river-key-grid"><div class="river-key"><span style="background:#cc33ff"></span>Major</div><div class="river-key"><span style="background:#ff3333"></span>Moderate</div><div class="river-key"><span style="background:#ff9900"></span>Minor</div><div class="river-key"><span style="background:#ffea00"></span>Action</div><div class="river-key"><span style="background:#00e676"></span>No Flood</div><div class="river-key"><span style="background:#72afe9"></span>Undefined</div></div>
   </div>
 </div>
 <div class="hud collapsed" id="hud-cam">
@@ -1110,6 +1240,8 @@ body.drawer-mode #right-stack{
     <a class="cam-mlink" id="cam-m-link" href="#" target="_blank">▶ OPEN IN TXDOT ITS →</a>
   </div>
 </div>
+
+<div id="river-panel" aria-hidden="true"><div class="river-panel-head"><div class="river-panel-title" id="river-panel-title">RIVER GAUGE</div><div class="river-panel-close" id="river-panel-close">CLOSE</div></div><div class="river-panel-meta" id="river-panel-meta">Select a gauge to load hydrograph data.</div><div class="river-panel-loading" id="river-panel-loading">LOADING HYDROGRAPH…</div><iframe class="river-panel-frame" id="river-panel-frame" title="NWPS hydrograph" loading="lazy"></iframe></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -1145,6 +1277,7 @@ let isSyncingMaps = false;
 let mirrorMarkerOnMain = null;
 let mirrorMarkerOnCompare = null;
 let warningLayer = null, watchLayer = null;
+let riverGaugeLayer = null, riverGaugeFetchController = null, riverGaugeCount = 0;
 let localAlertFeatures = [];
 let alertFeatureIndex = new Map();
 let alertLayerIndex = new Map();
@@ -1155,9 +1288,33 @@ let cityLimitLayer = null;
 let fireStationLayer = null, fireDistrictLayer = null;
 let sirenLayer = null, camMarkerLayer = null;
 let selectedVelStation = 'kfws';
+let splitRadarProduct = 'velocity';
 let stationMarkerLayer = null;
-const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false };
+const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false, riverGauges:false };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
+const NWPS_GAUGE_LAYER_URL = 'https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/0/query';
+
+// Recent radar history loop. Live radar remains default until LOOP is pressed.
+const REFLECTIVITY_LOOP_MINUTES = 35;
+const REFLECTIVITY_LOOP_MAX_FRAMES = 10;
+const REFLECTIVITY_LOOP_SPEED_MS = 700;
+
+let reflectivityLoopFrames = [];
+let reflectivityLoopLayer = null;
+let reflectivityLoopLayerCache = new Map();
+let reflectivityLoopPreloaded = false;
+let reflectivityLoopPreloading = false;
+let reflectivityLoopTimer = null;
+let reflectivityLoopIndex = 0;
+let reflectivityLoopPlaying = false;
+let reflectivityLoopConfigKey = null;
+
+let compareLoopFrames = [];
+let compareLoopLayerCache = new Map();
+let compareLoopConfigKey = null;
+let hydroInspectMode = false;
+let stationRangeRingMain = null;
+let stationRangeRingCompare = null;
 
 function makeWMS(url, layerName, opacity) {
   return L.tileLayer.wms(url, {
@@ -1171,9 +1328,176 @@ function makeWMS(url, layerName, opacity) {
     updateWhenIdle: true,
     updateWhenZooming: false,
     keepBuffer: 1,
-    className: 'radar-tile',
-    attribution: 'NOAA/NWS MRMS'
+    className: String(layerName || '').includes('_bdhc') ? 'radar-tile hydro-tile' : 'radar-tile',
+    attribution: 'NOAA/NWS MRMS',
+    crossOrigin: true
   });
+}
+
+function makeTimedRadarLayer(spec, isoTime, opacity) {
+  return L.tileLayer.wms(spec.url, {
+    layers: spec.layer,
+    format: 'image/png',
+    transparent: true,
+    opacity: typeof opacity === 'number' ? opacity : (spec.opacity || 0.68),
+    version: '1.3.0',
+    uppercase: true,
+    time: isoTime,
+    updateWhenIdle: true,
+    updateWhenZooming: false,
+    keepBuffer: 1,
+    className: String(spec.layer || '').includes('_bdhc') ? 'radar-tile hydro-tile' : 'radar-tile',
+    attribution: 'NOAA/NWS MRMS',
+    crossOrigin: true
+  });
+}
+
+function getRadarLoopConfig() {
+  const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation && !s.tdwr) || DFW_STATIONS[0];
+
+  if (radarType === 'composite') {
+    return {
+      key: 'conus-composite',
+      productName: 'COMPOSITE REFLECTIVITY',
+      loadingText: 'LOADING COMPOSITE REFLECTIVITY FRAMES',
+      capability: { url: `${NWS_BASE}/conus/ows`, layer: 'conus_cref_qcd' },
+      layers: [{ url: `${NWS_BASE}/conus/ows`, layer: 'conus_cref_qcd', opacity: 0.66 }]
+    };
+  }
+
+  if (radarType === 'velocity' && station) {
+    const velocityLayer = getLayerName(station, 'velocity');
+    if (!velocityLayer) return null;
+    return {
+      key: `${station.id}-velocity`,
+      productName: `${station.name} VELOCITY`,
+      loadingText: `LOADING ${station.name} VELOCITY FRAMES`,
+      capability: { url: `${NWS_BASE}/${station.id}/ows`, layer: velocityLayer },
+      layers: [{ url: `${NWS_BASE}/${station.id}/ows`, layer: velocityLayer, opacity: 0.82 }]
+    };
+  }
+
+  if (radarType === 'hclass' && station) {
+    const hydroLayer = getLayerName(station, 'hclass');
+    if (!hydroLayer) return null;
+    return {
+      key: `${station.id}-hydro-class`,
+      productName: `${station.name} HYDRO CLASS`,
+      loadingText: `LOADING ${station.name} HYDRO CLASS FRAMES`,
+      capability: { url: `${NWS_BASE}/${station.id}/ows`, layer: hydroLayer },
+      layers: [{ url: `${NWS_BASE}/${station.id}/ows`, layer: hydroLayer, opacity: 0.92 }]
+    };
+  }
+
+  if (radarType === 'reflectivity') {
+    // Use the CONUS MRMS base reflectivity time dimension for the main Base Reflectivity loop.
+    // Station-specific base reflectivity services are less consistent with TIME support and can
+    // return transparent/empty tiles for generated timestamps, which made the map appear to clear.
+    return {
+      key: 'conus-base-reflectivity',
+      productName: 'BASE REFLECTIVITY',
+      loadingText: 'LOADING BASE REFLECTIVITY FRAMES',
+      capability: { url: `${NWS_BASE}/conus/ows`, layer: 'conus_bref_qcd' },
+      layers: [{ url: `${NWS_BASE}/conus/ows`, layer: 'conus_bref_qcd', opacity: 0.68 }]
+    };
+  }
+
+  return null;
+}
+
+function getCompareRadarLoopConfig() {
+  if (!splitViewActive || !compareMap) return null;
+  const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation && !s.tdwr) || DFW_STATIONS[0];
+  if (!station) return null;
+  const product = splitRadarProduct === 'hclass' ? 'hclass' : 'velocity';
+  const layerName = getLayerName(station, product);
+  if (!layerName) return null;
+  return {
+    key: `compare-${station.id}-${product}`,
+    productName: `${station.name} ${product === 'hclass' ? 'HYDRO CLASS' : 'VELOCITY'}`,
+    loadingText: `LOADING ${station.name} ${product === 'hclass' ? 'HYDRO CLASS' : 'VELOCITY'} FRAMES`,
+    capability: { url: `${NWS_BASE}/${station.id}/ows`, layer: layerName },
+    layers: [{ url: `${NWS_BASE}/${station.id}/ows`, layer: layerName, opacity: product === 'hclass' ? 0.92 : 0.82 }]
+  };
+}
+
+async function fetchRadarTimesForConfig(config) {
+  function generatedFallbackFrames() {
+    // Some station products do not reliably expose a usable TIME dimension in GetCapabilities.
+    // When that happens, request a conservative set of recent timestamps so WMS can serve
+    // the closest available frame instead of failing the loop outright.
+    const now = Date.now();
+    const intervalMs = 5 * 60 * 1000;
+    const endMs = Math.floor((now - 2 * 60 * 1000) / intervalMs) * intervalMs;
+    const frames = [];
+    for (let i = REFLECTIVITY_LOOP_MAX_FRAMES - 1; i >= 0; i--) {
+      const ms = endMs - i * intervalMs;
+      frames.push({ iso: new Date(ms).toISOString(), ms });
+    }
+    return frames;
+  }
+
+  try {
+    const url = `${config.capability.url}?service=WMS&version=1.3.0&request=GetCapabilities&_=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch WMS capabilities');
+    const text = await res.text();
+    const doc = new DOMParser().parseFromString(text, 'text/xml');
+    const layers = Array.from(doc.getElementsByTagName('Layer'));
+    const wanted = String(config.capability.layer || '').toLowerCase();
+    const targetLayer = layers.find(layer => {
+      const name = layer.getElementsByTagName('Name')[0];
+      return name && name.textContent.trim().toLowerCase() === wanted;
+    }) || layers.find(layer => {
+      const name = layer.getElementsByTagName('Name')[0];
+      return name && name.textContent.trim().toLowerCase().includes(wanted);
+    });
+
+    if (!targetLayer) throw new Error(`${config.capability.layer} layer not found`);
+
+    const timeNodes = [
+      ...Array.from(targetLayer.getElementsByTagName('Dimension')),
+      ...Array.from(targetLayer.getElementsByTagName('Extent'))
+    ];
+    const timeDimension = timeNodes.find(d => (d.getAttribute('name') || '').toLowerCase() === 'time');
+    if (!timeDimension) throw new Error('No time dimension found');
+
+    const rawText = (timeDimension.textContent || '').trim();
+    let rawTimes = [];
+
+    if (rawText.includes('/') && !rawText.includes(',')) {
+      // ISO interval syntax: start/end/period. Build frames from the end backward.
+      const parts = rawText.split('/').map(x => x.trim());
+      const endMs = Date.parse(parts[1]);
+      const stepMin = /PT(\d+)M/i.exec(parts[2] || '');
+      const stepMs = (stepMin ? Number(stepMin[1]) : 5) * 60 * 1000;
+      if (Number.isFinite(endMs)) {
+        for (let i = REFLECTIVITY_LOOP_MAX_FRAMES - 1; i >= 0; i--) {
+          rawTimes.push(new Date(endMs - i * stepMs).toISOString());
+        }
+      }
+    } else {
+      rawTimes = rawText.split(',').map(t => t.trim()).filter(Boolean);
+    }
+
+    const cutoff = Date.now() - REFLECTIVITY_LOOP_MINUTES * 60 * 1000;
+    let frames = rawTimes.map(t => ({ iso: t, ms: Date.parse(t) }))
+      .filter(f => Number.isFinite(f.ms) && f.ms >= cutoff)
+      .sort((a, b) => a.ms - b.ms)
+      .slice(-REFLECTIVITY_LOOP_MAX_FRAMES);
+
+    if (frames.length < Math.min(4, REFLECTIVITY_LOOP_MAX_FRAMES)) {
+      frames = rawTimes.map(t => ({ iso: t, ms: Date.parse(t) }))
+        .filter(f => Number.isFinite(f.ms))
+        .sort((a, b) => a.ms - b.ms)
+        .slice(-REFLECTIVITY_LOOP_MAX_FRAMES);
+    }
+
+    return frames.length ? frames : generatedFallbackFrames();
+  } catch (err) {
+    console.warn('Using generated radar history timestamps for', config && config.key, err);
+    return generatedFallbackFrames();
+  }
 }
 
 function makeBaseMapLayer() {
@@ -1191,25 +1515,86 @@ function clearCompareRadarLayers() {
   compareRadarLayers = [];
 }
 
-function buildCompareVelocityLayer() {
+
+function makeStationRangeRing(station, targetMap) {
+  return L.circle([station.lat, station.lon], {
+    radius: 160934.4,
+    color: 'rgba(255,234,0,.78)',
+    weight: 1.5,
+    dashArray: '8 6',
+    fillColor: 'rgba(255,234,0,.035)',
+    fillOpacity: 1,
+    interactive: false
+  }).addTo(targetMap);
+}
+
+function updateStationRangeRings() {
+  if (stationRangeRingMain) { map.removeLayer(stationRangeRingMain); stationRangeRingMain = null; }
+  if (stationRangeRingCompare && compareMap) { compareMap.removeLayer(stationRangeRingCompare); stationRangeRingCompare = null; }
+
+  const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation && !s.tdwr);
+  if (!station) return;
+
+  if (radarType === 'velocity' || radarType === 'hclass') {
+    stationRangeRingMain = makeStationRangeRing(station, map);
+  }
+
+  if (splitViewActive && compareMap && (splitRadarProduct === 'velocity' || splitRadarProduct === 'hclass')) {
+    stationRangeRingCompare = makeStationRangeRing(station, compareMap);
+  }
+}
+
+function buildCompareRadarLayer() {
   if (!compareMap) return;
 
   clearCompareRadarLayers();
 
-  const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
+  const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation && !s.tdwr);
+  const product = splitRadarProduct === 'hclass' ? 'hclass' : 'velocity';
 
-  if (station && !station.tdwr) {
-    const ln = getLayerName(station, 'velocity');
+  if (station) {
+    const ln = getLayerName(station, product);
 
     if (ln) {
-      const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
+      const opacity = product === 'hclass' ? 0.92 : 0.82;
+      const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, opacity);
       l.addTo(compareMap);
       compareRadarLayers.push(l);
     }
   }
 
+  updateSplitProductHUD();
+  updateStationRangeRings();
+}
+
+function buildCompareVelocityLayer() {
+  buildCompareRadarLayer();
+}
+
+function updateSplitProductHUD() {
+  const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation);
   const label = document.getElementById('split-vel-label');
+  const productLabel = document.getElementById('split-product-label');
+  const hydroLegend = document.getElementById('hydro-legend');
+
   if (label && station) label.textContent = station.name;
+  if (productLabel) productLabel.textContent = splitRadarProduct === 'hclass' ? 'HYDRO CLASS' : 'VELOCITY';
+
+  document.getElementById('split-btn-velocity')?.classList.toggle('on', splitRadarProduct !== 'hclass');
+  document.getElementById('split-btn-hydro')?.classList.toggle('on', splitRadarProduct === 'hclass');
+
+  if (hydroLegend) hydroLegend.classList.toggle('active', radarType === 'hclass' || (splitViewActive && splitRadarProduct === 'hclass'));
+  updateHydroInspectAvailability();
+}
+
+function setSplitRadarProduct(product) {
+  const nextProduct = product === 'hclass' ? 'hclass' : 'velocity';
+  if (nextProduct !== splitRadarProduct) {
+    stopReflectivityLoop(true, true);
+  }
+  splitRadarProduct = nextProduct;
+  updateSplitProductHUD();
+  if (splitViewActive) buildCompareRadarLayer();
 }
 
 function initCompareMap() {
@@ -1241,8 +1626,14 @@ function initCompareMap() {
     isSyncingMaps = false;
   });
 
-  compareMap.on('mousemove', e => updateMirrorCursor('compare', e.latlng));
-  compareMap.on('mouseout', hideMirrorCursors);
+  compareMap.on('mousemove', e => {
+    updateMirrorCursor('compare', e.latlng);
+    sampleHydroTileAtMouse(e);
+  });
+  compareMap.on('mouseout', () => {
+    hideMirrorCursors();
+    hideHydroMapTip();
+  });
 }
 
 function syncCompareToMain() {
@@ -1326,7 +1717,7 @@ function setSplitView(active) {
       compareMap.invalidateSize();
       syncCompareToMain();
 
-      // Left side stays reflectivity; right side shows selected-station velocity.
+      // Left side stays reflectivity; right side can show selected-station velocity or hydro class.
       if (radarType !== 'reflectivity') {
         setRadarType('reflectivity');
       } else {
@@ -1334,7 +1725,6 @@ function setSplitView(active) {
       }
 
       buildCompareVelocityLayer();
-      openStackPanel('radar');
     } else {
       hideMirrorCursors();
 
@@ -1464,6 +1854,28 @@ const TEST_STATIONS = [
 ];
 
 const ALL_STATIONS = [...DFW_STATIONS, ...TEST_STATIONS];
+let ACTIVE_STATIONS = [...ALL_STATIONS];
+let dopplerStationsOn = true;
+let dopplerStationFetchController = null;
+const NWS_RADAR_STATIONS_URL = 'https://api.weather.gov/radar/stations?stationType=WSR-88D';
+
+const HYDRO_CLASSES = [
+  {color:'#9C9C9C', code:'BI', cls:'Biological', meaning:'Birds, insects — non-precipitation return, often at dawn/dusk near roosts'},
+  {color:'#767676', code:'GC', cls:'Ground Clutter', meaning:'Anomalous propagation or stationary ground targets; not real precipitation'},
+  {color:'#FFB0B0', code:'IC', cls:'Ice Crystals', meaning:'Small, high-altitude ice crystals; little to no precipitation reaching the ground'},
+  {color:'#00FFFF', code:'DS', cls:'Dry Snow', meaning:'Low-density, unrimed snow; light accumulation potential'},
+  {color:'#0090FF', code:'WS', cls:'Wet Snow', meaning:'Melting snow near the bright band; slushy precipitation with higher accumulation rates'},
+  {color:'#00FB90', code:'RA', cls:'Rain', meaning:'Liquid precipitation; standard rain'},
+  {color:'#00BB00', code:'HR', cls:'Heavy Rain', meaning:'Intense rainfall; flash flood potential'},
+  {color:'#D0D060', code:'BD', cls:'Big Drops', meaning:'Large raindrops; often precedes or follows hail; high reflectivity but lower rain rate'},
+  {color:'#D28484', code:'GR', cls:'Graupel', meaning:'Soft hail / snow pellets; rimed ice common in strong convection'},
+  {color:'#FF0000', code:'HA', cls:'Hail', meaning:'Confirmed hail in the column; may or may not be reaching the surface'},
+  {color:'#A01414', code:'LH', cls:'Large Hail', meaning:'Significant hail, roughly 1 inch diameter range or larger; severe thunderstorm criteria met'},
+  {color:'#FFFF00', code:'GH', cls:'Giant Hail', meaning:'Extreme hail, potentially 2 inches or larger; life-threatening'},
+  {color:'#E700FF', code:'UK', cls:'Unknown', meaning:'Algorithm could not confidently classify the return; treat with caution'},
+  {color:'#77007D', code:'RF', cls:'Range Folding', meaning:'Radar artifact — second-trip echo from beyond the unambiguous range; not real weather at that spot'}
+];
+
 
 function getLayerName(station, type) {
   if (station.tdwr) {
@@ -1474,9 +1886,13 @@ function getLayerName(station, type) {
     return `${station.id}_bref_raw`;
   }
 
+  if (type === 'hclass') {
+    return station.id + '_bdhc';
+  }
+
   // NOAA OpenGeo uses super-resolution base velocity names like kfws_sr_bvel.
   if (type === 'velocity') {
-    return `${station.id}_sr_bvel`;
+    return station.id + '_sr_bvel';
   }
 
   return null;
@@ -1488,7 +1904,7 @@ function getNearestReflectivityStations(limit = MAX_ACTIVE_REFLECTIVITY_RADARS) 
   const center = map.getCenter();
   const paddedBounds = map.getBounds().pad(1.5);
 
-  return ALL_STATIONS
+  return ACTIVE_STATIONS
     .filter(s => !s.tdwr)
     // Always allow the nearby primary DFW sites; only include distant test/aux sites if they are near the current map view.
     .filter(s => !s.test || paddedBounds.contains([s.lat, s.lon]))
@@ -1849,52 +2265,41 @@ function loadRadar() {
 function applyAllRadarLayers() {
   radarLayers.forEach(l=>map.removeLayer(l));
   radarLayers=[];
+  const hydroLegend = document.getElementById('hydro-legend');
+  if (hydroLegend) hydroLegend.classList.toggle('active', radarType === 'hclass' || (splitViewActive && splitRadarProduct === 'hclass'));
+  updateHydroInspectAvailability();
 
   if (radarType === 'reflectivity') {
-    // CONUS composite base. This gives broad coverage without loading every single radar site.
-    const base = makeWMS(`${NWS_BASE}/conus/ows`, 'conus_bref_qcd', 0.52);
-    base.addTo(map);
-    radarLayers.push(base);
-
-    // Load only the closest station-level reflectivity layers. Loading every NEXRAD site at once can exhaust browser resources.
-    getNearestReflectivityStations(4).forEach(s => {
-      const ln = getLayerName(s, 'reflectivity');
-      if (!ln) return;
-
-      const l = makeWMS(`${NWS_BASE}/${s.id}/ows`, ln, 0.68);
-      l.addTo(map);
-      radarLayers.push(l);
-    });
+    const base = makeWMS(NWS_BASE + '/conus/ows', 'conus_bref_qcd', 0.52);
+    base.addTo(map); radarLayers.push(base);
+    getNearestReflectivityStations(4).forEach(s => { const ln = getLayerName(s, 'reflectivity'); if (!ln) return; const l = makeWMS(NWS_BASE + '/' + s.id + '/ows', ln, 0.68); l.addTo(map); radarLayers.push(l); });
+  } else if (radarType === 'composite') {
+    const l = makeWMS(NWS_BASE + '/conus/ows', 'conus_cref_qcd', 0.66); l.addTo(map); radarLayers.push(l);
+  } else if (radarType === 'hclass') {
+    const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation && !s.tdwr) || DFW_STATIONS[0];
+    const ln = station ? getLayerName(station, 'hclass') : null;
+    if (station && ln) { const l = makeWMS(NWS_BASE + '/' + station.id + '/ows', ln, 0.92); l.addTo(map); radarLayers.push(l); }
+    updateVelStationHUD();
   } else {
-    // Velocity — one selected station only. This avoids loading dozens of velocity products at once.
-    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
-
-    if (station && !station.tdwr) {
-      const ln = getLayerName(station, 'velocity');
-
-      if (ln) {
-        console.log('Loading velocity layer:', `${NWS_BASE}/${station.id}/ows`, ln);
-        const l = makeWMS(`${NWS_BASE}/${station.id}/ows`, ln, 0.82);
-        l.addTo(map);
-        radarLayers.push(l);
-      }
-    }
-
+    const station = ACTIVE_STATIONS.find(s => s.id === selectedVelStation);
+    if (station && !station.tdwr) { const ln = getLayerName(station, 'velocity'); if (ln) { console.log('Loading velocity layer:', NWS_BASE + '/' + station.id + '/ows', ln); const l = makeWMS(NWS_BASE + '/' + station.id + '/ows', ln, 0.82); l.addTo(map); radarLayers.push(l); } }
     updateVelStationHUD();
   }
+  updateStationRangeRings();
 }
 
 function buildStationMarkers() {
   if (stationMarkerLayer) map.removeLayer(stationMarkerLayer);
+  if (!dopplerStationsOn) return;
   stationMarkerLayer = L.layerGroup().addTo(map);
 
-  ALL_STATIONS.forEach(station=>{
+  ACTIVE_STATIONS.forEach(station=>{
     const isSelected = station.id===selectedVelStation;
     const isTdwr = !!station.tdwr;
     const isTest = !!station.test;
     const ringColor = isTdwr ? '#ffb300' : isTest ? '#a078ff' : '#00c8ff';
     const ringBg    = isTdwr ? 'rgba(255,180,0,.08)' : isTest ? 'rgba(160,120,255,.08)' : 'rgba(0,200,255,.08)';
-    const selGlow   = radarType==='velocity'&&isSelected&&!isTdwr
+    const selGlow   = (radarType==='velocity'||radarType==='hclass'||splitViewActive)&&isSelected&&!isTdwr
       ? `box-shadow:0 0 14px ${ringColor}99;border-width:2.5px;` : '';
 
     const icon = L.divIcon({
@@ -1909,7 +2314,7 @@ function buildStationMarkers() {
     });
 
     const canSelectVel = !isTdwr;
-    const btnLabel = isSelected&&radarType==='velocity' ? '✓ ACTIVE VEL SRC' : 'USE FOR VELOCITY';
+    const btnLabel = isSelected ? '✓ STATION SELECTED' : 'SELECT STATION';
     const popup = `
       <div style="font-family:'JetBrains Mono',monospace;min-width:170px">
         <div style="color:${ringColor};font-size:11px;font-weight:600;margin-bottom:3px">${station.name} · ${station.label}</div>
@@ -1929,8 +2334,9 @@ function buildStationMarkers() {
 function buildStationLegend() {
   const el = document.getElementById('station-legend');
   if (!el) return;
+  if (!dopplerStationsOn) { el.innerHTML = '<div class="river-gauge-list">Doppler station markers are hidden. Toggle Doppler Stations to show them.</div>'; return; }
 
-  el.innerHTML = ALL_STATIONS.map(s => {
+  el.innerHTML = ACTIVE_STATIONS.map(s => {
     const cls = s.tdwr ? 'tdwr' : s.test ? 'test' : 'wsr';
     const sel = radarType === 'velocity' && s.id === selectedVelStation && !s.tdwr
       ? ' style="border-width:1.5px;opacity:1"'
@@ -1963,7 +2369,7 @@ function buildStationLegend() {
 }
 
 function flyToStation(stationId) {
-  const station = ALL_STATIONS.find(s => s.id === stationId);
+  const station = ACTIVE_STATIONS.find(s => s.id === stationId);
   if (!station) return;
 
   const targetZoom = Math.max(map.getZoom(), 9);
@@ -1984,28 +2390,450 @@ function flyToStation(stationId) {
 }
 
 function updateVelStationHUD() {
-  const station=ALL_STATIONS.find(s=>s.id===selectedVelStation);
+  const station=ACTIVE_STATIONS.find(s=>s.id===selectedVelStation);
   const el=document.getElementById('vel-station-label');
   if (el&&station) el.textContent=station.name+' · '+station.label;
 }
 
+async function loadReflectivityLoopFrames() {
+  const config = getRadarLoopConfig();
+  const status = document.getElementById('radar-frames');
+  const label = document.getElementById('refl-loop-label');
+  const playBtn = document.getElementById('refl-loop-play');
 
-function setRadarType(type) {
-  if (splitViewActive && type === 'velocity') {
-    buildCompareVelocityLayer();
-    openStackPanel('radar');
+  if (!config) {
+    if (status) status.textContent = 'NO HISTORY';
+    if (label) label.textContent = 'HISTORY UNAVAILABLE';
+    reflectivityLoopFrames = [];
+    return [];
+  }
+
+  try {
+    reflectivityLoopConfigKey = config.key;
+    if (status) status.textContent = 'LOADING HISTORY';
+    if (label) label.textContent = 'FETCHING RECENT FRAMES…';
+    if (playBtn) playBtn.textContent = 'LOADING…';
+    setReflectivityLoopLoadProgress(3, config.loadingText || 'LOADING RADAR FRAMES');
+
+    reflectivityLoopFrames = await fetchRadarTimesForConfig(config);
+
+    if (!reflectivityLoopFrames.length) throw new Error('No recent radar frames available');
+
+    if (status) status.textContent = `${reflectivityLoopFrames.length} FRAMES`;
+    if (label) label.textContent = `${config.productName} READY`;
+
+    return reflectivityLoopFrames;
+  } catch (err) {
+    console.warn('Radar history loop failed:', err);
+
+    if (status) status.textContent = 'HISTORY UNAVAILABLE';
+    if (label) label.textContent = 'HISTORY UNAVAILABLE';
+    if (playBtn) playBtn.textContent = '▶ LOOP';
+    hideReflectivityLoopLoadProgress();
+
+    reflectivityLoopFrames = [];
+    return [];
+  }
+}
+
+function formatRadarFrameTime(frame) {
+  if (!frame || !frame.ms) return '—';
+
+  return new Date(frame.ms).toLocaleTimeString('en-US', {
+    timeZone: 'America/Chicago',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' CDT';
+}
+
+function waitForLayerReady(layer, timeoutMs = 2200) {
+  return new Promise(resolve => {
+    let done = false;
+
+    function finish() {
+      if (done) return;
+      done = true;
+      layer.off('load', finish);
+      layer.off('tileerror', finish);
+      resolve();
+    }
+
+    layer.once('load', finish);
+    layer.once('tileerror', finish);
+    setTimeout(finish, timeoutMs);
+  });
+}
+
+function clearReflectivityLoopCache() {
+  if (reflectivityLoopLayer) {
+    map.removeLayer(reflectivityLoopLayer);
+    reflectivityLoopLayer = null;
+  }
+
+  reflectivityLoopLayerCache.forEach(layer => {
+    if (map.hasLayer(layer)) map.removeLayer(layer);
+  });
+
+  reflectivityLoopLayerCache.clear();
+  reflectivityLoopPreloaded = false;
+  reflectivityLoopPreloading = false;
+  clearCompareLoopCache();
+  hideReflectivityLoopLoadProgress();
+}
+
+function setReflectivityLoopLoadProgress(pct, text) {
+  const wrap = document.getElementById('refl-loop-loader');
+  const bar = document.getElementById('refl-loop-loader-bar');
+  const pctEl = document.getElementById('refl-loop-loader-pct');
+  const textEl = document.getElementById('refl-loop-loader-text');
+
+  const safePct = Math.max(0, Math.min(100, Math.round(pct || 0)));
+
+  if (wrap) {
+    wrap.classList.add('active');
+    wrap.setAttribute('aria-hidden', 'false');
+  }
+
+  if (bar) bar.style.width = safePct + '%';
+  if (pctEl) pctEl.textContent = safePct + '%';
+  if (textEl && text) textEl.textContent = text;
+}
+
+function hideReflectivityLoopLoadProgress() {
+  const wrap = document.getElementById('refl-loop-loader');
+  const bar = document.getElementById('refl-loop-loader-bar');
+  const pctEl = document.getElementById('refl-loop-loader-pct');
+
+  if (wrap) {
+    wrap.classList.remove('active');
+    wrap.setAttribute('aria-hidden', 'true');
+  }
+
+  if (bar) bar.style.width = '0%';
+  if (pctEl) pctEl.textContent = '0%';
+}
+
+async function preloadReflectivityLoopLayers() {
+  const config = getRadarLoopConfig();
+  if (!config || !reflectivityLoopFrames.length || reflectivityLoopPreloaded || reflectivityLoopPreloading) return;
+
+  reflectivityLoopPreloading = true;
+  reflectivityLoopConfigKey = config.key;
+
+  const label = document.getElementById('refl-loop-label');
+  const playBtn = document.getElementById('refl-loop-play');
+  const status = document.getElementById('radar-frames');
+
+  if (label) label.textContent = 'RENDERING FRAMES…';
+  if (playBtn) playBtn.textContent = 'LOADING…';
+  if (status) status.textContent = 'PRELOADING';
+  setReflectivityLoopLoadProgress(0, config.loadingText || 'LOADING RADAR FRAMES');
+
+  const total = reflectivityLoopFrames.length * config.layers.length;
+  let loaded = 0;
+
+  const readyPromises = [];
+
+  reflectivityLoopFrames.forEach(frame => {
+    config.layers.forEach(spec => {
+      const cacheKey = `${config.key}|${spec.layer}|${frame.iso}`;
+      let layer = reflectivityLoopLayerCache.get(cacheKey);
+
+      if (!layer) {
+        layer = makeTimedRadarLayer(spec, frame.iso, 0);
+        reflectivityLoopLayerCache.set(cacheKey, layer);
+      }
+
+      if (!map.hasLayer(layer)) {
+        layer.setOpacity(0);
+        layer.addTo(map);
+      }
+
+      readyPromises.push(waitForLayerReady(layer).then(() => {
+        loaded += 1;
+        setReflectivityLoopLoadProgress((loaded / total) * 100, config.loadingText || 'LOADING RADAR FRAMES');
+      }));
+    });
+  });
+
+  await Promise.allSettled(readyPromises);
+
+  setReflectivityLoopLoadProgress(100, 'FRAMES READY');
+
+  reflectivityLoopPreloaded = true;
+  reflectivityLoopPreloading = false;
+
+  if (!reflectivityLoopPlaying) {
+    if (label) label.textContent = 'READY · PRESS LOOP';
+    if (playBtn) playBtn.textContent = '▶ LOOP';
+  }
+
+  setTimeout(() => {
+    if (!reflectivityLoopPreloading) hideReflectivityLoopLoadProgress();
+  }, 450);
+}
+
+
+function clearCompareLoopCache() {
+  if (!compareMap) return;
+  compareLoopLayerCache.forEach(layer => {
+    if (compareMap.hasLayer(layer)) compareMap.removeLayer(layer);
+  });
+  compareLoopLayerCache.clear();
+  compareLoopFrames = [];
+  compareLoopConfigKey = null;
+}
+
+async function loadCompareLoopFrames() {
+  const config = getCompareRadarLoopConfig();
+  if (!config) { compareLoopFrames = []; return []; }
+  compareLoopConfigKey = config.key;
+  try {
+    compareLoopFrames = await fetchRadarTimesForConfig(config);
+    return compareLoopFrames;
+  } catch (err) {
+    console.warn('Split-view radar history failed:', err);
+    compareLoopFrames = [];
+    return [];
+  }
+}
+
+async function preloadCompareLoopLayers() {
+  const config = getCompareRadarLoopConfig();
+  if (!compareMap || !config || !compareLoopFrames.length) return;
+  const total = compareLoopFrames.length * config.layers.length;
+  let loaded = 0;
+  const readyPromises = [];
+  compareLoopFrames.forEach(frame => {
+    config.layers.forEach(spec => {
+      const cacheKey = `${config.key}|${spec.layer}|${frame.iso}`;
+      let layer = compareLoopLayerCache.get(cacheKey);
+      if (!layer) {
+        layer = makeTimedRadarLayer(spec, frame.iso, 0);
+        compareLoopLayerCache.set(cacheKey, layer);
+      }
+      if (!compareMap.hasLayer(layer)) {
+        layer.setOpacity(0);
+        layer.addTo(compareMap);
+      }
+      readyPromises.push(waitForLayerReady(layer).then(() => {
+        loaded += 1;
+        const baseLoaded = reflectivityLoopFrames.length ? reflectivityLoopFrames.length : 1;
+        setReflectivityLoopLoadProgress(50 + (loaded / Math.max(total,1)) * 50, config.loadingText || 'LOADING SPLIT FRAMES');
+      }));
+    });
+  });
+  await Promise.allSettled(readyPromises);
+}
+
+function hideLiveRadarLayersDuringLoop() {
+  if (radarLayers.length) {
+    radarLayers.forEach(layer => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    });
+    radarLayers = [];
+  }
+}
+
+function hideLiveCompareLayersDuringLoop() {
+  if (!compareMap || !compareRadarLayers.length) return;
+  compareRadarLayers.forEach(layer => {
+    if (compareMap.hasLayer(layer)) compareMap.removeLayer(layer);
+  });
+  compareRadarLayers = [];
+}
+
+function showCompareLoopFrame(index) {
+  const config = getCompareRadarLoopConfig();
+  if (!compareMap || !config || !compareLoopFrames.length) return;
+  const frameIndex = ((index % compareLoopFrames.length) + compareLoopFrames.length) % compareLoopFrames.length;
+  const frame = compareLoopFrames[frameIndex];
+  compareLoopLayerCache.forEach(layer => layer.setOpacity(0));
+  config.layers.forEach(spec => {
+    const cacheKey = `${config.key}|${spec.layer}|${frame.iso}`;
+    let layer = compareLoopLayerCache.get(cacheKey);
+    if (!layer) {
+      layer = makeTimedRadarLayer(spec, frame.iso, 0);
+      compareLoopLayerCache.set(cacheKey, layer);
+      layer.addTo(compareMap);
+    }
+    layer.setOpacity(spec.opacity || 0.78);
+    layer.bringToFront();
+  });
+
+  // Once the split history frame is visible, remove the live split layer so the loop is clean.
+  hideLiveCompareLayersDuringLoop();
+}
+
+function showReflectivityLoopFrame(index) {
+  const config = getRadarLoopConfig();
+  if (!config || !reflectivityLoopFrames.length) return;
+
+  reflectivityLoopIndex =
+    ((index % reflectivityLoopFrames.length) + reflectivityLoopFrames.length) %
+    reflectivityLoopFrames.length;
+
+  const frame = reflectivityLoopFrames[reflectivityLoopIndex];
+  const nextFrame = reflectivityLoopFrames[(reflectivityLoopIndex + 1) % reflectivityLoopFrames.length];
+
+  reflectivityLoopLayerCache.forEach(layer => layer.setOpacity(0));
+
+  config.layers.forEach(spec => {
+    const cacheKey = `${config.key}|${spec.layer}|${frame.iso}`;
+    let layer = reflectivityLoopLayerCache.get(cacheKey);
+
+    if (!layer) {
+      layer = makeTimedRadarLayer(spec, frame.iso, 0);
+      reflectivityLoopLayerCache.set(cacheKey, layer);
+      layer.addTo(map);
+    }
+
+    layer.setOpacity(spec.opacity || 0.7);
+    layer.bringToFront();
+    reflectivityLoopLayer = layer;
+  });
+
+  // Keep the next frame attached and rendered at opacity 0 so frame switches feel animated instead of flashing.
+  if (nextFrame) {
+    config.layers.forEach(spec => {
+      const nextKey = `${config.key}|${spec.layer}|${nextFrame.iso}`;
+      const nextLayer = reflectivityLoopLayerCache.get(nextKey);
+      if (nextLayer && !map.hasLayer(nextLayer)) {
+        nextLayer.setOpacity(0);
+        nextLayer.addTo(map);
+      }
+    });
+  }
+
+  const radarTime = document.getElementById('radar-time');
+  const label = document.getElementById('refl-loop-label');
+  const frames = document.getElementById('radar-frames');
+  const playBtn = document.getElementById('refl-loop-play');
+  const frameTime = formatRadarFrameTime(frame);
+
+  if (radarTime) radarTime.textContent = frameTime + ' · LOOP';
+  if (label) label.textContent = `FRAME ${reflectivityLoopIndex + 1}/${reflectivityLoopFrames.length}`;
+  if (frames) frames.textContent = 'LOOP ACTIVE';
+  if (playBtn) playBtn.textContent = `❚❚ ${frameTime}`;
+
+  // Once the history frame is visible, remove live radar so the loop is not noisy.
+  // Live returns when the user presses LIVE or refreshes.
+  hideLiveRadarLayersDuringLoop();
+}
+
+async function startReflectivityLoop() {
+  const configAtStart = getRadarLoopConfig();
+  if (!configAtStart) return;
+
+  // Reset any stale history cache, then load the left and right panes independently.
+  stopReflectivityLoop(false, true);
+
+  const label = document.getElementById('refl-loop-label');
+  const playBtn = document.getElementById('refl-loop-play');
+  const status = document.getElementById('radar-frames');
+
+  if (label) label.textContent = 'LOADING HISTORY…';
+  if (playBtn) playBtn.textContent = 'LOADING…';
+  if (status) status.textContent = splitViewActive ? 'LOADING BOTH PANES' : 'LOADING HISTORY';
+  setReflectivityLoopLoadProgress(2, splitViewActive ? 'LOADING BOTH RADAR PANES' : (configAtStart.loadingText || 'LOADING RADAR FRAMES'));
+
+  const mainFramesPromise = loadReflectivityLoopFrames();
+  const compareFramesPromise = (splitViewActive && compareMap) ? loadCompareLoopFrames() : Promise.resolve([]);
+  const [mainFrames, splitFrames] = await Promise.all([mainFramesPromise, compareFramesPromise]);
+
+  if (!mainFrames.length) {
+    if (playBtn) playBtn.textContent = '▶ LOOP';
+    if (label) label.textContent = 'HISTORY UNAVAILABLE';
+    hideReflectivityLoopLoadProgress();
     return;
   }
-  radarType=type;
-  ['btn-refl','btn-vel','rtype-refl','rtype-vel'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  document.getElementById(type==='reflectivity'?'btn-refl':'btn-vel').classList.add('on');
-  document.getElementById(type==='reflectivity'?'rtype-refl':'rtype-vel').classList.add('on');
-  const velRow=document.getElementById('vel-station-row');
-  if (velRow) velRow.style.display=type==='velocity'?'block':'none';
-  applyAllRadarLayers();
-  buildStationMarkers();
-  buildStationLegend();
-  updateRadarTime();
+
+  // Pre-render both panes in parallel before playback starts. This prevents one pane
+  // from blocking the other and reduces the flash between WMS frames.
+  const mainPreload = preloadReflectivityLoopLayers();
+  const splitPreload = (splitViewActive && compareMap && splitFrames.length)
+    ? preloadCompareLoopLayers()
+    : Promise.resolve();
+
+  await Promise.allSettled([mainPreload, splitPreload]);
+
+  // Frames are already preloaded at opacity 0. Playback will show the first frame,
+  // then remove the live layer immediately so the loop stays clean without clearing.
+
+  reflectivityLoopPlaying = true;
+  reflectivityLoopIndex = 0;
+  document.getElementById('hud-radar')?.classList.add('loop-active');
+
+  showReflectivityLoopFrame(reflectivityLoopIndex);
+  if (splitViewActive && compareMap && compareLoopFrames.length) {
+    showCompareLoopFrame(reflectivityLoopIndex);
+  }
+
+  reflectivityLoopTimer = setInterval(() => {
+    const nextIndex = reflectivityLoopIndex + 1;
+    showReflectivityLoopFrame(nextIndex);
+    if (splitViewActive && compareMap && compareLoopFrames.length) {
+      showCompareLoopFrame(nextIndex);
+    }
+  }, REFLECTIVITY_LOOP_SPEED_MS);
+}
+
+function stopReflectivityLoop(restoreLive = true, clearCache = true) {
+  reflectivityLoopPlaying = false;
+
+  if (reflectivityLoopTimer) {
+    clearInterval(reflectivityLoopTimer);
+    reflectivityLoopTimer = null;
+  }
+
+  const playBtn = document.getElementById('refl-loop-play');
+  const label = document.getElementById('refl-loop-label');
+  const radarHud = document.getElementById('hud-radar');
+
+  if (playBtn) playBtn.textContent = '▶ LOOP';
+  if (label) label.textContent = 'LIVE UNTIL PLAY';
+  if (radarHud) radarHud.classList.remove('loop-active');
+
+  if (clearCache) {
+    clearReflectivityLoopCache();
+  } else {
+    reflectivityLoopLayerCache.forEach(layer => layer.setOpacity(0));
+    compareLoopLayerCache.forEach(layer => layer.setOpacity(0));
+    hideReflectivityLoopLoadProgress();
+  }
+
+  if (restoreLive) {
+    applyAllRadarLayers();
+    if (splitViewActive && compareMap) buildCompareRadarLayer();
+    updateRadarTime();
+
+    const frames = document.getElementById('radar-frames');
+    if (frames) frames.textContent = 'NWS LIVE';
+  }
+}
+
+function setRadarType(type) {
+  if (type !== radarType) {
+    stopReflectivityLoop(false, true);
+    reflectivityLoopFrames = [];
+    reflectivityLoopConfigKey = null;
+  }
+  if (splitViewActive && (type === 'velocity' || type === 'hclass')) { setSplitRadarProduct(type === 'hclass' ? 'hclass' : 'velocity'); return; }
+  radarType = type;
+  ['rtype-refl','rtype-comp','rtype-hydro','rtype-vel'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('on'); });
+  if (type === 'reflectivity') { document.getElementById('rtype-refl')?.classList.add('on'); }
+  else if (type === 'velocity') { document.getElementById('rtype-vel')?.classList.add('on'); }
+  else if (type === 'composite') document.getElementById('rtype-comp')?.classList.add('on');
+  else if (type === 'hclass') document.getElementById('rtype-hydro')?.classList.add('on');
+  const velRow=document.getElementById('vel-station-row'), loopRow=document.getElementById('refl-loop-row'), hydroLegend=document.getElementById('hydro-legend');
+  if (velRow) velRow.style.display = (type === 'velocity' || type === 'hclass') ? 'block' : 'none';
+  if (loopRow) loopRow.style.display = (type === 'reflectivity' || type === 'composite' || type === 'velocity' || type === 'hclass') ? 'flex' : 'none';
+  if (hydroLegend) hydroLegend.classList.toggle('active', type === 'hclass' || (splitViewActive && splitRadarProduct === 'hclass'));
+  updateHydroInspectAvailability();
+  applyAllRadarLayers(); buildStationMarkers(); buildStationLegend(); updateRadarTime();
+  const frames=document.getElementById('radar-frames');
+  if(frames) frames.textContent = type === 'composite' ? 'COMP REFL' : type === 'hclass' ? 'HYDRO CLASS' : type === 'velocity' ? selectedVelStation.toUpperCase() : 'NWS LIVE';
 }
 
 function updateRadarTime() {
@@ -2024,10 +2852,186 @@ function updateRadarTime() {
 }
 
 function refreshRadar() {
+  stopReflectivityLoop(false);
+  reflectivityLoopFrames = [];
+  reflectivityLoopConfigKey = null;
+
   applyAllRadarLayers();
-  if (splitViewActive) buildCompareVelocityLayer();
+  if (splitViewActive) buildCompareRadarLayer();
   updateRadarTime();
+
+  const frames = document.getElementById('radar-frames');
+  if (frames) frames.textContent = 'NWS LIVE';
+
+  const label = document.getElementById('refl-loop-label');
+  if (label) label.textContent = 'LIVE UNTIL PLAY';
+
+  hideReflectivityLoopLoadProgress();
 }
+
+
+// ── LIVE NWS DOPPLER STATIONS ────────────────────────────────────────────────
+function updateStationStatus(text){const el=document.getElementById('station-status');if(el)el.textContent=text;}
+function normalizeRadarStationFeature(feature){
+  const p=feature && feature.properties ? feature.properties : {};
+  const coords=feature && feature.geometry && Array.isArray(feature.geometry.coordinates) ? feature.geometry.coordinates : null;
+  const rawId=p.id || p.radarStationId || p.stationId || p.identifier || (feature.id ? String(feature.id).split('/').pop() : '');
+  const code=String(rawId||'').replace(/^K/i,'K').toUpperCase();
+  if(!code || !coords || coords.length<2) return null;
+  return {
+    id:code.toLowerCase(),
+    name:code,
+    label:p.name || p.location || p.siteName || 'NWS Doppler Radar',
+    lat:Number(coords[1]),
+    lon:Number(coords[0]),
+    live:true,
+    tdwr:false,
+    test:false
+  };
+}
+function dedupeStations(stations){
+  const seen=new Map();
+  stations.forEach(s=>{if(s&&Number.isFinite(s.lat)&&Number.isFinite(s.lon)&&!seen.has(s.id))seen.set(s.id,s);});
+  return Array.from(seen.values()).sort((a,b)=>a.name.localeCompare(b.name));
+}
+async function loadLiveDopplerStations(){
+  if(dopplerStationFetchController) dopplerStationFetchController.abort();
+  dopplerStationFetchController=new AbortController();
+  updateStationStatus('Loading live NWS Doppler station list…');
+  try{
+    const res=await fetch(NWS_RADAR_STATIONS_URL,{cache:'no-store',signal:dopplerStationFetchController.signal,headers:{'Accept':'application/geo+json, application/json'}});
+    if(!res.ok) throw new Error('NWS radar station request failed');
+    const data=await res.json();
+    const live=dedupeStations((data.features||[]).map(normalizeRadarStationFeature));
+    if(!live.length) throw new Error('No live radar stations returned');
+    ACTIVE_STATIONS=live;
+    if(!ACTIVE_STATIONS.some(s=>s.id===selectedVelStation)){
+      const nearest=getNearestReflectivityStations(1)[0];
+      selectedVelStation=(nearest&&nearest.id)||'kfws';
+    }
+    updateStationStatus('Showing '+ACTIVE_STATIONS.length+' live NWS Doppler station nodes. Click a station to view velocity.');
+  }catch(err){
+    if(err.name==='AbortError')return;
+    console.warn('Live Doppler station load failed:',err);
+    ACTIVE_STATIONS=dedupeStations(ALL_STATIONS);
+    updateStationStatus('Live NWS station list unavailable. Using built-in fallback station list.');
+  }
+  buildStationMarkers();
+  buildStationLegend();
+  updateVelStationHUD();
+  if(radarType==='reflectivity'||radarType==='velocity'||radarType==='hclass') applyAllRadarLayers(); if(splitViewActive) buildCompareRadarLayer();
+}
+function toggleDopplerStations(){
+  dopplerStationsOn=!dopplerStationsOn;
+  const btn=document.getElementById('btn-dopplerstations');
+  if(btn){btn.classList.toggle('on',dopplerStationsOn);btn.textContent=dopplerStationsOn?'DOPPLER STATIONS':'STATIONS HIDDEN';}
+  if(dopplerStationsOn){buildStationMarkers();buildStationLegend();updateStationStatus('Doppler station nodes are visible. Click a station to view velocity.');}
+  else{if(stationMarkerLayer){map.removeLayer(stationMarkerLayer);stationMarkerLayer=null;}buildStationLegend();updateStationStatus('Doppler station nodes are hidden.');}
+}
+
+// ── RIVER / FLOOD GAUGES ─────────────────────────────────────────────────────
+function riverGaugeClass(status){return String(status||'not_defined').toLowerCase().replace(/[^a-z0-9_]+/g,'_');}
+function riverGaugeLabel(status){return String(status||'Not Defined').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function riverGaugeIcon(status){
+  const cls=riverGaugeClass(status);
+  return L.divIcon({className:'',html:'<div class="gauge-dot '+cls+'"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+}
+function updateRiverGaugeStatus(text){const el=document.getElementById('river-gauge-status');if(el)el.textContent=text;}
+async function loadRiverGaugeLayer(){
+  if(riverGaugeFetchController) riverGaugeFetchController.abort();
+  riverGaugeFetchController=new AbortController();
+  if(riverGaugeLayer){map.removeLayer(riverGaugeLayer);riverGaugeLayer=null;}
+  updateRiverGaugeStatus('Loading NWPS river/flood gauge nodes for this map view…');
+  const b=map.getBounds().pad(0.85);
+  const params=new URLSearchParams({
+    f:'geojson',
+    where:'1=1',
+    outFields:'gaugelid,status,location,waterbody,state,obstime,wfo,url,observed,units,action,flood,moderate,major,latitude,longitude',
+    returnGeometry:'true',
+    geometry:[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()].join(','),
+    geometryType:'esriGeometryEnvelope',
+    inSR:'4326',
+    outSR:'4326',
+    spatialRel:'esriSpatialRelIntersects'
+  });
+  try{
+    const res=await fetch(NWPS_GAUGE_LAYER_URL+'?'+params.toString(),{cache:'no-store',signal:riverGaugeFetchController.signal});
+    if(!res.ok) throw new Error('Gauge layer request failed');
+    const data=await res.json();
+    riverGaugeCount=data.features?data.features.length:0;
+    riverGaugeLayer=L.geoJSON(data,{
+      pointToLayer:(feature,latlng)=>L.marker(latlng,{icon:riverGaugeIcon(feature.properties && feature.properties.status),zIndexOffset:650}),
+      onEachFeature:(feature,layer)=>{
+        const p=feature.properties||{};
+        const title=p.location||p.waterbody||p.gaugelid||'River Gauge';
+        const status=riverGaugeLabel(p.status);
+        layer.bindTooltip((p.gaugelid||'')+' · '+status,{direction:'top',sticky:true});
+        layer.on('click',()=>openRiverGaugePanel(p));
+        const safeId=String(p.gaugelid||'').replace(/[^a-zA-Z0-9]/g,'');
+        const popupHtml =
+          '<div style="font-family:JetBrains Mono,monospace;min-width:190px">'+
+          '<div style="color:#00c8ff;font-size:10px;font-weight:600;margin-bottom:4px">'+title+'</div>'+
+          '<div style="font-size:8.5px;color:rgba(160,200,225,.7);line-height:1.45">'+
+          '<b>ID:</b> '+(p.gaugelid||'—')+'<br>'+
+          '<b>Waterbody:</b> '+(p.waterbody||'—')+'<br>'+
+          '<b>Status:</b> '+status+'<br>'+
+          '<b>Observed:</b> '+(p.observed||'—')+' '+(p.units||'')+
+          '</div>'+
+          '<button onclick="window.openRiverGaugeFromPopup && window.openRiverGaugeFromPopup(\''+safeId+'\')" style="margin-top:7px;font-family:JetBrains Mono,monospace;font-size:8.5px;padding:4px 8px;background:rgba(0,200,255,.1);border:1px solid #00c8ff;color:#00c8ff;border-radius:3px;cursor:pointer;width:100%">OPEN HYDROGRAPH</button>'+
+          '</div>';
+        layer.bindPopup(popupHtml,{maxWidth:250});
+      }
+    });
+    if(layersOn.riverGauges) riverGaugeLayer.addTo(map);
+    updateRiverGaugeStatus(riverGaugeCount ? 'Showing '+riverGaugeCount+' NWPS gauge node'+(riverGaugeCount===1?'':'s')+' in this map view. Click a node to load its hydrograph.' : 'No NWPS gauge nodes found in this map view. Zoom out and toggle again if needed.');
+  }catch(err){
+    if(err.name==='AbortError')return;
+    console.warn('River gauge layer failed:',err);
+    updateRiverGaugeStatus('River gauge nodes could not be loaded from NWPS right now.');
+  }
+}
+function setRiverGaugeButtonState(){
+  const btn=document.getElementById('btn-rivergauges');
+  if(!btn) return;
+  btn.classList.toggle('on',layersOn.riverGauges);
+  btn.textContent = layersOn.riverGauges ? 'HIDE GAUGES' : 'SHOW GAUGES';
+}
+function toggleRiverGaugeLayer(){
+  layersOn.riverGauges=!layersOn.riverGauges;
+  setRiverGaugeButtonState();
+  if(layersOn.riverGauges){openStackPanel('rivergauges');toggleToolsDrawer(true);loadRiverGaugeLayer();}
+  else{if(riverGaugeFetchController)riverGaugeFetchController.abort();if(riverGaugeLayer)map.removeLayer(riverGaugeLayer);riverGaugeLayer=null;riverGaugeCount=0;updateRiverGaugeStatus('River/flood gauge layer is off. Toggle gauges here to load NWPS nodes.');closeRiverGaugePanel();}
+}
+let riverGaugeReloadTimer=null;
+map.on('moveend zoomend',()=>{
+  if(!layersOn.riverGauges) return;
+  clearTimeout(riverGaugeReloadTimer);
+  riverGaugeReloadTimer=setTimeout(loadRiverGaugeLayer,650);
+});
+function openRiverGaugePanel(props){
+  const panel=document.getElementById('river-panel'),title=document.getElementById('river-panel-title'),meta=document.getElementById('river-panel-meta'),frame=document.getElementById('river-panel-frame'),loading=document.getElementById('river-panel-loading');
+  if(!panel||!frame)return;
+  const id=props.gaugelid||'';
+  const hydroUrl=props.url||(id?'https://water.noaa.gov/gauges/'+encodeURIComponent(id):'https://water.noaa.gov/');
+  if(title)title.textContent=id?'GAUGE '+id:'RIVER GAUGE';
+  if(meta)meta.innerHTML='<b>Location:</b> '+(props.location||'—')+'<br><b>Waterbody:</b> '+(props.waterbody||'—')+'<br><b>Status:</b> '+riverGaugeLabel(props.status)+' · <b>Observed:</b> '+(props.observed||'—')+' '+(props.units||'')+'<br><span style="color:rgba(160,200,225,.45)">Hydrograph data is fetched only now, after the node was selected.</span>';
+  if(loading)loading.style.display='block';
+  frame.style.display='none';
+  frame.src='about:blank';
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden','false');
+  frame.onload=()=>{if(loading)loading.style.display='none';frame.style.display='block';};
+  setTimeout(()=>{frame.src=hydroUrl;},50);
+}
+function closeRiverGaugePanel(){
+  const panel=document.getElementById('river-panel'),frame=document.getElementById('river-panel-frame');
+  if(frame)frame.src='about:blank';
+  if(panel){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');}
+}
+window.openRiverGaugeFromPopup=function(gaugeId){
+  if(!riverGaugeLayer||!gaugeId)return;
+  riverGaugeLayer.eachLayer(layer=>{const p=(layer.feature&&layer.feature.properties)||{}; if(String(p.gaugelid||'').toLowerCase()===String(gaugeId).toLowerCase()) openRiverGaugePanel(p);});
+};
 
 // ── ALERT FILTERS ─────────────────────────────────────────────────────────────
 // These are the national warning/watch products that will be drawn on the map.
@@ -2838,8 +3842,6 @@ function toggleLayer(name) {
 }
 
 [
-  ['btn-refl',     ()=>{ toggleToolsDrawer(true); openStackPanel('radar'); setRadarType('reflectivity'); }],
-  ['btn-vel',      ()=>{ toggleToolsDrawer(true); openStackPanel('radar'); setRadarType('velocity'); }],
   ['btn-split',    ()=>toggleSplitView()],
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
@@ -2849,11 +3851,412 @@ function toggleLayer(name) {
   ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); if (layersOn.cameras) { toggleToolsDrawer(true); openStackPanel('cam'); } }],
   ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
   ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
+  ['btn-rivergauges', () => toggleRiverGaugeLayer()],
+  ['btn-riverreload', () => { if (!layersOn.riverGauges) { layersOn.riverGauges = true; setRiverGaugeButtonState(); } openStackPanel('rivergauges'); loadRiverGaugeLayer(); }],
+  ['btn-dopplerstations', () => toggleDopplerStations()],
+  ['btn-stationreload', () => loadLiveDopplerStations()],
 
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
-document.getElementById('rtype-refl').addEventListener('click',()=>{ openStackPanel('radar'); setRadarType('reflectivity'); });
-document.getElementById('rtype-vel').addEventListener('click', ()=>{ openStackPanel('radar'); setRadarType('velocity'); });
+
+
+function renderHydroLegend() {
+  const grid = document.getElementById('hydro-grid');
+  if (!grid) return;
+  grid.innerHTML = HYDRO_CLASSES.map(item => `
+    <div class="hydro-key" data-hydro-code="${item.code}">
+      <span class="hydro-swatch" style="background:${item.color}"></span>
+      <span class="hydro-code">${item.code}</span>
+      <span class="hydro-class">${item.cls}</span>
+      <span class="hydro-help">What it means</span>
+    </div>`).join('');
+}
+
+function showHydroMeaning(item, x, y) {
+  const pop = document.getElementById('hydro-hover-pop');
+  if (!pop || !item) return;
+  pop.innerHTML = `<div class="hydro-hover-title"><span style="display:inline-block;width:10px;height:8px;border-radius:2px;background:${item.color};border:1px solid rgba(255,255,255,.25);margin-right:5px"></span>${item.code} · ${item.cls}</div><div>${item.meaning}</div>`;
+  pop.classList.add('open');
+  pop.setAttribute('aria-hidden','false');
+  const width = 310;
+  let left = x + 12;
+  let top = y + 12;
+  if (left + width > window.innerWidth - 10) left = x - width - 12;
+  if (top + 92 > window.innerHeight - 10) top = y - 92;
+  pop.style.left = Math.max(10, left) + 'px';
+  pop.style.top = Math.max(10, top) + 'px';
+}
+
+function hideHydroMeaning() {
+  const pop = document.getElementById('hydro-hover-pop');
+  if (!pop) return;
+  pop.classList.remove('open');
+  pop.setAttribute('aria-hidden','true');
+}
+
+function setupHydroLegendHover() {
+  renderHydroLegend();
+  const grid = document.getElementById('hydro-grid');
+  if (!grid) return;
+  grid.addEventListener('mousemove', e => {
+    const row = e.target.closest('.hydro-key');
+    if (!row) return hideHydroMeaning();
+    const item = HYDRO_CLASSES.find(h => h.code === row.dataset.hydroCode);
+    showHydroMeaning(item, e.clientX, e.clientY);
+  });
+  grid.addEventListener('mouseleave', hideHydroMeaning);
+}
+
+function hexToRgb(hex) {
+  const clean = String(hex || '').replace('#','');
+  const n = parseInt(clean.length === 3 ? clean.split('').map(c=>c+c).join('') : clean, 16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+
+const HYDRO_CLASSES_RGB = HYDRO_CLASSES.map(item => ({ ...item, rgb: hexToRgb(item.color) }));
+
+function nearestHydroClass(r,g,b,a) {
+  if (!a || a < 20) return null;
+  let best = null, bestD = Infinity;
+  HYDRO_CLASSES_RGB.forEach(item => {
+    const d = Math.pow(r-item.rgb.r,2) + Math.pow(g-item.rgb.g,2) + Math.pow(b-item.rgb.b,2);
+    if (d < bestD) { bestD = d; best = item; }
+  });
+
+  // The NWS WMS sometimes returns anti-aliased / resampled colors rather than exact legend colors.
+  // 12000 ~= 109 RGB units of distance, which is generous enough for tile smoothing but still
+  // tight enough to avoid matching dark basemap/background pixels as a Hydro Class.
+  return bestD < 12000 ? { item: best, distance: bestD, rgb: { r, g, b }, hex: rgbToHex(r,g,b) } : null;
+}
+
+function getNumberFromProp(props, names) {
+  const lowerMap = {};
+  Object.entries(props || {}).forEach(([k, v]) => {
+    lowerMap[String(k).toLowerCase()] = v;
+  });
+
+  for (const name of names) {
+    const v = lowerMap[String(name).toLowerCase()];
+    if (v === undefined || v === null || v === '') continue;
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+
+  return null;
+}
+
+function matchHydroClassFromBandProps(props) {
+  if (!props) return null;
+
+  const r = getNumberFromProp(props, ['RED_BAND', 'RED', 'R', 'BAND_1', 'B1']);
+  const g = getNumberFromProp(props, ['GREEN_BAND', 'GREEN', 'G', 'BAND_2', 'B2']);
+  const b = getNumberFromProp(props, ['BLUE_BAND', 'BLUE', 'B', 'BAND_3', 'B3']);
+  const a = getNumberFromProp(props, ['ALPHA_BAND', 'ALPHA', 'A', 'BAND_4', 'B4']);
+
+  if (r === null || g === null || b === null) return null;
+
+  const match = nearestHydroClass(r, g, b, a === null ? 255 : a);
+  if (!match || !match.item) return null;
+
+  return {
+    ...match,
+    source: 'featureinfo',
+    rawBands: { r, g, b, a: a === null ? 255 : a }
+  };
+}
+
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+function isHydroVisible() {
+  return radarType === 'hclass' || (splitViewActive && splitRadarProduct === 'hclass');
+}
+
+function setHydroInspectMode(active) {
+  hydroInspectMode = !!active && isHydroVisible();
+  document.body.classList.toggle('hydro-inspect', hydroInspectMode);
+  const btn = document.getElementById('hydro-inspect-btn');
+  const status = document.getElementById('hydro-inspect-status');
+  const overlay = document.getElementById('hydro-inspect-overlay');
+
+  if (btn) {
+    btn.classList.toggle('on', hydroInspectMode);
+    btn.textContent = hydroInspectMode ? 'INSPECT ON' : 'INSPECT';
+  }
+  if (status) {
+    status.textContent = hydroInspectMode
+      ? 'Map locked. Click a Hydro Class color to identify it.'
+      : 'Turn on Inspect to lock the map, then click a Hydro Class color to identify it.';
+  }
+  if (overlay) overlay.setAttribute('aria-hidden', hydroInspectMode ? 'false' : 'true');
+
+  const method = hydroInspectMode ? 'disable' : 'enable';
+  try { map.dragging[method](); } catch(e) {}
+  try { map.touchZoom[method](); } catch(e) {}
+  try { map.doubleClickZoom[method](); } catch(e) {}
+  try { map.scrollWheelZoom[method](); } catch(e) {}
+  try { map.boxZoom[method](); } catch(e) {}
+  try { map.keyboard[method](); } catch(e) {}
+  if (compareMap) {
+    try { compareMap.dragging[method](); } catch(e) {}
+    try { compareMap.touchZoom[method](); } catch(e) {}
+    try { compareMap.doubleClickZoom[method](); } catch(e) {}
+    try { compareMap.scrollWheelZoom[method](); } catch(e) {}
+    try { compareMap.boxZoom[method](); } catch(e) {}
+    try { compareMap.keyboard[method](); } catch(e) {}
+  }
+
+  if (!hydroInspectMode) hideHydroMapTip();
+}
+
+function updateHydroInspectAvailability() {
+  if (!isHydroVisible() && hydroInspectMode) setHydroInspectMode(false);
+}
+
+function showHydroMapTip(matchOrItem, originalEvent, pinned) {
+  const tip = document.getElementById('hydro-map-tip');
+  const item = matchOrItem && matchOrItem.item ? matchOrItem.item : matchOrItem;
+  if (!tip || !item) return;
+  const sampled = matchOrItem && matchOrItem.hex ? `<br><span style="color:rgba(160,200,225,.55)">Sampled ${matchOrItem.hex}</span>` : '';
+  const clickHint = pinned ? '<br><span style="color:rgba(160,200,225,.45)">Click another color to identify it.</span>' : '';
+  tip.innerHTML = `<b>${item.code} · ${item.cls}</b><br>${item.meaning}${sampled}${clickHint}`;
+  tip.classList.add('open');
+  tip.setAttribute('aria-hidden','false');
+  const ev = originalEvent || window.event;
+  let left = ev && ev.clientX ? ev.clientX + 14 : 20;
+  let top = ev && ev.clientY ? ev.clientY + 14 : 20;
+  if (left + 260 > window.innerWidth) left -= 280;
+  if (top + 78 > window.innerHeight) top -= 88;
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
+}
+
+function hideHydroMapTip() {
+  const tip = document.getElementById('hydro-map-tip');
+  if (!tip) return;
+  tip.classList.remove('open');
+  tip.setAttribute('aria-hidden','true');
+}
+
+function getHydroInspectContext(clientX, clientY) {
+  const compareEl = document.getElementById('compare-map');
+  const compareRect = compareEl ? compareEl.getBoundingClientRect() : null;
+  const inCompare = splitViewActive && compareMap && compareRect &&
+    clientX >= compareRect.left && clientX <= compareRect.right &&
+    clientY >= compareRect.top && clientY <= compareRect.bottom;
+
+  if (inCompare && splitRadarProduct === 'hclass') {
+    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
+    return station ? { mapObj: compareMap, station, layerName: getLayerName(station, 'hclass'), pane: 'split' } : null;
+  }
+
+  if (radarType === 'hclass') {
+    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
+    return station ? { mapObj: map, station, layerName: getLayerName(station, 'hclass'), pane: 'main' } : null;
+  }
+
+  return null;
+}
+
+function findHydroTileColorAtClient(clientX, clientY) {
+  const tiles = Array.from(document.querySelectorAll('img.leaflet-tile.hydro-tile'))
+    .filter(tile => tile.complete && tile.naturalWidth)
+    .filter(tile => {
+      const style = window.getComputedStyle(tile);
+      if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity || 1) < 0.05) return false;
+      const r = tile.getBoundingClientRect();
+      return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+    });
+
+  if (!tiles.length) return null;
+
+  const offsets = [[0,0],[-2,0],[2,0],[0,-2],[0,2],[-4,0],[4,0],[0,-4],[0,4],[-3,-3],[3,-3],[-3,3],[3,3]];
+
+  for (let i = tiles.length - 1; i >= 0; i--) {
+    const tile = tiles[i];
+    const r = tile.getBoundingClientRect();
+    const c = findHydroTileColorAtClient.canvas || (findHydroTileColorAtClient.canvas = document.createElement('canvas'));
+    c.width = tile.naturalWidth;
+    c.height = tile.naturalHeight;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.drawImage(tile, 0, 0);
+
+    for (const [dx, dy] of offsets) {
+      const x = Math.floor((clientX + dx - r.left) * (tile.naturalWidth / r.width));
+      const y = Math.floor((clientY + dy - r.top) * (tile.naturalHeight / r.height));
+      if (x < 0 || y < 0 || x >= tile.naturalWidth || y >= tile.naturalHeight) continue;
+      const px = ctx.getImageData(x, y, 1, 1).data;
+      const match = nearestHydroClass(px[0], px[1], px[2], px[3]);
+      if (match) return match;
+    }
+  }
+
+  return null;
+}
+
+async function tryHydroGetFeatureInfo(clientX, clientY) {
+  const ctx = getHydroInspectContext(clientX, clientY);
+  if (!ctx || !ctx.mapObj || !ctx.station || !ctx.layerName) return null;
+
+  const mapEl = ctx.mapObj.getContainer();
+  const rect = mapEl.getBoundingClientRect();
+  const x = Math.round(clientX - rect.left);
+  const y = Math.round(clientY - rect.top);
+  if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+
+  const size = ctx.mapObj.getSize();
+  const crs = ctx.mapObj.options.crs;
+  const b = ctx.mapObj.getBounds();
+  const sw = crs.project(b.getSouthWest());
+  const ne = crs.project(b.getNorthEast());
+  const bbox = [sw.x, sw.y, ne.x, ne.y].join(',');
+  const url = `${NWS_BASE}/${ctx.station.id}/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+    `&LAYERS=${encodeURIComponent(ctx.layerName)}` +
+    `&QUERY_LAYERS=${encodeURIComponent(ctx.layerName)}` +
+    `&STYLES=&CRS=EPSG:3857&BBOX=${bbox}` +
+    `&WIDTH=${size.x}&HEIGHT=${size.y}&I=${x}&J=${y}` +
+    `&FEATURE_COUNT=1&INFO_FORMAT=application/json`;
+
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) return null;
+  const json = await res.json().catch(() => null);
+  const props = json && json.features && json.features[0] && json.features[0].properties;
+  if (!props) return null;
+
+  const bandMatch = matchHydroClassFromBandProps(props);
+  if (bandMatch && bandMatch.item) {
+    return bandMatch;
+  }
+
+  const raw = Object.values(props).join(' ').toLowerCase();
+  for (const item of HYDRO_CLASSES) {
+    if (raw.includes(item.code.toLowerCase()) || raw.includes(String(item.cls).toLowerCase())) {
+      return { item, hex: null, source: 'featureinfo' };
+    }
+  }
+
+  return { raw: Object.entries(props).map(([k,v]) => `${k}: ${v}`).join(' · ') };
+}
+
+async function identifyHydroAtClient(clientX, clientY, originalEvent) {
+  if (!hydroInspectMode || !isHydroVisible()) return;
+
+  const status = document.getElementById('hydro-inspect-status');
+  if (status) status.textContent = 'Checking Hydro Class color…';
+
+  try {
+    const match = findHydroTileColorAtClient(clientX, clientY);
+    if (match && match.item) {
+      showHydroMapTip(match, originalEvent, true);
+      if (status) status.textContent = `${match.item.code} · ${match.item.cls} identified. Click another color to inspect it.`;
+      return;
+    }
+  } catch (err) {
+    // Canvas reads can be blocked by browser/CORS policy. Fall through to GetFeatureInfo.
+  }
+
+  try {
+    const info = await tryHydroGetFeatureInfo(clientX, clientY);
+    if (info && info.item) {
+      showHydroMapTip(info, originalEvent, true);
+      if (status) status.textContent = `${info.item.code} · ${info.item.cls} identified from radar data. Click another color to inspect it.`;
+      return;
+    }
+    if (info && info.raw && status) {
+      status.textContent = `The server returned data, but it did not map cleanly to the legend: ${info.raw}`;
+      hideHydroMapTip();
+      return;
+    }
+  } catch (err) {}
+
+  hideHydroMapTip();
+  if (status) status.textContent = 'No Hydro Class color identified at that point. Try clicking directly on a colored radar pixel.';
+}
+
+function sampleHydroTileAtClient(clientX, clientY, originalEvent) {
+  // Passive hover sampling was intentionally replaced with click-to-identify Inspect mode.
+  return;
+}
+
+function sampleHydroTileAtMouse(e) {
+  if (!e || !e.originalEvent) return;
+  sampleHydroTileAtClient(e.originalEvent.clientX, e.originalEvent.clientY, e.originalEvent);
+}
+
+
+const RADAR_HELP_TEXT = {
+  base: {
+    title: 'Base Reflectivity',
+    body: '<b>Base reflectivity</b> shows precipitation intensity from the lowest radar scan, roughly 0.5°, which is crucial for ground-level conditions. Best for near-ground rain and hail.'
+  },
+  comp: {
+    title: 'Composite Reflectivity',
+    body: '<b>Composite reflectivity</b> displays the highest reflectivity value from all scans, highlighting the most intense storm parts regardless of height. Best for overall storm structure and high-altitude hail.'
+  }
+};
+
+function showRadarHelp(btn) {
+  const pop = document.getElementById('radar-help-popover');
+  const key = btn && btn.getAttribute('data-help');
+  const data = RADAR_HELP_TEXT[key];
+  if (!pop || !data) return;
+
+  pop.innerHTML = `<div class="radar-help-title">${data.title}</div><div>${data.body}</div>`;
+  pop.classList.add('open');
+  pop.setAttribute('aria-hidden', 'false');
+
+  const r = btn.getBoundingClientRect();
+  const top = Math.max(8, r.bottom + 7);
+  let left = r.left;
+  const width = Math.min(300, window.innerWidth - 28);
+  if (left + width > window.innerWidth - 14) left = window.innerWidth - width - 14;
+  pop.style.top = top + 'px';
+  pop.style.left = Math.max(14, left) + 'px';
+}
+
+function hideRadarHelp() {
+  const pop = document.getElementById('radar-help-popover');
+  if (!pop) return;
+  pop.classList.remove('open');
+  pop.setAttribute('aria-hidden', 'true');
+}
+
+setupHydroLegendHover();
+const hydroInspectOverlay = document.getElementById('hydro-inspect-overlay');
+if (hydroInspectOverlay) {
+  hydroInspectOverlay.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    identifyHydroAtClient(e.clientX, e.clientY, e);
+  });
+}
+document.getElementById('hydro-inspect-btn')?.addEventListener('click', () => setHydroInspectMode(!hydroInspectMode));
+
+document.querySelectorAll('.rtype-btn.has-help').forEach(btn => {
+  btn.addEventListener('mouseenter', () => showRadarHelp(btn));
+  btn.addEventListener('focus', () => showRadarHelp(btn));
+  btn.addEventListener('mouseleave', hideRadarHelp);
+  btn.addEventListener('blur', hideRadarHelp);
+});
+
+document.getElementById('rtype-refl').addEventListener('click',()=>{ setRadarType('reflectivity'); });
+document.getElementById('rtype-comp').addEventListener('click',()=>{ setRadarType('composite'); });
+document.getElementById('rtype-hydro').addEventListener('click',()=>{ setRadarType('hclass'); });
+document.getElementById('rtype-vel').addEventListener('click', ()=>{ setRadarType('velocity'); });
+document.getElementById('split-btn-velocity')?.addEventListener('click',()=>setSplitRadarProduct('velocity'));
+document.getElementById('split-btn-hydro')?.addEventListener('click',()=>setSplitRadarProduct('hclass'));
+document.getElementById('refl-loop-play')?.addEventListener('click', () => {
+  if (reflectivityLoopPlaying) {
+    stopReflectivityLoop(true);
+  } else {
+    startReflectivityLoop();
+  }
+});
+document.getElementById('refl-loop-live')?.addEventListener('click', () => {
+  stopReflectivityLoop(true);
+});
 document.getElementById('top-refresh-btn').addEventListener('click',()=>{
   refreshRadar();
   loadAlerts();
@@ -2865,24 +4268,44 @@ document.getElementById('top-refresh-btn').addEventListener('click',()=>{
 
 // ── HUD DRAG ──────────────────────────────────────────────────────────────────
 let drag=null,dox=0,doy=0;
-['hud-cond','hud-alerts'].forEach(id=>{
-  document.getElementById(id+'-head').addEventListener('mousedown',e=>{
-    drag=document.getElementById(id);
-    const r=drag.getBoundingClientRect();
-    dox=e.clientX-r.left; doy=e.clientY-r.top; e.preventDefault();
-  });
-});
-document.addEventListener('mousemove',e=>{
+function startHudDrag(id, clientX, clientY) {
+  drag=document.getElementById(id);
+  if (!drag) return;
+  const r=drag.getBoundingClientRect();
+  dox=clientX-r.left; doy=clientY-r.top;
+}
+function moveHudDrag(clientX, clientY) {
   if(!drag)return;
-  let x=e.clientX-dox,y=e.clientY-doy;
+  let x=clientX-dox,y=clientY-doy;
   x=Math.max(0,Math.min(window.innerWidth-drag.offsetWidth,x));
   y=Math.max(0,Math.min(window.innerHeight-drag.offsetHeight,y));
   drag.style.left=x+'px';drag.style.top=y+'px';drag.style.right='auto';drag.style.bottom='auto';
-});
-document.addEventListener('mouseup',()=>drag=null);
+}
+['hud-cond','hud-alerts','hud-radar'].forEach(id=>{
+  const head = document.getElementById(id+'-head');
+  if (!head) return;
 
-['cond','alerts'].forEach(id=>{
-  document.getElementById('hud-'+id+'-tog').addEventListener('click',()=>{
+  head.addEventListener('mousedown',e=>{
+    startHudDrag(id, e.clientX, e.clientY);
+    e.preventDefault();
+  });
+
+  head.addEventListener('touchstart',e=>{
+    if (!e.touches || !e.touches.length) return;
+    startHudDrag(id, e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive:true });
+});
+document.addEventListener('mousemove',e=>moveHudDrag(e.clientX,e.clientY));
+document.addEventListener('mouseup',()=>drag=null);
+document.addEventListener('touchmove',e=>{
+  if(!drag || !e.touches || !e.touches.length) return;
+  moveHudDrag(e.touches[0].clientX,e.touches[0].clientY);
+}, { passive:true });
+document.addEventListener('touchend',()=>drag=null);
+
+['cond','alerts','radar'].forEach(id=>{
+  document.getElementById('hud-'+id+'-tog').addEventListener('click',(e)=>{
+    e.stopPropagation();
     const card=document.getElementById('hud-'+id);
     card.classList.toggle('collapsed');
     document.getElementById('hud-'+id+'-tog').textContent=card.classList.contains('collapsed')?'▸':'▾';
@@ -2909,10 +4332,11 @@ const drawerClose = document.getElementById('drawer-close');
 if (drawerClose) {
   drawerClose.addEventListener('click', () => toggleToolsDrawer(false));
 }
+document.getElementById('river-panel-close')?.addEventListener('click', closeRiverGaugePanel);
 
 // ── RIGHT STACK ACCORDION ─────────────────────────────────────────────────────
 function openStackPanel(panelId) {
-  const panels = ['radar', 'citylayers', 'cam'];
+  const panels = ['citylayers', 'stations', 'rivergauges', 'cam'];
 
   panels.forEach(id => {
     const card = document.getElementById('hud-' + id);
@@ -2926,7 +4350,7 @@ function openStackPanel(panelId) {
   });
 }
 
-['radar','citylayers','cam'].forEach(id => {
+['citylayers','stations','rivergauges','cam'].forEach(id => {
   const head = document.getElementById('hud-' + id + '-head');
   const tog = document.getElementById('hud-' + id + '-tog');
 
@@ -2951,12 +4375,15 @@ setInterval(loadAlerts,60000);
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('selectVelStation',e=>{
   selectedVelStation=e.detail;
-  if(radarType!=='velocity'){setRadarType('velocity');}
-  else{applyAllRadarLayers();buildStationMarkers();buildStationLegend();updateRadarTime();}
+  stopReflectivityLoop(true, true);
+  if(radarType!=='velocity' && radarType!=='hclass'){setRadarType('velocity');}
+  else{applyAllRadarLayers();if(splitViewActive&&compareMap)buildCompareRadarLayer();buildStationMarkers();buildStationLegend();updateRadarTime();}
   map.closePopup();
 });
 
 loadRadar();
+loadLiveDopplerStations();
+setRiverGaugeButtonState();
 loadAlerts();
 loadConditions();
 buildSirens();
