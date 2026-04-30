@@ -291,6 +291,7 @@ body.split-view #right-map-label{
 .cam-mclose{font-family:var(--fm);font-size:11px;color:var(--text-dim);cursor:pointer;padding:3px 8px;border:1px solid var(--border);border-radius:3px;transition:all .15s}
 .cam-mclose:hover{color:var(--danger);border-color:var(--danger)}
 #cam-modal img{width:100%;border-radius:3px;border:1px solid var(--border);background:#000;display:block}
+#cam-modal iframe{width:100%;height:360px;border:1px solid var(--border);border-radius:3px;background:#000;display:none}
 .cam-mlink{display:block;margin-top:7px;font-family:var(--fm);font-size:9.5px;color:var(--accent);text-decoration:none;letter-spacing:.5px}
 .cam-mlink:hover{text-decoration:underline}
 .siren-dot{width:9px;height:9px;border-radius:50%;background:rgba(0,200,255,.55);border:1.5px solid var(--accent);box-shadow:0 0 5px rgba(0,200,255,.35)}
@@ -1037,7 +1038,7 @@ body.split-view .split-product-toggle{display:flex}
 .river-gauge-list{font-family:var(--fm);font-size:8.5px;color:var(--text-dim);line-height:1.45}
 .river-key-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 6px;margin-top:7px;border-top:1px solid var(--border);padding-top:7px}.river-key{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:8px;color:var(--text)}.river-key span:first-child{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.75)}
 .menu-toggle-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}.menu-toggle-btn{flex:1;font-family:var(--fm);font-size:8.5px;letter-spacing:.75px;padding:6px 7px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.05);color:var(--text-dim);cursor:pointer;text-align:center;text-transform:uppercase;transition:all .15s}.menu-toggle-btn:hover{border-color:var(--border-hi);color:var(--text)}.menu-toggle-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.12);box-shadow:0 0 8px rgba(0,200,255,.16)}.menu-toggle-btn.warn.on{border-color:var(--watch);color:var(--watch);background:rgba(255,234,0,.10)}.station-status{font-family:var(--fm);font-size:8.3px;color:var(--text-dim);line-height:1.45;margin:6px 0 7px;border-top:1px solid var(--border);padding-top:7px}
-#river-panel{display:none;position:fixed;right:18px;top:64px;bottom:20px;width:min(470px,calc(100vw - 36px));z-index:1600;background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:6px;box-shadow:0 0 28px rgba(0,0,0,.55),var(--glow);backdrop-filter:blur(18px);overflow:hidden}#river-panel.open{display:flex;flex-direction:column}.river-panel-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:rgba(0,170,240,.04)}.river-panel-title{font-family:var(--fm);font-size:10px;letter-spacing:1.7px;color:var(--accent);text-transform:uppercase;line-height:1.3}.river-panel-close{font-family:var(--fm);font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:pointer}.river-panel-close:hover{border-color:var(--danger);color:var(--danger)}.river-panel-meta{padding:8px 12px;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:8.5px;color:var(--text-dim);line-height:1.45}.river-panel-meta b{color:var(--text)}.river-panel-frame{flex:1;width:100%;border:0;background:#02060a}.river-panel-loading{font-family:var(--fm);font-size:10px;color:var(--text-dim);padding:14px;text-align:center;letter-spacing:1px}
+#river-panel{display:none;position:fixed;right:18px;top:64px;bottom:20px;width:min(470px,calc(100vw - 36px));z-index:1600;background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:6px;box-shadow:0 0 28px rgba(0,0,0,.55),var(--glow);backdrop-filter:blur(18px);overflow:hidden}#river-panel.open{display:flex;flex-direction:column}.river-panel-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:rgba(0,170,240,.04)}.river-panel-title{font-family:var(--fm);font-size:10px;letter-spacing:1.7px;color:var(--accent);text-transform:uppercase;line-height:1.3}.river-panel-close{font-family:var(--fm);font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:pointer}.river-panel-close:hover{border-color:var(--danger);color:var(--danger)}.river-panel-meta{padding:8px 12px;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:8.5px;color:var(--text-dim);line-height:1.45}.river-panel-meta b{color:var(--text)}.river-panel-loading{font-family:var(--fm);font-size:10px;color:var(--text-dim);padding:14px;text-align:center;letter-spacing:1px}.river-graph-wrap{position:relative;flex:1;min-height:0;padding:10px 12px 12px;background:#fff;color:#111;border-top:1px solid rgba(0,170,240,.12);overflow:auto}.river-graph-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-family:var(--fm);font-size:9px;color:#40515e}.river-graph-actions{display:flex;gap:6px;flex-wrap:wrap}.river-graph-btn{font-family:var(--fm);font-size:8.5px;letter-spacing:.7px;text-transform:uppercase;border:1px solid rgba(0,0,0,.16);background:#f7fbff;color:#21435b;border-radius:3px;padding:4px 7px;cursor:pointer}.river-graph-btn:hover{border-color:#00a6d6;color:#006b8e}.river-graph-svg{width:100%;height:430px;display:block;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:4px}.river-graph-note{margin-top:8px;font-family:var(--fm);font-size:8px;color:#6b7780;line-height:1.4}.river-graph-error{font-family:var(--fm);font-size:10px;color:#7a2430;background:#fff3f5;border:1px solid #ffd0d8;border-radius:4px;padding:10px;line-height:1.45}.river-graph-tooltip{position:fixed;display:none;pointer-events:none;z-index:2000;background:rgba(10,20,32,.94);color:#fff;border:1px solid rgba(0,200,255,.35);border-radius:4px;padding:6px 8px;font-family:var(--fm);font-size:9px;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.25)}@media (max-width:700px){#river-panel{right:10px;left:10px;top:58px;bottom:12px;width:auto}.river-panel-meta{font-size:8px;padding:7px 10px}.river-graph-wrap{padding:8px}.river-graph-svg{height:360px}}
 
 
 @media (max-width:760px), (pointer:coarse){
@@ -1237,11 +1238,13 @@ body.split-view .split-product-toggle{display:flex}
       <div class="cam-mclose" id="cam-mclose">✕ CLOSE</div>
     </div>
     <img id="cam-m-img" src="" alt="Camera feed">
+    <iframe id="cam-m-embed" title="Camera feed" loading="lazy" allowfullscreen></iframe>
+    <div id="cam-m-status" style="font-family:var(--fm);font-size:10px;color:var(--text-dim);line-height:1.45;margin-top:8px;display:none"></div>
     <a class="cam-mlink" id="cam-m-link" href="#" target="_blank">▶ OPEN IN TXDOT ITS →</a>
   </div>
 </div>
 
-<div id="river-panel" aria-hidden="true"><div class="river-panel-head"><div class="river-panel-title" id="river-panel-title">RIVER GAUGE</div><div class="river-panel-close" id="river-panel-close">CLOSE</div></div><div class="river-panel-meta" id="river-panel-meta">Select a gauge to load hydrograph data.</div><div class="river-panel-loading" id="river-panel-loading">LOADING HYDROGRAPH…</div><iframe class="river-panel-frame" id="river-panel-frame" title="NWPS hydrograph" loading="lazy"></iframe></div>
+<div id="river-panel" aria-hidden="true"><div class="river-panel-head"><div class="river-panel-title" id="river-panel-title">RIVER GAUGE</div><div class="river-panel-close" id="river-panel-close">CLOSE</div></div><div class="river-panel-meta" id="river-panel-meta">Select a gauge to load hydrograph data.</div><div class="river-panel-loading" id="river-panel-loading">LOADING GRAPH DATA…</div><div class="river-graph-wrap" id="river-graph-wrap"><div class="river-graph-top"><span id="river-graph-caption">Graph loads only after a gauge is selected.</span><div class="river-graph-actions"><button class="river-graph-btn" id="river-graph-refresh" type="button">REFRESH</button><button class="river-graph-btn" id="river-graph-full" type="button">FULL NWPS</button></div></div><div id="river-graph-content"></div><div class="river-graph-tooltip" id="river-graph-tooltip"></div><div class="river-graph-note">This panel uses the NWPS Application API and draws the graph directly, so it does not load the full water.noaa.gov gauge page.</div></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -1293,6 +1296,9 @@ let stationMarkerLayer = null;
 const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false, riverGauges:false };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 const NWPS_GAUGE_LAYER_URL = 'https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/0/query';
+const NWPS_API_BASE = 'https://api.water.noaa.gov/nwps/v1';
+let activeRiverGaugeProps = null;
+let riverGraphFetchController = null;
 
 // Recent radar history loop. Live radar remains default until LOOP is pressed.
 const REFLECTIVITY_LOOP_MINUTES = 35;
@@ -3008,24 +3014,159 @@ map.on('moveend zoomend',()=>{
   clearTimeout(riverGaugeReloadTimer);
   riverGaugeReloadTimer=setTimeout(loadRiverGaugeLayer,650);
 });
+
+function riverNumber(v){
+  if(v===null||v===undefined||v==='') return null;
+  const n=Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+function riverTime(v){
+  if(!v) return null;
+  const t=new Date(v).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+function riverFmtTime(t){
+  try{return new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return '';}
+}
+function riverPickSeries(stageFlow, productName){
+  const wanted=String(productName||'').toLowerCase();
+  const roots=[];
+  if(stageFlow && typeof stageFlow==='object'){
+    if(stageFlow[wanted]) roots.push(stageFlow[wanted]);
+    if(stageFlow.data && stageFlow.data[wanted]) roots.push(stageFlow.data[wanted]);
+    roots.push(stageFlow);
+  }
+  for(const root of roots){
+    if(!root || typeof root!=='object') continue;
+    const candidates=[root.data,root.values,root.datums,root.series,root.points,root.timeSeries,root];
+    for(const c of candidates){
+      if(Array.isArray(c)) return c;
+      if(c && typeof c==='object'){
+        for(const key of Object.keys(c)) if(Array.isArray(c[key])) return c[key];
+      }
+    }
+  }
+  return [];
+}
+function riverNormalizePoints(items){
+  return (items||[]).map(d=>{
+    const t=riverTime(d.validTime||d.valid_time||d.time||d.dateTime||d.datetime||d.obstime||d.timestamp);
+    let y=riverNumber(d.primary);
+    if(y===null) y=riverNumber(d.stage);
+    if(y===null) y=riverNumber(d.value);
+    if(y===null) y=riverNumber(d.secondary);
+    return t!==null && y!==null ? {t,y,raw:d} : null;
+  }).filter(Boolean).sort((a,b)=>a.t-b.t);
+}
+function riverBuildThresholds(props, gaugeMeta){
+  const cats=[];
+  const src=(gaugeMeta && gaugeMeta.flood && gaugeMeta.flood.categories) || {};
+  const add=(propKey,apiKey,label,color)=>{
+    let v=riverNumber(props && props[propKey]);
+    if(v===null && src[apiKey]) v=riverNumber(src[apiKey].stage);
+    if(v!==null) cats.push({label,value:v,color});
+  };
+  add('action','action','Action','#d5bd00');
+  add('flood','minor','Minor','#ff9900');
+  add('moderate','moderate','Moderate','#ff3333');
+  add('major','major','Major','#cc33ff');
+  return cats;
+}
+function riverRenderGraph(props, stageFlow, gaugeMeta){
+  const content=document.getElementById('river-graph-content');
+  const caption=document.getElementById('river-graph-caption');
+  const tip=document.getElementById('river-graph-tooltip');
+  if(!content) return;
+  const observed=riverNormalizePoints(riverPickSeries(stageFlow,'observed'));
+  const forecast=riverNormalizePoints(riverPickSeries(stageFlow,'forecast'));
+  const all=[...observed,...forecast];
+  if(!all.length){
+    content.innerHTML='<div class="river-graph-error">NWPS returned gauge data, but no observed/forecast stage-flow points were available for this location.</div>';
+    if(caption) caption.textContent='No graph points available';
+    return;
+  }
+  const thresholds=riverBuildThresholds(props,gaugeMeta);
+  const w=920,h=430,pad={l:54,r:18,t:26,b:48};
+  const xs=all.map(p=>p.t), ys=all.map(p=>p.y).concat(thresholds.map(t=>t.value));
+  let minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+  if(minX===maxX){minX-=3600000;maxX+=3600000;}
+  if(minY===maxY){minY-=1;maxY+=1;}
+  const yPad=Math.max((maxY-minY)*0.12,0.5); minY-=yPad; maxY+=yPad;
+  const x=p=>pad.l+(p.t-minX)/(maxX-minX)*(w-pad.l-pad.r);
+  const y=p=>pad.t+(maxY-p.y)/(maxY-minY)*(h-pad.t-pad.b);
+  const yVal=v=>pad.t+(maxY-v)/(maxY-minY)*(h-pad.t-pad.b);
+  const line=pts=>pts.map((p,i)=>(i?'L':'M')+x(p).toFixed(1)+' '+y(p).toFixed(1)).join(' ');
+  const grid=[];
+  for(let i=0;i<=5;i++){
+    const yy=pad.t+i/5*(h-pad.t-pad.b);
+    const val=maxY-i/5*(maxY-minY);
+    grid.push('<line x1="'+pad.l+'" y1="'+yy+'" x2="'+(w-pad.r)+'" y2="'+yy+'" stroke="rgba(0,0,0,.10)"/>');
+    grid.push('<text x="'+(pad.l-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="#52606a">'+val.toFixed(1)+'</text>');
+  }
+  for(let i=0;i<=4;i++){
+    const xx=pad.l+i/4*(w-pad.l-pad.r);
+    const tt=minX+i/4*(maxX-minX);
+    grid.push('<line x1="'+xx+'" y1="'+pad.t+'" x2="'+xx+'" y2="'+(h-pad.b)+'" stroke="rgba(0,0,0,.06)"/>');
+    grid.push('<text x="'+xx+'" y="'+(h-18)+'" text-anchor="middle" font-size="10" fill="#52606a">'+riverFmtTime(tt)+'</text>');
+  }
+  const thresh=thresholds.map(t=>'<g><line x1="'+pad.l+'" y1="'+yVal(t.value)+'" x2="'+(w-pad.r)+'" y2="'+yVal(t.value)+'" stroke="'+t.color+'" stroke-width="1.3" stroke-dasharray="5 4"/><text x="'+(pad.l+6)+'" y="'+(yVal(t.value)-4)+'" font-size="10" fill="#111">'+t.label+': '+t.value+' ft</text></g>').join('');
+  const obsPath=observed.length>1?'<path d="'+line(observed)+'" fill="none" stroke="#2056a7" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>':'';
+  const fcstPath=forecast.length>1?'<path d="'+line(forecast)+'" fill="none" stroke="#7ecdf4" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 4"/>':'';
+  const dots=all.map((p,i)=>'<circle class="river-dot" data-i="'+i+'" data-t="'+riverFmtTime(p.t)+'" data-y="'+p.y.toFixed(2)+'" cx="'+x(p).toFixed(1)+'" cy="'+y(p).toFixed(1)+'" r="3" fill="'+(i<observed.length?'#2056a7':'#7ecdf4')+'" opacity=".85"/>').join('');
+  const last=all[all.length-1];
+  content.innerHTML='<svg class="river-graph-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="River hydrograph"><rect x="0" y="0" width="'+w+'" height="'+h+'" fill="#fff"/>'+grid.join('')+thresh+'<text x="14" y="22" font-size="12" fill="#111" font-weight="700">Stage (ft)</text><text x="'+(w-18)+'" y="22" text-anchor="end" font-size="12" fill="#52606a">Observed solid · Forecast dashed</text>'+obsPath+fcstPath+dots+'</svg>';
+  if(caption) caption.textContent='Latest plotted value: '+last.y.toFixed(2)+' ft · '+riverFmtTime(last.t);
+  content.querySelectorAll('.river-dot').forEach(dot=>{
+    dot.addEventListener('mousemove',e=>{ if(!tip)return; tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px'; tip.innerHTML=dot.dataset.t+'<br>'+dot.dataset.y+' ft'; });
+    dot.addEventListener('mouseleave',()=>{ if(tip) tip.style.display='none'; });
+  });
+}
+async function loadRiverGaugeGraph(props){
+  const loading=document.getElementById('river-panel-loading');
+  const content=document.getElementById('river-graph-content');
+  const caption=document.getElementById('river-graph-caption');
+  const id=props && props.gaugelid;
+  if(!id||!content) return;
+  if(riverGraphFetchController) riverGraphFetchController.abort();
+  riverGraphFetchController=new AbortController();
+  if(loading) loading.style.display='block';
+  if(caption) caption.textContent='Loading NWPS graph data…';
+  content.innerHTML='';
+  try{
+    const [metaRes, sfRes]=await Promise.all([
+      fetch(NWPS_API_BASE+'/gauges/'+encodeURIComponent(id),{cache:'no-store',signal:riverGraphFetchController.signal}),
+      fetch(NWPS_API_BASE+'/gauges/'+encodeURIComponent(id)+'/stageflow',{cache:'no-store',signal:riverGraphFetchController.signal})
+    ]);
+    if(!sfRes.ok) throw new Error('NWPS stageflow request failed');
+    const gaugeMeta=metaRes.ok ? await metaRes.json() : null;
+    const stageFlow=await sfRes.json();
+    if(loading) loading.style.display='none';
+    riverRenderGraph(props, stageFlow, gaugeMeta);
+  }catch(err){
+    if(err.name==='AbortError') return;
+    console.warn('River graph load failed:',err);
+    if(loading) loading.style.display='none';
+    if(caption) caption.textContent='Graph data unavailable';
+    content.innerHTML='<div class="river-graph-error">I could not load the graph-only NWPS API data for this gauge. Use the FULL NWPS button to open the official page.</div>';
+  }
+}
 function openRiverGaugePanel(props){
-  const panel=document.getElementById('river-panel'),title=document.getElementById('river-panel-title'),meta=document.getElementById('river-panel-meta'),frame=document.getElementById('river-panel-frame'),loading=document.getElementById('river-panel-loading');
-  if(!panel||!frame)return;
+  activeRiverGaugeProps=props||null;
+  const panel=document.getElementById('river-panel'),title=document.getElementById('river-panel-title'),meta=document.getElementById('river-panel-meta');
+  if(!panel)return;
   const id=props.gaugelid||'';
-  const hydroUrl=props.url||(id?'https://water.noaa.gov/gauges/'+encodeURIComponent(id):'https://water.noaa.gov/');
   if(title)title.textContent=id?'GAUGE '+id:'RIVER GAUGE';
-  if(meta)meta.innerHTML='<b>Location:</b> '+(props.location||'—')+'<br><b>Waterbody:</b> '+(props.waterbody||'—')+'<br><b>Status:</b> '+riverGaugeLabel(props.status)+' · <b>Observed:</b> '+(props.observed||'—')+' '+(props.units||'')+'<br><span style="color:rgba(160,200,225,.45)">Hydrograph data is fetched only now, after the node was selected.</span>';
-  if(loading)loading.style.display='block';
-  frame.style.display='none';
-  frame.src='about:blank';
+  if(meta)meta.innerHTML='<b>Location:</b> '+(props.location||'—')+'<br><b>Waterbody:</b> '+(props.waterbody||'—')+'<br><b>Status:</b> '+riverGaugeLabel(props.status)+' · <b>Observed:</b> '+(props.observed||'—')+' '+(props.units||'')+'<br><span style="color:rgba(160,200,225,.45)">Graph-only mode: this does not iframe the full NWPS page.</span>';
   panel.classList.add('open');
   panel.setAttribute('aria-hidden','false');
-  frame.onload=()=>{if(loading)loading.style.display='none';frame.style.display='block';};
-  setTimeout(()=>{frame.src=hydroUrl;},50);
+  loadRiverGaugeGraph(props);
 }
 function closeRiverGaugePanel(){
-  const panel=document.getElementById('river-panel'),frame=document.getElementById('river-panel-frame');
-  if(frame)frame.src='about:blank';
+  const panel=document.getElementById('river-panel'),content=document.getElementById('river-graph-content'),loading=document.getElementById('river-panel-loading');
+  if(riverGraphFetchController) riverGraphFetchController.abort();
+  activeRiverGaugeProps=null;
+  if(content) content.innerHTML='';
+  if(loading) loading.style.display='none';
   if(panel){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');}
 }
 window.openRiverGaugeFromPopup=function(gaugeId){
@@ -3784,6 +3925,22 @@ function buildSirens() {
 
 // ── CAMERAS ───────────────────────────────────────────────────────────────────
 const CAMERAS=[
+  // TxDOT/ITS test camera requested by Alex.
+  // HAR-confirmed snapshot request:
+  // /its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH35E%20@%20Swisher%20North&districtCode=DAL1
+  {
+    id:'txdot-swisher-north',
+    name:'IH35E @ Swisher North',
+    lat:33.1289,
+    lon:-97.0397,
+    dist:'DAL1',
+    road:'IH35E',
+    icdId:'IH35E @ Swisher North',
+    districtCode:'DAL1',
+    txdotPage:'https://its.txdot.gov/its/District/DAL/cameras',
+    note:'Live TxDOT snapshot loaded from GetCctvSnapshotByIcdId using icdId + districtCode from the HAR.'
+  },
+
   {id:'1001',name:'US-75 @ SH-121',lat:33.123,lon:-96.689,dist:'DAL',road:'US-75'},
   {id:'1002',name:'DNT @ Lebanon',lat:33.165,lon:-96.852,dist:'DAL',road:'DNT'},
   {id:'1003',name:'DNT @ Main St',lat:33.151,lon:-96.824,dist:'DAL',road:'DNT'},
@@ -3794,6 +3951,62 @@ const CAMERAS=[
   {id:'1008',name:'SH-289 @ University',lat:33.151,lon:-96.855,dist:'DAL',road:'SH-289'},
 ];
 
+
+const TXDOT_SNAPSHOT_ENDPOINT = 'https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId';
+// Optional: if TxDOT blocks cross-origin browser fetches, set this to your own Apps Script / server proxy URL.
+// The proxy should accept a url query parameter and return the TxDOT JSON response unchanged.
+const TXDOT_PROXY_URL = '';
+
+function txdotSnapshotUrl(cam) {
+  const params = new URLSearchParams({
+    icdId: cam.icdId || cam.name,
+    districtCode: cam.districtCode || cam.dist || 'DAL'
+  });
+  return TXDOT_SNAPSHOT_ENDPOINT + '?' + params.toString();
+}
+
+function extractBase64ImageFromTxdotPayload(payload) {
+  if (!payload) return '';
+  if (typeof payload === 'string') {
+    const trimmed = payload.trim();
+    if (trimmed.startsWith('data:image')) return trimmed;
+    if (/^\/?9j\//.test(trimmed) || trimmed.length > 1000) return 'data:image/jpeg;base64,' + trimmed;
+    return '';
+  }
+  const likelyKeys = ['snippet', 'image', 'imageData', 'snapshot', 'base64', 'data', 'content', 'value'];
+  for (const key of likelyKeys) {
+    if (payload[key]) {
+      const found = extractBase64ImageFromTxdotPayload(payload[key]);
+      if (found) return found;
+    }
+  }
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      const found = extractBase64ImageFromTxdotPayload(item);
+      if (found) return found;
+    }
+  } else if (typeof payload === 'object') {
+    for (const value of Object.values(payload)) {
+      const found = extractBase64ImageFromTxdotPayload(value);
+      if (found) return found;
+    }
+  }
+  return '';
+}
+
+async function fetchTxdotSnapshot(cam) {
+  const directUrl = txdotSnapshotUrl(cam);
+  const requestUrl = TXDOT_PROXY_URL
+    ? TXDOT_PROXY_URL + (TXDOT_PROXY_URL.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(directUrl)
+    : directUrl;
+  const res = await fetch(requestUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+  if (!res.ok) throw new Error('TxDOT snapshot request failed: ' + res.status);
+  const payload = await res.json();
+  const imageSrc = extractBase64ImageFromTxdotPayload(payload);
+  if (!imageSrc) throw new Error('TxDOT response did not contain a recognizable base64 JPEG field.');
+  return imageSrc;
+}
+
 function buildCameras() {
   camMarkerLayer=L.layerGroup();
   const list=document.getElementById('cam-list');
@@ -3801,25 +4014,67 @@ function buildCameras() {
   CAMERAS.forEach(cam=>{
     const item=document.createElement('div');
     item.className='cam-item';
-    item.innerHTML=`<div><div class="cam-name">${cam.name}</div><div class="cam-dist">${cam.dist} · ${cam.road}</div></div><img class="cam-thumb" src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" onerror="this.style.display='none'" alt="">`;
+    const thumbHtml = cam.icdId
+      ? `<div class="cam-thumb" style="display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:8px;color:var(--accent);text-align:center">TXDOT</div>`
+      : `<img class="cam-thumb" src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" onerror="this.style.display='none'" alt="">`;
+
+    item.innerHTML=`<div><div class="cam-name">${cam.name}</div><div class="cam-dist">${cam.dist} · ${cam.road}</div></div>${thumbHtml}`;
     item.addEventListener('click',()=>openCam(cam));
     list.appendChild(item);
+
+    const popupMedia = cam.icdId
+      ? `<div style="margin-top:6px;font-size:10px;color:#b8d4e8;line-height:1.35">Click this marker or the camera card to request the live TxDOT snapshot.</div>`
+      : `<img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" style="width:180px;margin-top:6px;border-radius:2px" onerror="this.style.display='none'">`;
+
     const marker=L.marker([cam.lat,cam.lon],{icon:L.divIcon({className:'',html:'<div style="width:11px;height:11px;background:rgba(0,230,118,.65);border:1.5px solid #00e676;border-radius:2px;box-shadow:0 0 5px rgba(0,230,118,.35)"></div>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
-      .bindPopup(`<b style="color:#00e676">${cam.name}</b><br><span style="font-size:10px;color:var(--text-dim)">${cam.dist}</span><br><img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" style="width:180px;margin-top:6px;border-radius:2px" onerror="this.style.display='none'"><br><a href="https://its.txdot.gov/its/District/${cam.dist}" target="_blank" style="color:var(--accent);font-size:10px">Open ITS →</a>`);
+      .bindPopup('<b style="color:#00e676">'+cam.name+'</b><br><span style="font-size:10px;color:var(--text-dim)">'+cam.dist+' · '+cam.road+'</span>'+popupMedia+'<br><a href="'+(cam.txdotPage || 'https://its.txdot.gov/its/District/DAL/cameras')+'" target="_blank" style="color:var(--accent);font-size:10px">Open TxDOT ITS →</a>');
+    marker.on('click',()=>openCam(cam));
     camMarkerLayer.addLayer(marker);
   });
   if(layersOn.cameras)camMarkerLayer.addTo(map);
 }
 
-function openCam(cam) {
+async function openCam(cam) {
+  const img = document.getElementById('cam-m-img');
+  const embed = document.getElementById('cam-m-embed');
+  const link = document.getElementById('cam-m-link');
+  const status = document.getElementById('cam-m-status');
+
   document.getElementById('cam-m-name').textContent=cam.name;
-  document.getElementById('cam-m-img').src=`https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg?t=${Date.now()}`;
-  document.getElementById('cam-m-link').href=`https://its.txdot.gov/its/District/${cam.dist}`;
+  img.style.display='none';
+  embed.style.display='none';
+  status.style.display='block';
+  status.textContent='LOADING TXDOT SNAPSHOT…';
+  img.src='';
+  embed.src='';
+  link.textContent='▶ OPEN IN TXDOT ITS →';
+  link.href=cam.txdotPage || 'https://its.txdot.gov/its/District/DAL/cameras';
   document.getElementById('cam-modal').classList.add('open');
+
+  if (cam.icdId) {
+    try {
+      const imageSrc = await fetchTxdotSnapshot(cam);
+      img.src = imageSrc;
+      img.style.display = 'block';
+      status.style.display = 'none';
+    } catch (err) {
+      status.innerHTML = 'Snapshot request is wired to TxDOT, but the browser could not display it.<br><br><span style="color:var(--accent)">Likely cause:</span> TxDOT allows this XHR from its own site, but may block cross-origin browser fetches from this map. Use the optional TXDOT_PROXY_URL constant if needed.<br><br><span style="color:var(--text-hi)">Endpoint:</span><br>' + txdotSnapshotUrl(cam);
+      console.warn('TxDOT snapshot error', err);
+    }
+    return;
+  }
+
+  img.src='https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/' + cam.id + '.jpg?t=' + Date.now();
+  img.style.display='block';
+  status.style.display='none';
 }
 function closeCam() {
   document.getElementById('cam-modal').classList.remove('open');
   document.getElementById('cam-m-img').src='';
+  const embed = document.getElementById('cam-m-embed');
+  if (embed) embed.src='';
+  const status = document.getElementById('cam-m-status');
+  if (status) { status.style.display='none'; status.textContent=''; }
 }
 document.getElementById('cam-mclose').addEventListener('click',closeCam);
 document.getElementById('cam-modal').addEventListener('click',e=>{if(e.target===document.getElementById('cam-modal'))closeCam();});
@@ -4333,6 +4588,8 @@ if (drawerClose) {
   drawerClose.addEventListener('click', () => toggleToolsDrawer(false));
 }
 document.getElementById('river-panel-close')?.addEventListener('click', closeRiverGaugePanel);
+document.getElementById('river-graph-refresh')?.addEventListener('click',()=>{ if(activeRiverGaugeProps) loadRiverGaugeGraph(activeRiverGaugeProps); });
+document.getElementById('river-graph-full')?.addEventListener('click',()=>{ const id=activeRiverGaugeProps&&activeRiverGaugeProps.gaugelid; const url=(activeRiverGaugeProps&&activeRiverGaugeProps.url)||(id?'https://water.noaa.gov/gauges/'+encodeURIComponent(id):'https://water.noaa.gov/'); window.open(url,'_blank','noopener'); });
 
 // ── RIGHT STACK ACCORDION ─────────────────────────────────────────────────────
 function openStackPanel(panelId) {
