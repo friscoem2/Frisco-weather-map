@@ -1067,6 +1067,88 @@ body.split-view .split-product-toggle{display:flex}
 @media (max-width:480px){#topbar{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:34px 34px;min-height:80px}.logo{display:none!important}.city-search{grid-column:1;grid-row:1}.top-refresh{grid-column:2;grid-row:1}.layer-btns{grid-column:1/-1;grid-row:2}.city-search input{font-size:9.5px}.city-search button{font-size:8px;padding:0 8px}#hud-alerts{top:88px!important;left:8px!important;right:8px!important;width:auto!important;max-width:none!important}#hud-radar{left:8px!important;right:8px!important;width:auto!important;max-width:none!important;bottom:58px!important}}
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){#topbar{display:grid;grid-template-columns:auto minmax(190px,1fr) auto;grid-template-rows:38px;min-height:44px;padding:5px 8px}.logo{display:block!important;grid-column:1;grid-row:1;font-size:12px}.city-search{grid-column:2;grid-row:1;width:100%}.top-refresh{grid-column:3;grid-row:1}.layer-btns{grid-column:1/-1;grid-row:2;display:none!important}#map{top:44px!important}body.split-view #map{top:44px!important;height:calc(100% - 44px)!important;width:50%}body.split-view #compare-map{top:44px!important;height:calc(100% - 44px)!important;width:50%}.split-label{top:52px!important}#hud-alerts,#alert-poly-loader{top:52px!important}}
 
+
+
+/* DEVICE LOCATION BUTTON + LIVE LOCATION MARKER */
+.locate-btn{
+  position:fixed;
+  right:14px;
+  bottom:84px;
+  z-index:1450;
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  border:1px solid var(--border-hi);
+  background:rgba(5,10,18,.90);
+  color:var(--accent);
+  font-family:var(--fm);
+  font-size:20px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 0 18px rgba(0,200,255,.22),0 0 20px rgba(0,0,0,.45);
+  backdrop-filter:blur(14px);
+  -webkit-tap-highlight-color:transparent;
+}
+.locate-btn:hover{background:rgba(0,200,255,.12)}
+.locate-btn.tracking{color:var(--safe);border-color:var(--safe);box-shadow:0 0 16px rgba(0,230,118,.35),0 0 20px rgba(0,0,0,.45)}
+.locate-btn.error{color:var(--danger);border-color:var(--danger);box-shadow:0 0 16px rgba(255,23,68,.35),0 0 20px rgba(0,0,0,.45)}
+.locate-dot{position:relative;width:16px;height:16px;border-radius:50%;background:var(--safe);border:2px solid #eafff4;box-shadow:0 0 0 6px rgba(0,230,118,.16),0 0 18px rgba(0,230,118,.75)}
+.locate-dot:after{content:'';position:absolute;left:50%;top:50%;width:34px;height:34px;margin-left:-17px;margin-top:-17px;border-radius:50%;border:1px solid rgba(0,230,118,.55);animation:locPulse 1.8s ease-out infinite}
+@keyframes locPulse{0%{transform:scale(.45);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+.location-popup{font-family:var(--fm);font-size:10px;line-height:1.45;color:var(--text)}
+.location-popup b{color:var(--safe);font-weight:600}.location-popup span{color:var(--text-dim)}
+@media (max-width:760px), (pointer:coarse){.locate-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:42px;height:42px;font-size:19px}}
+@media (max-width:480px){.locate-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:40px;height:40px}}
+
+
+/* MOBILE SPACE OPTIMIZATION PATCH */
+@media (max-width:760px), (pointer:coarse){
+  #topbar{grid-template-rows:30px 30px!important;min-height:70px!important;padding:5px 8px!important;gap:5px!important;background:linear-gradient(180deg,rgba(5,10,18,.98) 0%,rgba(5,10,18,.66) 100%)!important;}
+  .city-search input{height:30px!important;font-size:9.5px!important;padding:0 7px!important;}
+  .city-search button,.top-refresh-btn{height:30px!important;padding:0 8px!important;}
+  .lbtn{min-height:28px!important;padding:5px 9px!important;font-size:8px!important;}
+  #map{top:72px!important;}
+  body.split-view #map{top:72px!important;height:calc(50% - 36px)!important;}
+  .hud{border-radius:6px!important;background:rgba(5,10,18,.88)!important;backdrop-filter:blur(14px)!important;}
+  .hud-head{padding:7px 9px!important;min-height:34px!important;}
+  .hud-title{font-size:8px!important;letter-spacing:1.9px!important;}
+  .hud-tog{font-size:10px!important;padding:3px 6px!important;background:rgba(0,170,240,.08);}
+  #hud-alerts{top:80px!important;left:8px!important;right:8px!important;width:auto!important;max-width:none!important;min-width:0!important;max-height:30vh!important;overflow:hidden!important;}
+  #hud-alerts .hud-body{padding:7px 8px!important;max-height:calc(30vh - 36px)!important;overflow-y:auto!important;}
+  #hud-alerts .al-item{padding:6px 7px!important;margin-bottom:5px!important;}
+  #hud-alerts .al-event{font-size:8.5px!important;letter-spacing:1.1px!important;}
+  #hud-alerts .al-head{font-size:9px!important;line-height:1.25!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;}
+  #hud-alerts .al-exp{font-size:7.5px!important;margin-top:4px!important;}
+  #hud-alerts .al-toggle-hint{display:none!important;}
+  #hud-alerts .al-item.expanded{max-height:calc(30vh - 54px)!important;overflow-y:auto!important;}
+  #hud-alerts .al-description{max-height:90px!important;}
+  #hud-radar{left:8px!important;right:8px!important;bottom:12px!important;width:auto!important;min-width:0!important;max-width:none!important;max-height:32vh!important;overflow:hidden!important;}
+  #hud-radar .hud-body{padding:7px 8px!important;max-height:calc(32vh - 36px)!important;overflow-y:auto!important;}
+  #hud-radar.collapsed{max-height:36px!important;box-shadow:0 0 14px rgba(0,200,255,.18)!important;}
+  #hud-radar.collapsed .hud-body{display:none!important;}
+  #hud-radar .rtype-row.products{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;margin-bottom:7px!important;}
+  #hud-radar .rtype-btn{font-size:7.2px!important;letter-spacing:.75px!important;padding:6px 2px!important;min-height:28px!important;}
+  #hud-radar .timeline-row{gap:6px!important;margin-bottom:5px!important;}
+  #hud-radar .play-btn{font-size:8px!important;padding:5px 8px!important;}
+  #hud-radar .tlabel{font-size:8px!important;}
+  #hud-radar .radar-status{font-size:7.8px!important;}
+  #alert-poly-loader{top:76px!important;}
+  .split-label{top:80px!important;}
+  #right-map-label{top:calc(50% + 8px)!important;}
+}
+@media (max-width:480px){
+  #topbar{grid-template-rows:30px 29px!important;min-height:68px!important;}
+  #map{top:70px!important;}
+  .city-search input::placeholder{font-size:8.5px!important;}
+  #hud-alerts{top:78px!important;max-height:28vh!important;}
+  #hud-alerts .hud-body{max-height:calc(28vh - 36px)!important;}
+  #hud-radar{bottom:10px!important;max-height:30vh!important;}
+  #hud-radar .hud-body{max-height:calc(30vh - 36px)!important;}
+}
+
 </style>
 </head>
 <body class="drawer-mode">
@@ -1104,6 +1186,8 @@ body.split-view .split-product-toggle{display:flex}
   <div class="top-refresh"><button class="top-refresh-btn" id="top-refresh-btn">↻ REFRESH</button><span class="last-refresh" id="last-refresh">LAST —</span></div>
   <div id="clock">--:--:-- CDT</div>
 </div>
+
+<button class="locate-btn" id="locate-me-btn" type="button" title="Locate me" aria-label="Locate me" aria-pressed="false">⌖</button>
 
 <div class="hud" id="hud-cond">
   <div class="hud-head" id="hud-cond-head">
@@ -2268,6 +2352,97 @@ function refitMapToCityLimitLayer(layer,animate){
 }
 async function searchCityBoundaryAndTower(raw){const parsed=parseCityStateSearch(raw);if(!parsed||!parsed.city||!parsed.state){setCitySearchStatus('USE CITY, ST','err');return;}if(citySearchController)citySearchController.abort();citySearchController=new AbortController();setCitySearchStatus('SEARCHING…');try{const data=await fetchCityBoundary(parsed.city,parsed.state,citySearchController.signal);const layer=replaceCityLimitBoundary(data,parsed.city,parsed.state);updateSelectedCityContext(parsed.city,parsed.state,layer);selectNearestTowerForCity(layer);refitMapToCityLimitLayer(layer,true);setTimeout(()=>refitMapToCityLimitLayer(layer,true),180);setTimeout(()=>refitMapToCityLimitLayer(layer,false),520);}catch(err){if(err.name==='AbortError')return;console.warn('City search failed:',err);setCitySearchStatus(err.message||'NOT FOUND','err');}}
 function initCitySearch(){const form=document.getElementById('city-search-form');const input=document.getElementById('city-search-input');if(!form||!input)return;form.addEventListener('submit',e=>{e.preventDefault();searchCityBoundaryAndTower(input.value);});}
+
+
+// ── DEVICE LOCATION / REAL-TIME TRACKING ─────────────────────────────────────
+let userLocationMarker = null;
+let userAccuracyCircle = null;
+let userLocationWatchId = null;
+let userLocationFirstFix = true;
+let userLocationLast = null;
+
+function setLocateButtonState(state, title){
+  const btn = document.getElementById('locate-me-btn');
+  if(!btn) return;
+  btn.classList.toggle('tracking', state === 'tracking');
+  btn.classList.toggle('error', state === 'error');
+  btn.setAttribute('aria-pressed', state === 'tracking' ? 'true' : 'false');
+  btn.title = title || (state === 'tracking' ? 'Tracking your location' : 'Locate me');
+}
+function formatCoord(n){return Number.isFinite(n) ? n.toFixed(5) : '—';}
+function formatLocationTime(ts){try{return new Date(ts || Date.now()).toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});}catch(e){return 'now';}}
+function buildLocationPopup(pos){
+  const c = pos.coords || {};
+  const acc = Number.isFinite(c.accuracy) ? Math.round(c.accuracy) + ' m' : '—';
+  const speed = Number.isFinite(c.speed) && c.speed !== null ? (c.speed * 2.23694).toFixed(1) + ' mph' : '—';
+  const heading = Number.isFinite(c.heading) && c.heading !== null ? Math.round(c.heading) + '°' : '—';
+  return '<div class="location-popup"><b>LIVE DEVICE LOCATION</b><br>' +
+    '<span>Lat/Lon:</span> ' + formatCoord(c.latitude) + ', ' + formatCoord(c.longitude) + '<br>' +
+    '<span>Accuracy:</span> ' + acc + '<br>' +
+    '<span>Speed:</span> ' + speed + ' &nbsp; <span>Heading:</span> ' + heading + '<br>' +
+    '<span>Updated:</span> ' + formatLocationTime(pos.timestamp) + '</div>';
+}
+function updateUserLocationOnMap(pos){
+  if(!pos || !pos.coords) return;
+  const lat = pos.coords.latitude, lng = pos.coords.longitude;
+  if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+  const latlng = [lat, lng];
+  const popupHtml = buildLocationPopup(pos);
+  userLocationLast = pos;
+  if(!userLocationMarker){
+    userLocationMarker = L.marker(latlng, {zIndexOffset:2200, icon:L.divIcon({className:'', html:'<div class="locate-dot"></div>', iconSize:[18,18], iconAnchor:[9,9]})}).addTo(map);
+    userLocationMarker.bindPopup(popupHtml);
+  } else {
+    userLocationMarker.setLatLng(latlng);
+    userLocationMarker.setPopupContent(popupHtml);
+  }
+  const accuracy = Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : 0;
+  if(!userAccuracyCircle){
+    userAccuracyCircle = L.circle(latlng, {radius:Math.max(accuracy,10), color:'rgba(0,230,118,.75)', weight:1, fillColor:'rgba(0,230,118,.14)', fillOpacity:1, interactive:false}).addTo(map);
+  } else {
+    userAccuracyCircle.setLatLng(latlng);
+    userAccuracyCircle.setRadius(Math.max(accuracy,10));
+  }
+  if(userLocationFirstFix){
+    userLocationFirstFix = false;
+    map.setView(latlng, Math.max(map.getZoom(), 13), {animate:true});
+    setTimeout(() => { try{ userLocationMarker.openPopup(); }catch(e){} }, 350);
+  }
+}
+function handleUserLocationError(err){
+  console.warn('Location error:', err);
+  stopDeviceLocationTracking(false);
+  let msg = 'Location unavailable';
+  if(err && err.code === 1) msg = 'Location permission denied';
+  if(err && err.code === 2) msg = 'Device position unavailable';
+  if(err && err.code === 3) msg = 'Location request timed out';
+  setLocateButtonState('error', msg);
+  setTimeout(() => setLocateButtonState('idle'), 2500);
+}
+function startDeviceLocationTracking(){
+  if(!navigator.geolocation){setLocateButtonState('error','Geolocation is not supported');setTimeout(()=>setLocateButtonState('idle'),2500);return;}
+  userLocationFirstFix = true;
+  setLocateButtonState('tracking','Finding your location…');
+  userLocationWatchId = navigator.geolocation.watchPosition(updateUserLocationOnMap, handleUserLocationError, {enableHighAccuracy:true, maximumAge:3000, timeout:15000});
+}
+function stopDeviceLocationTracking(clearLayers){
+  if(userLocationWatchId !== null){navigator.geolocation.clearWatch(userLocationWatchId);userLocationWatchId = null;}
+  if(clearLayers){
+    if(userLocationMarker){try{map.removeLayer(userLocationMarker);}catch(e){} userLocationMarker = null;}
+    if(userAccuracyCircle){try{map.removeLayer(userAccuracyCircle);}catch(e){} userAccuracyCircle = null;}
+    userLocationLast = null;
+  }
+  setLocateButtonState('idle');
+}
+function toggleDeviceLocationTracking(){
+  if(userLocationWatchId !== null) stopDeviceLocationTracking(true);
+  else startDeviceLocationTracking();
+}
+function initLocateMeControl(){
+  const btn = document.getElementById('locate-me-btn');
+  if(!btn) return;
+  btn.addEventListener('click', toggleDeviceLocationTracking);
+}
 
 // ── FRISCO BOUNDARY ───────────────────────────────────────────────────────────
 async function loadFriscoBoundary() {
@@ -4484,7 +4659,30 @@ document.addEventListener('selectVelStation',e=>{
   map.closePopup();
 });
 
+
+
+// Mobile space optimization: start secondary controls collapsed on phones.
+function applyMobileSpaceOptimization(){
+  const isMobile = window.matchMedia('(max-width:760px), (pointer:coarse)').matches;
+  const setCollapsed = (id, collapsed) => {
+    const card = document.getElementById('hud-' + id);
+    const tog = document.getElementById('hud-' + id + '-tog');
+    if (!card || !tog) return;
+    card.classList.toggle('collapsed', collapsed);
+    tog.textContent = collapsed ? '▸' : '▾';
+  };
+  if (isMobile) {
+    setCollapsed('radar', true);
+    setCollapsed('cond', true);
+  } else {
+    setCollapsed('radar', false);
+  }
+  setTimeout(() => { try { map.invalidateSize(); } catch(e) {} }, 150);
+}
+window.addEventListener('resize', applyMobileSpaceOptimization);
+
 initCitySearch();
+initLocateMeControl();
 setConditionsTitle(selectedCityContext.city, selectedCityContext.state);
 loadRadar();
 loadLiveDopplerStations();
@@ -4495,6 +4693,7 @@ buildSirens();
 buildCameras();
 buildFireStations();
 buildFireDistricts();
+applyMobileSpaceOptimization();
 
 })();
 
