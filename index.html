@@ -1031,6 +1031,7 @@ body.split-view .split-product-toggle{display:flex}
 .hydro-swatch{width:12px;height:9px;border-radius:2px;border:1px solid rgba(255,255,255,.20);flex-shrink:0}.hydro-code{color:var(--accent);font-weight:600}.hydro-class{color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hydro-help{color:var(--text-dim);font-size:7.4px;text-transform:uppercase;letter-spacing:.8px}.hydro-key.dim{color:var(--text-dim)}
 .hydro-hover-pop{display:none;position:fixed;z-index:2400;max-width:min(310px,calc(100vw - 24px));background:rgba(5,10,18,.97);border:1px solid var(--border-hi);border-radius:5px;box-shadow:0 0 18px rgba(0,0,0,.45),var(--glow);backdrop-filter:blur(16px);padding:8px 9px;font-family:var(--fm);font-size:8.4px;line-height:1.45;color:var(--text);pointer-events:none}.hydro-hover-pop.open{display:block}.hydro-hover-title{color:var(--accent);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}.hydro-map-tip{display:none;position:fixed;z-index:2350;max-width:260px;background:rgba(5,10,18,.94);border:1px solid var(--border-hi);border-radius:4px;padding:6px 8px;box-shadow:0 0 14px rgba(0,0,0,.4);font-family:var(--fm);font-size:8px;line-height:1.35;color:var(--text);pointer-events:none}.hydro-map-tip.open{display:block}.hydro-map-tip b{color:var(--accent)}
 .hydro-inspect-row{display:flex;gap:6px;align-items:center;margin:0 0 7px}.hydro-inspect-btn{font-family:var(--fm);font-size:8.5px;letter-spacing:.8px;padding:5px 8px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.05);color:var(--text-dim);cursor:pointer;text-transform:uppercase;transition:all .15s}.hydro-inspect-btn:hover{border-color:var(--border-hi);color:var(--text)}.hydro-inspect-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.12);box-shadow:0 0 8px rgba(0,200,255,.16)}.hydro-inspect-status{font-family:var(--fm);font-size:7.8px;line-height:1.35;color:var(--text-dim)}#hydro-inspect-overlay{display:none;position:absolute;inset:0;z-index:845;cursor:crosshair;pointer-events:none;background:transparent}body.hydro-inspect #hydro-inspect-overlay{display:block;pointer-events:auto}body.hydro-inspect #map,body.hydro-inspect #compare-map{cursor:crosshair!important}
+.hydro-debug-panel{display:none;margin:7px 0 0;border:1px solid rgba(0,170,240,.14);border-radius:4px;background:rgba(0,0,0,.20);overflow:hidden}.hydro-debug-panel.open{display:block}.hydro-debug-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 6px;border-bottom:1px solid rgba(0,170,240,.12);font-family:var(--fm);font-size:7.6px;letter-spacing:.8px;text-transform:uppercase;color:var(--accent)}.hydro-debug-actions{display:flex;gap:4px}.hydro-debug-mini{font-family:var(--fm);font-size:7.3px;letter-spacing:.6px;padding:3px 5px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.04);color:var(--text-dim);cursor:pointer;text-transform:uppercase}.hydro-debug-mini:hover{border-color:var(--border-hi);color:var(--text)}.hydro-debug-log{max-height:150px;overflow:auto;padding:5px 6px;font-family:var(--fm);font-size:7.4px;line-height:1.42;color:var(--text-dim);white-space:pre-wrap}.hydro-debug-line{padding:2px 0;border-bottom:1px solid rgba(0,170,240,.06)}.hydro-debug-line:last-child{border-bottom:0}.hydro-debug-line.warn{color:#ffea00}.hydro-debug-line.err{color:#ff6b6b}.hydro-debug-line.ok{color:#00e676}.overlap-note{font-family:var(--fm);font-size:7.6px;color:var(--text-dim);line-height:1.45;margin-top:7px;border-top:1px solid var(--border);padding-top:7px}.overlap-note b{color:var(--accent)}
 /* RIVER / FLOOD GAUGE LAYER */
 .gauge-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,0,0,.75);box-shadow:0 0 8px rgba(0,0,0,.55),0 0 10px currentColor;background:currentColor}
 .gauge-dot.major{color:#cc33ff}.gauge-dot.moderate{color:#ff3333}.gauge-dot.minor{color:#ff9900}.gauge-dot.action{color:#ffea00}.gauge-dot.no_flooding{color:#00e676}.gauge-dot.not_defined{color:#72afe9}.gauge-dot.low_threshold{color:#906320}.gauge-dot.obs_not_current{color:#bdbebb}.gauge-dot.out_of_service{color:#666}
@@ -1071,37 +1072,111 @@ body.split-view .split-product-toggle{display:flex}
 
 /* DEVICE LOCATION BUTTON + LIVE LOCATION MARKER */
 .locate-btn{
-  position:fixed;
-  right:14px;
-  bottom:84px;
-  z-index:1450;
-  width:44px;
-  height:44px;
+  position:relative;
+  z-index:auto;
+  width:auto;
+  min-width:86px;
+  height:28px;
   border-radius:999px;
-  border:1px solid var(--border-hi);
-  background:rgba(5,10,18,.90);
+  border:1px solid rgba(0,200,255,.42);
+  background:linear-gradient(180deg,rgba(0,200,255,.15),rgba(0,120,180,.07));
   color:var(--accent);
   font-family:var(--fm);
-  font-size:20px;
+  font-size:8.5px;
+  font-weight:500;
   line-height:1;
-  display:flex;
+  letter-spacing:.9px;
+  padding:0 10px 0 8px;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:6px;
   cursor:pointer;
-  box-shadow:0 0 18px rgba(0,200,255,.22),0 0 20px rgba(0,0,0,.45);
-  backdrop-filter:blur(14px);
+  text-transform:uppercase;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.035),0 0 10px rgba(0,200,255,.12);
+  backdrop-filter:blur(10px);
   -webkit-tap-highlight-color:transparent;
+  white-space:nowrap;
+  flex:0 0 auto;
 }
-.locate-btn:hover{background:rgba(0,200,255,.12)}
-.locate-btn.tracking{color:var(--safe);border-color:var(--safe);box-shadow:0 0 16px rgba(0,230,118,.35),0 0 20px rgba(0,0,0,.45)}
-.locate-btn.error{color:var(--danger);border-color:var(--danger);box-shadow:0 0 16px rgba(255,23,68,.35),0 0 20px rgba(0,0,0,.45)}
+.locate-btn-icon{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:1px solid rgba(0,200,255,.60);
+  display:inline-block;
+  position:relative;
+  flex:0 0 auto;
+  font-size:0;
+  line-height:0;
+  box-shadow:0 0 8px rgba(0,200,255,.20);
+}
+.locate-btn-icon::before,
+.locate-btn-icon::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:currentColor;
+  border-radius:999px;
+  opacity:.95;
+}
+.locate-btn-icon::before{
+  width:12px;
+  height:1px;
+}
+.locate-btn-icon::after{
+  width:1px;
+  height:12px;
+}
+.locate-btn-icon .locate-dot-center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:3px;
+  height:3px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 6px currentColor;
+}
+.locate-btn-label{display:inline-block}
+.locate-btn:hover{
+  border-color:var(--accent);
+  background:linear-gradient(180deg,rgba(0,200,255,.24),rgba(0,120,180,.11));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 0 14px rgba(0,200,255,.22);
+}
+.locate-btn.tracking{
+  color:var(--safe);
+  border-color:rgba(0,230,118,.70);
+  background:linear-gradient(180deg,rgba(0,230,118,.18),rgba(0,120,70,.08));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 0 14px rgba(0,230,118,.24);
+}
+.locate-btn.tracking .locate-btn-icon{
+  border-color:rgba(0,230,118,.75);
+  box-shadow:0 0 0 4px rgba(0,230,118,.10),0 0 10px rgba(0,230,118,.35);
+}
+.locate-btn.error{
+  color:var(--danger);
+  border-color:rgba(255,23,68,.70);
+  background:linear-gradient(180deg,rgba(255,23,68,.18),rgba(130,0,30,.08));
+  box-shadow:0 0 14px rgba(255,23,68,.24);
+}
 .locate-dot{position:relative;width:16px;height:16px;border-radius:50%;background:var(--safe);border:2px solid #eafff4;box-shadow:0 0 0 6px rgba(0,230,118,.16),0 0 18px rgba(0,230,118,.75)}
 .locate-dot:after{content:'';position:absolute;left:50%;top:50%;width:34px;height:34px;margin-left:-17px;margin-top:-17px;border-radius:50%;border:1px solid rgba(0,230,118,.55);animation:locPulse 1.8s ease-out infinite}
 @keyframes locPulse{0%{transform:scale(.45);opacity:.9}100%{transform:scale(1.45);opacity:0}}
 .location-popup{font-family:var(--fm);font-size:10px;line-height:1.45;color:var(--text)}
 .location-popup b{color:var(--safe);font-weight:600}.location-popup span{color:var(--text-dim)}
-@media (max-width:760px), (pointer:coarse){.locate-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:42px;height:42px;font-size:19px}}
-@media (max-width:480px){.locate-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:40px;height:40px}}
+@media (max-width:760px), (pointer:coarse){
+  .locate-btn{height:30px;min-width:34px;width:34px;padding:0;border-radius:9px;gap:0}
+  .locate-btn-label{display:none}
+  .locate-btn-icon{width:18px;height:18px;border:1px solid rgba(0,200,255,.60);box-shadow:0 0 8px rgba(0,200,255,.20)}
+}
+@media (max-width:480px){
+  .locate-btn{height:30px;width:32px;min-width:32px}
+}
+
 
 
 /* MOBILE SPACE OPTIMIZATION PATCH */
@@ -1149,6 +1224,41 @@ body.split-view .split-product-toggle{display:flex}
   #hud-radar .hud-body{max-height:calc(30vh - 36px)!important;}
 }
 
+
+
+/* TXDOT LIVE CAMERA LAYER — integrated Tools panel */
+.cam-tool-stats{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font-family:var(--fm);font-size:8.5px;color:var(--text-dim);letter-spacing:.6px;text-transform:uppercase}.cam-tool-stats b{color:var(--text-hi)}
+.cam-district-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:7px}.cam-dist-btn,.cam-filter-btn,.cam-refresh-btn{font-family:var(--fm);font-size:8px;letter-spacing:.7px;padding:5px 4px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.04);color:var(--text-dim);cursor:pointer;text-align:center;text-transform:uppercase;transition:all .15s}.cam-dist-btn:hover,.cam-filter-btn:hover,.cam-refresh-btn:hover{border-color:var(--border-hi);color:var(--text);background:rgba(0,170,240,.08)}.cam-dist-btn.active,.cam-filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,200,255,.12);box-shadow:0 0 8px rgba(0,200,255,.16)}
+.cam-search-row{margin-bottom:7px}.cam-search-row input{width:100%;height:28px;border-radius:3px;border:1px solid var(--border);background:rgba(0,170,240,.05);color:var(--text-hi);font-family:var(--fm);font-size:9.5px;letter-spacing:.35px;padding:0 8px;outline:none}.cam-search-row input::placeholder{color:var(--text-dim)}.cam-search-row input:focus{border-color:var(--border-hi);box-shadow:0 0 8px rgba(0,200,255,.16)}.cam-filter-row{display:flex;gap:5px;margin-bottom:7px}.cam-filter-btn{flex:1}.cam-refresh-btn{flex:1.1;color:var(--accent)}
+.cam-load-wrap{display:none;margin:7px 0}.cam-load-wrap.active{display:block}.cam-load-label{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;font-family:var(--fm);font-size:7.7px;color:var(--text-dim);letter-spacing:.8px;text-transform:uppercase}.cam-load-track{height:4px;overflow:hidden;border-radius:999px;background:rgba(0,170,240,.12);border:1px solid rgba(0,170,240,.14)}.cam-load-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,rgba(0,200,255,.25),var(--accent));box-shadow:0 0 10px rgba(0,200,255,.35);transition:width .18s ease}
+#cam-list{max-height:42vh;overflow:auto}.cam-empty{font-family:var(--fm);font-size:9px;color:var(--text-dim);text-align:center;padding:10px 4px;line-height:1.45;letter-spacing:.4px}.cam-item{display:flex;align-items:center;gap:7px;padding:6px 7px;border:1px solid var(--border);border-radius:3px;background:rgba(0,0,0,.2);cursor:pointer;transition:all .15s;margin-bottom:5px}.cam-item:hover{border-color:var(--border-hi);background:rgba(0,170,240,.06)}.cam-item.selected{border-color:var(--accent);background:rgba(0,200,255,.10)}.cam-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.cam-name{font-family:var(--fm);font-size:9px;color:var(--text);line-height:1.25;flex:1;min-width:0}.cam-road{display:block;font-family:var(--fm);font-size:7.7px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.img-badge,.loading-badge,.error-badge{font-family:var(--fm);font-size:8px;border-radius:3px;padding:2px 4px;flex-shrink:0}.img-badge{color:var(--watch);border:1px solid rgba(255,234,0,.25)}.loading-badge{color:var(--accent);border:1px solid rgba(0,200,255,.25);animation:blink 1s ease-in-out infinite}.error-badge{color:var(--danger);border:1px solid rgba(255,23,68,.35)}.cam-countbar{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--border);margin-top:7px;padding-top:7px;font-family:var(--fm);font-size:7.5px;color:var(--text-dim);line-height:1.35}
+.cm{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.38);background:rgba(0,200,255,.55);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);transition:transform .1s}.cm:hover{transform:scale(1.18)}.cm.snap-loaded{border-color:var(--safe);background:rgba(0,230,118,.65);box-shadow:0 0 0 2px rgba(0,230,118,.3),0 2px 8px rgba(0,0,0,.5)}.cm.snap-error{border-color:var(--danger);background:rgba(255,23,68,.45);box-shadow:0 0 0 2px rgba(255,23,68,.22),0 2px 8px rgba(0,0,0,.5)}
+.cam-popup{min-width:260px;max-width:320px;font-family:var(--fm)}.popup-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.7rem}.popup-name{font-size:11px;font-weight:600;color:var(--text-hi);line-height:1.25}.popup-meta{font-size:8px;color:var(--text-dim);margin-top:3px;text-transform:uppercase;letter-spacing:.6px}.popup-img-wrap{background:#08151f;border-radius:5px;overflow:hidden;margin-bottom:7px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;border:1px solid var(--border)}.popup-img-wrap img{width:100%;height:auto;display:block;cursor:zoom-in}.popup-no-img{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-dim);font-size:9px;text-align:center;padding:10px}.popup-no-img .icon{font-size:20px;opacity:.75}.popup-ts{font-size:7.5px;color:var(--text-dim);text-align:right;margin-bottom:7px}.popup-fetch-btn{display:block;width:100%;padding:6px;text-align:center;background:rgba(0,200,255,.10);border:1px solid rgba(0,200,255,.28);border-radius:4px;color:var(--accent);font-family:var(--fm);font-size:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.7px;transition:all .15s}.popup-fetch-btn:hover{background:rgba(0,200,255,.18)}.popup-fetch-btn:disabled{opacity:.45;cursor:default}
+#image-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(2,8,15,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:64px 24px 28px}#image-modal.show{display:flex}#image-modal-card{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}#image-modal-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 18px 60px rgba(0,0,0,.55);background:#02080f;border:1px solid var(--border-hi)}#image-modal-top{position:absolute;top:16px;left:16px;right:16px;z-index:10000;display:flex;align-items:center;justify-content:space-between;gap:1rem;pointer-events:none}#image-modal-title{pointer-events:auto;max-width:calc(100vw - 100px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--fm);font-size:10px;color:var(--text);background:rgba(5,10,18,.78);border:1px solid var(--border);border-radius:999px;padding:7px 11px}#image-modal-close{pointer-events:auto;width:38px;height:38px;border-radius:50%;border:1px solid var(--border-hi);background:rgba(5,10,18,.86);color:var(--text);font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}#image-modal-close:hover{border-color:var(--accent);color:var(--accent)}
+@media (max-width:760px), (pointer:coarse){.cam-district-grid{grid-template-columns:repeat(3,1fr)}#cam-list{max-height:36vh}.cam-countbar{flex-direction:column;gap:2px}#image-modal{padding:62px 10px 18px}}
+
+
+/* SEARCH BAR LOCATION BUTTON FINAL OVERRIDES */
+.city-search .locate-btn{
+  height:28px;
+  border-radius:999px;
+  padding:0 10px 0 8px;
+}
+@media (max-width:760px), (pointer:coarse){
+  .city-search .locate-btn{height:30px;width:34px;min-width:34px;padding:0;border-radius:9px;}
+}
+@media (max-width:480px){
+  .city-search .locate-btn{height:30px;width:32px;min-width:32px;padding:0;}
+}
+
+
+/* LOCATE BUTTON CENTERING + REMOVE CITY LIMITS SEARCH STATUS */
+.city-search-status{display:none!important}
+.city-search .locate-btn{align-self:center}
+.city-search .locate-btn-icon{display:inline-block;position:relative;overflow:visible}
+.city-search .locate-btn-icon::before,
+.city-search .locate-btn-icon::after{box-sizing:border-box}
+
 </style>
 </head>
 <body class="drawer-mode">
@@ -1172,7 +1282,7 @@ body.split-view .split-product-toggle{display:flex}
   <form class="city-search" id="city-search-form">
     <input id="city-search-input" type="text" placeholder="Search city, state — Frisco, TX" autocomplete="off" spellcheck="false">
     <button type="submit" id="city-search-btn">GO</button>
-    <span class="city-search-status" id="city-search-status">CITY LIMITS</span>
+    <button class="locate-btn" id="locate-me-btn" type="button" title="Locate me" aria-label="Locate me" aria-pressed="false"><span class="locate-btn-icon"><span class="locate-dot-center"></span></span><span class="locate-btn-label">LOCATE</span></button>
   </form>
   <div class="tb-div"></div>
   <div class="layer-btns">
@@ -1187,7 +1297,6 @@ body.split-view .split-product-toggle{display:flex}
   <div id="clock">--:--:-- CDT</div>
 </div>
 
-<button class="locate-btn" id="locate-me-btn" type="button" title="Locate me" aria-label="Locate me" aria-pressed="false">⌖</button>
 
 <div class="hud" id="hud-cond">
   <div class="hud-head" id="hud-cond-head">
@@ -1254,7 +1363,18 @@ body.split-view .split-product-toggle{display:flex}
       <div class="hydro-note">Hydrometeor Classification estimates what the radar echo is most likely seeing. Hover any key row for a plain-language meaning. Use it as context, not ground truth.</div>
       <div class="hydro-inspect-row">
         <button class="hydro-inspect-btn" id="hydro-inspect-btn">INSPECT</button>
+        <button class="hydro-inspect-btn" id="hydro-debug-btn">DEBUG</button>
         <div class="hydro-inspect-status" id="hydro-inspect-status">Turn on Inspect to lock the map, then click a Hydro Class color to identify it.</div>
+      </div>
+      <div class="hydro-debug-panel" id="hydro-debug-panel" aria-hidden="true">
+        <div class="hydro-debug-head">
+          <span>HYDRO INSPECT DEBUG</span>
+          <div class="hydro-debug-actions">
+            <button class="hydro-debug-mini" id="hydro-debug-copy">COPY</button>
+            <button class="hydro-debug-mini" id="hydro-debug-clear">CLEAR</button>
+          </div>
+        </div>
+        <div class="hydro-debug-log" id="hydro-debug-log">Debug off. Turn this on, click a Hydro pixel, then review tile/WMS details here.</div>
       </div>
       <div class="hydro-grid" id="hydro-grid"></div>
     </div>    </div>
@@ -1285,15 +1405,18 @@ body.split-view .split-product-toggle{display:flex}
   </div>
   <div class="hud-body">
     <div class="city-layer-grid">
+      <button class="city-layer-btn on"   id="btn-darkmode">DARK MODE</button>
+      <button class="city-layer-btn on"   id="btn-overlapcull">HIDE OVERLAP</button>
       <button class="city-layer-btn on"   id="btn-citylimits">CITY LIMITS</button>
       <button class="city-layer-btn on"   id="btn-sirens">SIRENS</button>
-      <button class="city-layer-btn on"   id="btn-cameras">CAMERAS</button>
+      <button class="city-layer-btn"      id="btn-cameras">CAMERAS</button>
       <button class="city-layer-btn fire on" id="btn-firestations">FIRE STA.</button>
       <button class="city-layer-btn fire" id="btn-firedistricts">FIRE DIST.</button>
     </div>
     <div class="city-layer-note">
       Fire stations and fire districts load from Frisco public ArcGIS services.
       River/flood gauges live in their own Tools panel with the legend and toggle.
+      <div class="overlap-note"><b>Hide Overlap</b> hides only tightly stacked map nodes until you zoom in, reducing marker clutter and some browser rendering load.<br><span id="overlap-cull-status">Overlap hiding is on.</span></div>
     </div>
   </div>
 </div>
@@ -1325,32 +1448,59 @@ body.split-view .split-product-toggle{display:flex}
 </div>
 <div class="hud collapsed" id="hud-cam">
   <div class="hud-head" id="hud-cam-head">
-    <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS · DAL/FTW</div>
+    <div class="hud-title"><div class="dot g"></div>TXDOT CAMERAS</div>
     <div class="hud-tog" id="hud-cam-tog">▸</div>
   </div>
   <div class="hud-body">
-    <div id="cam-list"><div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);text-align:center;padding:6px 0;letter-spacing:1px">LOADING…</div></div>
-  </div>
-</div>
-</div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-<div id="cam-modal">
-  <div class="cam-modal-inner">
-    <div class="cam-mhead">
-      <div class="cam-mtitle" id="cam-m-name">CAMERA FEED</div>
-      <div class="cam-mclose" id="cam-mclose">✕ CLOSE</div>
+    <div class="cam-tool-stats">
+      <span><b id="cam-cnt-snap">0</b> snapshots</span>
+      <span><b id="cam-cnt-total">—</b> cameras</span>
     </div>
-    <img id="cam-m-img" src="" alt="Camera feed">
-    <a class="cam-mlink" id="cam-m-link" href="#" target="_blank">▶ OPEN IN TXDOT ITS →</a>
+    <div class="cam-district-grid">
+      <button class="cam-dist-btn active" data-district="TX">TX</button>
+      <button class="cam-dist-btn" data-district="DAL">DAL</button>
+      <button class="cam-dist-btn" data-district="FTW">FTW</button>
+      <button class="cam-dist-btn" data-district="WAC">WAC</button>
+      <button class="cam-dist-btn" data-district="WFS">WFS</button>
+      <button class="cam-dist-btn" data-district="AUS">AUS</button>
+      <button class="cam-dist-btn" data-district="TYL">TYL</button>
+      <button class="cam-dist-btn" data-district="BRY">BRY</button>
+      <button class="cam-dist-btn" data-district="PAR">PAR</button>
+    </div>
+    <div class="cam-search-row">
+      <input id="cam-search" type="text" placeholder="Search cameras…" autocomplete="off">
+    </div>
+    <div class="cam-filter-row">
+      <button class="cam-filter-btn active" data-filter="all">ALL</button>
+      <button class="cam-filter-btn" data-filter="snap">LOADED</button>
+      <button class="cam-refresh-btn" id="cam-refresh">↻ RELOAD</button>
+    </div>
+    <div class="cam-load-wrap" id="cam-load-wrap" aria-hidden="true">
+      <div class="cam-load-label"><span id="cam-load-text">CAMERA LAYER READY</span><span id="cam-dist-label">TX Districts</span></div>
+      <div class="cam-load-track"><div class="cam-load-fill" id="cam-load-fill"></div></div>
+    </div>
+    <div id="cam-list"><div class="cam-empty">Toggle Cameras on to load TxDOT camera pins.</div></div>
+    <div class="cam-countbar"><span id="cam-list-count">Layer off</span><span>Snapshots load only when selected.</span></div>
+  </div>
+</div></div>
+</div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<div id="image-modal" onclick="handleImageModalBackdrop(event)">
+  <div id="image-modal-top">
+    <div id="image-modal-title">Camera Snapshot</div>
+    <button id="image-modal-close" onclick="closeImageModal()" aria-label="Close image viewer">×</button>
+  </div>
+  <div id="image-modal-card">
+    <img id="image-modal-img" src="" alt="Expanded camera snapshot">
   </div>
 </div>
 
@@ -1375,9 +1525,9 @@ const map = L.map('map', {
   zoomDelta:0.5
 });
 // Zoom +/- controls removed for cleaner mobile map UI. Pinch and double-tap zoom remain enabled.
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  subdomains:'abcd', maxZoom:20, className:'basemap-tile', attribution:'© CARTO © OSM contributors'
-}).addTo(map);
+let darkModeEnabled = true;
+let baseLayer = makeBaseMapLayer();
+baseLayer.addTo(map);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let radarType = 'reflectivity';
@@ -1403,7 +1553,7 @@ let sirenLayer = null, camMarkerLayer = null;
 let selectedVelStation = 'kfws';
 let splitRadarProduct = 'velocity';
 let stationMarkerLayer = null;
-const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:true, fireStations:true, fireDistricts:false, riverGauges:false };
+const layersOn = { warnings:true, watches:true, cityLimits:true, sirens:true, cameras:false, fireStations:true, fireDistricts:false, riverGauges:false };
 const NWS_BASE = 'https://opengeo.ncep.noaa.gov/geoserver';
 const NWPS_GAUGE_LAYER_URL = 'https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/0/query';
 
@@ -1426,6 +1576,10 @@ let compareLoopFrames = [];
 let compareLoopLayerCache = new Map();
 let compareLoopConfigKey = null;
 let hydroInspectMode = false;
+let hydroInspectDebugEnabled = false;
+let hydroInspectDebugEntries = [];
+let overlapCullingEnabled = true;
+let overlapCullTimer = null;
 let stationRangeRingMain = null;
 let stationRangeRingCompare = null;
 
@@ -1614,12 +1768,47 @@ async function fetchRadarTimesForConfig(config) {
 }
 
 function makeBaseMapLayer() {
-  return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    subdomains:'abcd',
-    maxZoom:20,
-    className:'basemap-tile',
-    attribution:'© CARTO © OSM contributors'
+  if (darkModeEnabled) {
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      subdomains:'abcd',
+      maxZoom:20,
+      className:'basemap-tile dark-basemap-tile',
+      attribution:'© CARTO © OSM contributors'
+    });
+  }
+
+  return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19,
+    className:'streets-basemap-tile',
+    attribution:'© OpenStreetMap contributors'
   });
+}
+
+function setDarkMode(enabled) {
+  darkModeEnabled = !!enabled;
+
+  if (baseLayer) {
+    try { map.removeLayer(baseLayer); } catch(e) {}
+  }
+  baseLayer = makeBaseMapLayer();
+  baseLayer.addTo(map);
+  try { baseLayer.bringToBack(); } catch(e) {}
+
+  if (compareMap) {
+    if (compareBaseLayer) {
+      try { compareMap.removeLayer(compareBaseLayer); } catch(e) {}
+    }
+    compareBaseLayer = makeBaseMapLayer();
+    compareBaseLayer.addTo(compareMap);
+    try { compareBaseLayer.bringToBack(); } catch(e) {}
+  }
+
+  const btn = document.getElementById('btn-darkmode');
+  if (btn) btn.classList.toggle('on', darkModeEnabled);
+}
+
+function toggleDarkMode() {
+  setDarkMode(!darkModeEnabled);
 }
 
 function clearCompareRadarLayers() {
@@ -1856,6 +2045,7 @@ function toggleSplitView() {
 }
 
 map.on('moveend zoomend', () => {
+  scheduleOverlapCulling(80);
   if (!splitViewActive || !compareMap || isSyncingMaps) return;
   syncCompareToMain();
 });
@@ -2567,6 +2757,7 @@ function buildStationMarkers() {
       .bindPopup(popup,{maxWidth:230})
       .addTo(stationMarkerLayer);
   });
+  scheduleOverlapCulling(80);
 }
 
 function buildStationLegend() {
@@ -3222,6 +3413,7 @@ async function loadRiverGaugeLayer(){
     });
     if(layersOn.riverGauges) riverGaugeLayer.addTo(map);
     updateRiverGaugeStatus(riverGaugeCount ? 'Showing '+riverGaugeCount+' NWPS gauge node'+(riverGaugeCount===1?'':'s')+' in this map view. Click a node to load its hydrograph.' : 'No NWPS gauge nodes found in this map view. Zoom out and toggle again if needed.');
+    scheduleOverlapCulling(120);
   }catch(err){
     if(err.name==='AbortError')return;
     console.warn('River gauge layer failed:',err);
@@ -3972,7 +4164,7 @@ async function buildFireStations() {
       }
     });
 
-    if (layersOn.fireStations) fireStationLayer.addTo(map);
+    if (layersOn.fireStations) { fireStationLayer.addTo(map); scheduleOverlapCulling(100); }
   } catch(e) {
     console.error('Fire stations load error:', e);
   }
@@ -4058,49 +4250,466 @@ function buildSirens() {
       .bindPopup(`<b style="color:var(--accent)">${s.id}</b> · ${s.name}`).addTo(sirenLayer);
   });
   if(layersOn.sirens)sirenLayer.addTo(map);
+  scheduleOverlapCulling(80);
 }
 
-// ── CAMERAS ───────────────────────────────────────────────────────────────────
-const CAMERAS=[
-  {id:'1001',name:'US-75 @ SH-121',lat:33.123,lon:-96.689,dist:'DAL',road:'US-75'},
-  {id:'1002',name:'DNT @ Lebanon',lat:33.165,lon:-96.852,dist:'DAL',road:'DNT'},
-  {id:'1003',name:'DNT @ Main St',lat:33.151,lon:-96.824,dist:'DAL',road:'DNT'},
-  {id:'1004',name:'DNT @ Rolater',lat:33.128,lon:-96.849,dist:'DAL',road:'DNT'},
-  {id:'1005',name:'DNT @ SH-121',lat:33.110,lon:-96.829,dist:'DAL',road:'DNT'},
-  {id:'1006',name:'US-75 @ Eldorado',lat:33.180,lon:-96.670,dist:'DAL',road:'US-75'},
-  {id:'1007',name:'SH-121 @ Coit',lat:33.110,lon:-96.790,dist:'FTW',road:'SH-121'},
-  {id:'1008',name:'SH-289 @ University',lat:33.151,lon:-96.855,dist:'DAL',road:'SH-289'},
-];
 
-function buildCameras() {
-  camMarkerLayer=L.layerGroup();
-  const list=document.getElementById('cam-list');
-  list.innerHTML='';
-  CAMERAS.forEach(cam=>{
-    const item=document.createElement('div');
-    item.className='cam-item';
-    item.innerHTML=`<div><div class="cam-name">${cam.name}</div><div class="cam-dist">${cam.dist} · ${cam.road}</div></div><img class="cam-thumb" src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" onerror="this.style.display='none'" alt="">`;
-    item.addEventListener('click',()=>openCam(cam));
-    list.appendChild(item);
-    const marker=L.marker([cam.lat,cam.lon],{icon:L.divIcon({className:'',html:'<div style="width:11px;height:11px;background:rgba(0,230,118,.65);border:1.5px solid #00e676;border-radius:2px;box-shadow:0 0 5px rgba(0,230,118,.35)"></div>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
-      .bindPopup(`<b style="color:#00e676">${cam.name}</b><br><span style="font-size:10px;color:var(--text-dim)">${cam.dist}</span><br><img src="https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg" style="width:180px;margin-top:6px;border-radius:2px" onerror="this.style.display='none'"><br><a href="https://its.txdot.gov/its/District/${cam.dist}" target="_blank" style="color:var(--accent);font-size:10px">Open ITS →</a>`);
-    camMarkerLayer.addLayer(marker);
+// ── TXDOT LIVE CAMERAS ───────────────────────────────────────────────────────
+const TXDOT_WORKER = 'https://mapmaker.frisco-em2.workers.dev/';
+const TXDOT_DEFAULT_DISTRICTS = ['DAL', 'FTW', 'WAC', 'WFS', 'AUS', 'TYL', 'BRY', 'PAR'];
+let txdotCameras = [];
+let txdotSnapshots = {};
+let txdotSnapshotErrors = {};
+let txdotSnapLoading = new Set();
+let txdotMarkers = {};
+let txdotCurrentFilter = 'all';
+let txdotCurrentDistrict = 'TX';
+let txdotSelectedKey = null;
+let txdotHasLoaded = false;
+let txdotIsLoading = false;
+
+function txdotCameraKey(cam) {
+  return `${cam.district || txdotCurrentDistrict}:${cam.icd_Id}`;
+}
+
+function txdotEscHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function txdotEscAttr(value) { return txdotEscHTML(value); }
+
+function txdotEscJS(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
+function txdotFindCameraByKey(key) {
+  return txdotCameras.find(c => txdotCameraKey(c) === key);
+}
+
+function txdotSetLoading(message, pct = 0, active = true) {
+  const wrap = document.getElementById('cam-load-wrap');
+  const text = document.getElementById('cam-load-text');
+  const fill = document.getElementById('cam-load-fill');
+  if (!wrap || !text || !fill) return;
+  text.textContent = message;
+  fill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  wrap.classList.toggle('active', !!active);
+  wrap.setAttribute('aria-hidden', active ? 'false' : 'true');
+}
+
+function txdotSetDistrictLabel(label) {
+  const el = document.getElementById('cam-dist-label');
+  if (el) el.textContent = label;
+}
+
+function txdotExtractSnapshotData(data) {
+  if (!data || typeof data !== 'object') return null;
+  const possibleImage = data.snippet || data.image || data.img || data.snapshot || data.snapshotImage || data.snapshotBase64 || data.base64 || data.jpeg || data.jpg || data.data;
+  if (!possibleImage) return null;
+  const cleanImage = String(possibleImage).replace(/^data:image\/[a-zA-Z]+;base64,/, '').trim();
+  if (!cleanImage) return null;
+  return { img: cleanImage, ts: data.timestampFormatted || data.timestamp || data.timeStamp || data.captureTime || data.capturedAt || '' };
+}
+
+async function txdotFetchDistrictCameras(district) {
+  const url = `${TXDOT_WORKER}?endpoint=GetCctvStatusListByDistrict&district=${encodeURIComponent(district)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${district} HTTP ${res.status}`);
+  const data = await res.json();
+  const districtCams = [];
+  for (const [roadway, cams] of Object.entries(data.roadwayCctvStatuses || {})) {
+    for (const cam of cams) {
+      districtCams.push({ ...cam, district, roadwayGroup: roadway });
+    }
+  }
+  return districtCams;
+}
+
+function txdotSortCameras() {
+  txdotCameras.sort((a, b) => {
+    const d = String(a.district || '').localeCompare(String(b.district || ''));
+    if (d !== 0) return d;
+    return String(a.icd_Id || '').localeCompare(String(b.icd_Id || ''));
   });
-  if(layersOn.cameras)camMarkerLayer.addTo(map);
 }
 
-function openCam(cam) {
-  document.getElementById('cam-m-name').textContent=cam.name;
-  document.getElementById('cam-m-img').src=`https://its.txdot.gov/ITS_WEB/FrontEnd/CCTVImages/${cam.id}.jpg?t=${Date.now()}`;
-  document.getElementById('cam-m-link').href=`https://its.txdot.gov/its/District/${cam.dist}`;
-  document.getElementById('cam-modal').classList.add('open');
+async function txdotLoadDefaultDistricts() {
+  if (txdotIsLoading) return;
+  txdotIsLoading = true;
+  txdotCurrentDistrict = 'TX';
+  txdotSetActiveDistrictButton('TX');
+  txdotSetDistrictLabel('TX Districts');
+  txdotSetLoading('FETCHING TXDOT DISTRICTS…', 3, true);
+  document.getElementById('cam-list-count').textContent = 'Loading…';
+  txdotCameras = [];
+  txdotSnapshots = {};
+  txdotSnapshotErrors = {};
+  txdotSnapLoading.clear();
+  txdotSelectedKey = null;
+  const seen = new Set();
+  const failed = [];
+  try {
+    for (let i = 0; i < TXDOT_DEFAULT_DISTRICTS.length; i++) {
+      const district = TXDOT_DEFAULT_DISTRICTS[i];
+      const pct = Math.round(((i + 1) / TXDOT_DEFAULT_DISTRICTS.length) * 90);
+      txdotSetLoading(`FETCHING ${district} CAMERAS… ${i + 1}/${TXDOT_DEFAULT_DISTRICTS.length}`, pct, true);
+      try {
+        const districtCams = await txdotFetchDistrictCameras(district);
+        for (const cam of districtCams) {
+          const key = txdotCameraKey(cam);
+          if (!seen.has(key)) { seen.add(key); txdotCameras.push(cam); }
+        }
+      } catch (err) {
+        failed.push(district);
+        console.warn(`Failed to load ${district}`, err);
+      }
+    }
+    txdotSortCameras();
+    txdotBuildMarkers();
+    txdotUpdateStats();
+    txdotRenderList();
+    txdotHasLoaded = true;
+    if (layersOn.cameras && camMarkerLayer && !map.hasLayer(camMarkerLayer)) camMarkerLayer.addTo(map);
+    txdotApplyFilter();
+    txdotSetLoading(failed.length ? `LOADED WITH ERRORS: ${failed.join(', ')}` : 'CAMERA LAYER READY', 100, true);
+    setTimeout(() => txdotSetLoading('CAMERA LAYER READY', 100, false), failed.length ? 2800 : 900);
+  } catch (err) {
+    txdotSetLoading('ERROR: ' + (err.message || err), 100, true);
+    setTimeout(() => txdotSetLoading('CAMERA LAYER READY', 0, false), 3000);
+  } finally {
+    txdotIsLoading = false;
+  }
 }
-function closeCam() {
-  document.getElementById('cam-modal').classList.remove('open');
-  document.getElementById('cam-m-img').src='';
+
+async function txdotLoadSingleDistrict(district) {
+  if (txdotIsLoading) return;
+  txdotIsLoading = true;
+  txdotCurrentDistrict = district;
+  txdotSetActiveDistrictButton(district);
+  txdotSetDistrictLabel(district + ' District');
+  txdotSetLoading('FETCHING ' + district + ' CAMERAS…', 12, true);
+  document.getElementById('cam-list-count').textContent = 'Loading…';
+  txdotCameras = [];
+  txdotSnapshots = {};
+  txdotSnapshotErrors = {};
+  txdotSnapLoading.clear();
+  txdotSelectedKey = null;
+  try {
+    const cams = await txdotFetchDistrictCameras(district);
+    const seen = new Set();
+    for (const cam of cams) {
+      const key = txdotCameraKey(cam);
+      if (!seen.has(key)) { seen.add(key); txdotCameras.push(cam); }
+    }
+    txdotSortCameras();
+    txdotBuildMarkers();
+    txdotUpdateStats();
+    txdotRenderList();
+    txdotHasLoaded = true;
+    if (layersOn.cameras && camMarkerLayer && !map.hasLayer(camMarkerLayer)) camMarkerLayer.addTo(map);
+    txdotApplyFilter();
+    txdotSetLoading('CAMERA LAYER READY', 100, true);
+    setTimeout(() => txdotSetLoading('CAMERA LAYER READY', 100, false), 900);
+  } catch (err) {
+    txdotSetLoading('ERROR: ' + (err.message || err), 100, true);
+    setTimeout(() => txdotSetLoading('CAMERA LAYER READY', 0, false), 3000);
+  } finally {
+    txdotIsLoading = false;
+  }
 }
-document.getElementById('cam-mclose').addEventListener('click',closeCam);
-document.getElementById('cam-modal').addEventListener('click',e=>{if(e.target===document.getElementById('cam-modal'))closeCam();});
+
+function txdotCameraLatLng(cam) {
+  const lat = Number(cam.latitude);
+  const lng = Number(cam.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return L.latLng(lat, lng);
+}
+
+function txdotIsCameraInCurrentView(cam) {
+  if (!map) return false;
+  const ll = txdotCameraLatLng(cam);
+  if (!ll) return false;
+  const bounds = map.getBounds();
+  return bounds && bounds.isValid() && bounds.contains(ll);
+}
+
+// Intentionally no-op: loading or changing camera districts should never move/zoom the map.
+function txdotFitToCameraBounds() {}
+
+async function txdotFetchSnapshot(key) {
+  const cam = txdotFindCameraByKey(key);
+  if (!cam) return;
+  const district = cam.district || txdotCurrentDistrict;
+  if (txdotSnapshots[key] || txdotSnapLoading.has(key)) return;
+  delete txdotSnapshotErrors[key];
+  txdotSnapLoading.add(key);
+  txdotUpdateMarkerStyle(key);
+  txdotRenderListItem(key);
+  const initialEntry = txdotMarkers[key];
+  if (initialEntry && initialEntry.marker.isPopupOpen()) initialEntry.marker.setPopupContent(txdotBuildPopupHTML(cam));
+  try {
+    const url = `${TXDOT_WORKER}?endpoint=GetCctvSnapshotByIcdId&district=${encodeURIComponent(district)}&icdId=${encodeURIComponent(cam.icd_Id)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const extracted = txdotExtractSnapshotData(data);
+    if (!extracted) { txdotSnapshotErrors[key] = 'No image returned for this camera.'; return; }
+    txdotSnapshots[key] = { img: extracted.img, ts: extracted.ts, district, icd_Id: cam.icd_Id };
+    txdotUpdateStats();
+  } catch (err) {
+    console.warn('Snapshot fetch failed for', key, err);
+    txdotSnapshotErrors[key] = err.message || 'Snapshot failed to load.';
+  } finally {
+    txdotSnapLoading.delete(key);
+    txdotUpdateMarkerStyle(key);
+    txdotRenderListItem(key);
+    const latestEntry = txdotMarkers[key];
+    if (latestEntry && latestEntry.marker.isPopupOpen()) latestEntry.marker.setPopupContent(txdotBuildPopupHTML(cam));
+  }
+}
+
+async function txdotRefreshSingle(key, btn) {
+  delete txdotSnapshots[key];
+  delete txdotSnapshotErrors[key];
+  txdotSnapLoading.delete(key);
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+  await txdotFetchSnapshot(key);
+}
+
+function txdotBuildMarkers() {
+  if (!camMarkerLayer) camMarkerLayer = L.layerGroup();
+  camMarkerLayer.clearLayers();
+  txdotMarkers = {};
+  txdotCameras.forEach(cam => {
+    if (!cam.latitude || !cam.longitude) return;
+    const key = txdotCameraKey(cam);
+    const marker = L.marker([Number(cam.latitude), Number(cam.longitude)], { icon: txdotMakeIcon(cam), zIndexOffset: 250 })
+      .bindPopup(() => txdotBuildPopupHTML(cam), { maxWidth:340, minWidth:270, autoPan:false })
+      .on('click', () => {
+        txdotSelectedKey = key;
+        txdotRenderList();
+        if (!txdotSnapshots[key] && !txdotSnapLoading.has(key)) txdotFetchSnapshot(key);
+      });
+    if (txdotMatchesFilter(cam, (document.getElementById('cam-search')?.value || '').toLowerCase()) && txdotIsCameraInCurrentView(cam)) camMarkerLayer.addLayer(marker);
+    txdotMarkers[key] = { marker, cam };
+  });
+}
+
+function txdotMakeIcon(cam) {
+  const key = txdotCameraKey(cam);
+  const hasSnap = !!txdotSnapshots[key];
+  const hasErr = !!txdotSnapshotErrors[key];
+  const isLoading = txdotSnapLoading.has(key);
+  let extraCls = '';
+  if (!isLoading && hasSnap) extraCls = 'snap-loaded';
+  else if (!isLoading && hasErr) extraCls = 'snap-error';
+  return L.divIcon({ className:'', html:`<div class="cm ${extraCls}" title="${txdotEscAttr(cam.district || '')} ${txdotEscAttr(cam.icd_Id)}">${isLoading ? '⟳' : '📷'}</div>`, iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-14] });
+}
+
+function txdotUpdateMarkerStyle(key) {
+  const entry = txdotMarkers[key];
+  if (!entry) return;
+  entry.marker.setIcon(txdotMakeIcon(entry.cam));
+}
+
+function txdotBuildPopupHTML(cam) {
+  if (!cam) return '<div style="padding:.5rem;color:var(--text-dim)">Camera not found</div>';
+  const key = txdotCameraKey(cam);
+  const snap = txdotSnapshots[key];
+  const isLoading = txdotSnapLoading.has(key);
+  const errMsg = txdotSnapshotErrors[key];
+  const safeKey = txdotEscJS(key);
+  const safeName = txdotEscHTML(cam.icd_Id);
+  const safeDistrict = txdotEscHTML(cam.district || '');
+  const safeRoadway = txdotEscHTML(cam.equipLoc?.roadway || cam.roadwayGroup || '');
+  const safeNet = txdotEscHTML(cam.netId || '');
+  let imgSection;
+  if (isLoading) {
+    imgSection = `<div class="popup-img-wrap"><div class="popup-no-img"><div class="icon">⟳</div><div>Loading snapshot…</div></div></div>`;
+  } else if (snap) {
+    imgSection = `<div class="popup-img-wrap"><img src="data:image/jpeg;base64,${snap.img}" alt="${safeName}" loading="lazy" title="Click to enlarge" onclick="openImageModal('${safeKey}')"></div><div class="popup-ts">Captured: ${txdotEscHTML(snap.ts || 'Unknown time')}</div><button class="popup-fetch-btn" onclick="txdotRefreshSingle('${safeKey}',this)">⟳ Refresh Snapshot</button>`;
+  } else if (errMsg) {
+    imgSection = `<div class="popup-img-wrap"><div class="popup-no-img"><div class="icon">⚠️</div><div>${txdotEscHTML(errMsg)}</div></div></div><button class="popup-fetch-btn" onclick="txdotFetchSnapshot('${safeKey}');this.disabled=true;this.textContent='Loading…'">Try Again</button>`;
+  } else {
+    imgSection = `<div class="popup-img-wrap"><div class="popup-no-img"><div class="icon">📷</div><div>Click below to load snapshot</div></div></div><button class="popup-fetch-btn" onclick="txdotFetchSnapshot('${safeKey}');this.disabled=true;this.textContent='Loading…'">Load Snapshot</button>`;
+  }
+  return `<div class="cam-popup"><div class="popup-header"><div><div class="popup-name">${safeName}</div><div class="popup-meta">${safeDistrict} · ${safeRoadway} · ${safeNet}</div></div></div>${imgSection}</div>`;
+}
+
+function openImageModal(key) {
+  const snap = txdotSnapshots[key];
+  const cam = txdotFindCameraByKey(key);
+  if (!snap) return;
+  const modal = document.getElementById('image-modal');
+  const img = document.getElementById('image-modal-img');
+  const title = document.getElementById('image-modal-title');
+  img.src = `data:image/jpeg;base64,${snap.img}`;
+  const name = cam ? `${cam.district || ''} · ${cam.icd_Id || ''} · ${cam.equipLoc?.roadway || cam.roadwayGroup || ''}` : key;
+  title.textContent = `${name}${snap.ts ? ' · ' + snap.ts : ''}`;
+  modal.classList.add('show');
+}
+
+function closeImageModal() {
+  const modal = document.getElementById('image-modal');
+  const img = document.getElementById('image-modal-img');
+  modal.classList.remove('show');
+  setTimeout(() => { if (!modal.classList.contains('show')) img.src = ''; }, 150);
+}
+
+function handleImageModalBackdrop(event) {
+  if (event.target && event.target.id === 'image-modal') closeImageModal();
+}
+
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeImageModal(); });
+
+function txdotUpdateStats() {
+  const snap = document.getElementById('cam-cnt-snap');
+  const total = document.getElementById('cam-cnt-total');
+  if (snap) snap.textContent = Object.keys(txdotSnapshots).length;
+  if (total) total.textContent = txdotCameras.length || '—';
+}
+
+function txdotSetFilter(f, btn) {
+  txdotCurrentFilter = f;
+  document.querySelectorAll('.cam-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  txdotApplyFilter();
+}
+
+function txdotApplyFilter() {
+  if (!camMarkerLayer) return;
+  const q = (document.getElementById('cam-search')?.value || '').toLowerCase();
+  camMarkerLayer.clearLayers();
+  txdotVisibleCameraEntries(q).forEach(entry => camMarkerLayer.addLayer(entry.marker));
+  scheduleOverlapCulling(25);
+  txdotRenderList();
+}
+
+function txdotMatchesFilter(cam, q) {
+  const key = txdotCameraKey(cam);
+  const matchF = txdotCurrentFilter === 'all' || (txdotCurrentFilter === 'snap' && txdotSnapshots[key]);
+  const searchable = [cam.icd_Id, cam.district, cam.equipLoc?.roadway, cam.roadwayGroup, cam.netId].filter(Boolean).join(' ').toLowerCase();
+  const matchQ = !q || searchable.includes(q);
+  return matchF && matchQ;
+}
+
+function txdotRenderList() {
+  const list = document.getElementById('cam-list');
+  const count = document.getElementById('cam-list-count');
+  if (!list) return;
+  if (!layersOn.cameras && !txdotHasLoaded) {
+    list.innerHTML = '<div class="cam-empty">Toggle Cameras on to load TxDOT camera pins.</div>';
+    if (count) count.textContent = 'Layer off';
+    return;
+  }
+  const q = (document.getElementById('cam-search')?.value || '').toLowerCase();
+  const filtered = txdotCameras.filter(c => txdotMatchesFilter(c, q) && txdotIsCameraInCurrentView(c));
+  if (count) count.textContent = `${filtered.length} visible of ${txdotCameras.length}`;
+  if (!filtered.length) {
+    list.innerHTML = `<div class="cam-empty">${txdotIsLoading ? 'Loading cameras…' : 'No cameras in current map view. Pan or zoom the map to reveal nearby cameras.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(cam => {
+    const key = txdotCameraKey(cam);
+    const sel = key === txdotSelectedKey ? 'selected' : '';
+    const snap = txdotSnapshots[key];
+    const loading = txdotSnapLoading.has(key);
+    const err = txdotSnapshotErrors[key];
+    const badge = loading ? '<span class="loading-badge">⟳</span>' : snap ? '<span class="img-badge">📷</span>' : err ? '<span class="error-badge">!</span>' : '';
+    return `<div class="cam-item ${sel}" data-key="${txdotEscAttr(key)}" onclick="txdotSelectCamera('${txdotEscJS(key)}')"><div class="cam-dot" style="background:var(--accent);box-shadow:0 0 5px var(--accent)"></div><div class="cam-name">${txdotEscHTML(cam.icd_Id)}<span class="cam-road">${txdotEscHTML(cam.district || '')} · ${txdotEscHTML(cam.equipLoc?.roadway || cam.roadwayGroup || '')} · ${txdotEscHTML(cam.netId || '')}</span></div>${badge}</div>`;
+  }).join('');
+}
+
+function txdotCssEscape(value) {
+  if (window.CSS && CSS.escape) return CSS.escape(value);
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+}
+
+function txdotRenderListItem(key) {
+  const el = document.querySelector(`.cam-item[data-key="${txdotCssEscape(key)}"]`);
+  if (!el) return;
+  const snap = txdotSnapshots[key];
+  const loading = txdotSnapLoading.has(key);
+  const err = txdotSnapshotErrors[key];
+  const badge = el.querySelector('.img-badge,.loading-badge,.error-badge');
+  if (badge) badge.remove();
+  if (loading) el.insertAdjacentHTML('beforeend', '<span class="loading-badge">⟳</span>');
+  else if (snap) el.insertAdjacentHTML('beforeend', '<span class="img-badge">📷</span>');
+  else if (err) el.insertAdjacentHTML('beforeend', '<span class="error-badge">!</span>');
+}
+
+function txdotSelectCamera(key) {
+  txdotSelectedKey = key;
+  const entry = txdotMarkers[key];
+  if (!entry) return;
+  const { marker, cam } = entry;
+  // Do not pan or zoom the map from the camera list. The camera layer should behave passively.
+  if (layersOn.cameras && camMarkerLayer && txdotIsCameraInCurrentView(cam) && !camMarkerLayer.hasLayer(marker)) {
+    camMarkerLayer.addLayer(marker);
+  }
+  if (txdotIsCameraInCurrentView(cam)) marker.openPopup();
+  txdotRenderList();
+  if (!txdotSnapshots[key] && !txdotSnapLoading.has(key)) txdotFetchSnapshot(key);
+  setTimeout(() => {
+    const el = document.querySelector('.cam-item.selected');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 60);
+}
+
+function txdotSetActiveDistrictButton(district) {
+  document.querySelectorAll('.cam-dist-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.district === district));
+}
+
+async function ensureTxDotCamerasLoaded() {
+  if (!txdotHasLoaded && !txdotIsLoading) await txdotLoadDefaultDistricts();
+}
+
+function setTxDotCameraLayerButtonState() {
+  const btn = document.getElementById('btn-cameras');
+  if (btn) btn.classList.toggle('on', !!layersOn.cameras);
+}
+
+window.txdotFetchSnapshot = txdotFetchSnapshot;
+window.txdotRefreshSingle = txdotRefreshSingle;
+window.openImageModal = openImageModal;
+window.closeImageModal = closeImageModal;
+window.handleImageModalBackdrop = handleImageModalBackdrop;
+window.txdotSelectCamera = txdotSelectCamera;
+
+function initTxDotCameraControls() {
+  if (!camMarkerLayer) camMarkerLayer = L.layerGroup();
+  document.querySelectorAll('.cam-dist-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const district = btn.dataset.district;
+      if (district === 'TX') txdotLoadDefaultDistricts();
+      else txdotLoadSingleDistrict(district);
+    });
+  });
+  document.querySelectorAll('.cam-filter-btn').forEach(btn => btn.addEventListener('click', () => txdotSetFilter(btn.dataset.filter, btn)));
+  const search = document.getElementById('cam-search');
+  if (search) search.addEventListener('input', txdotApplyFilter);
+  const refresh = document.getElementById('cam-refresh');
+  if (refresh) refresh.addEventListener('click', () => txdotCurrentDistrict === 'TX' ? txdotLoadDefaultDistricts() : txdotLoadSingleDistrict(txdotCurrentDistrict));
+  if (map && !map._txdotCameraViewportListenerAttached) {
+    map.on('moveend zoomend resize', () => {
+      if (txdotHasLoaded || layersOn.cameras) txdotApplyFilter();
+    });
+    map._txdotCameraViewportListenerAttached = true;
+  }
+  txdotUpdateStats();
+  txdotRenderList();
+  setTxDotCameraLayerButtonState();
+}
 
 // ── LAYER TOGGLES ─────────────────────────────────────────────────────────────
 function toggleLayer(name) {
@@ -4114,7 +4723,14 @@ function toggleLayer(name) {
     case 'watches':  if(watchLayer)   on?watchLayer.addTo(map):map.removeLayer(watchLayer); break;
     case 'sirens':  if(sirenLayer)      on?sirenLayer.addTo(map):map.removeLayer(sirenLayer); break;
     case 'cameras':
-      if(camMarkerLayer) on?camMarkerLayer.addTo(map):map.removeLayer(camMarkerLayer);
+      if (on) {
+        if (!camMarkerLayer) camMarkerLayer = L.layerGroup();
+        txdotApplyFilter();
+        camMarkerLayer.addTo(map);
+        ensureTxDotCamerasLoaded();
+      } else if (camMarkerLayer && map.hasLayer(camMarkerLayer)) {
+        map.removeLayer(camMarkerLayer);
+      }
       break;
   }
 }
@@ -4124,9 +4740,11 @@ function toggleLayer(name) {
   ['btn-warnings', ()=>{toggleLayer('warnings');document.getElementById('btn-warnings').classList.toggle('on',layersOn.warnings);}],
   ['btn-watches',  ()=>{toggleLayer('watches'); document.getElementById('btn-watches').classList.toggle('on',layersOn.watches);}],
   ['btn-citylayers', () => { toggleToolsDrawer(true); openStackPanel('citylayers'); }],
+  ['btn-darkmode', () => toggleDarkMode()],
+  ['btn-overlapcull', () => toggleOverlapCulling()],
   ['btn-citylimits', () => { toggleLayer('cityLimits'); document.getElementById('btn-citylimits').classList.toggle('on', layersOn.cityLimits); }],
   ['btn-sirens', () => { toggleLayer('sirens'); document.getElementById('btn-sirens').classList.toggle('on', layersOn.sirens); }],
-  ['btn-cameras', () => { toggleLayer('cameras'); document.getElementById('btn-cameras').classList.toggle('on', layersOn.cameras); if (layersOn.cameras) { toggleToolsDrawer(true); openStackPanel('cam'); } }],
+  ['btn-cameras', () => { toggleLayer('cameras'); setTxDotCameraLayerButtonState(); toggleToolsDrawer(true); openStackPanel('cam'); }],
   ['btn-firestations', () => { toggleLayer('fireStations'); document.getElementById('btn-firestations').classList.toggle('on', layersOn.fireStations); }],
   ['btn-firedistricts', () => { toggleLayer('fireDistricts'); document.getElementById('btn-firedistricts').classList.toggle('on', layersOn.fireDistricts); }],
   ['btn-rivergauges', () => toggleRiverGaugeLayer()],
@@ -4137,6 +4755,206 @@ function toggleLayer(name) {
 ].forEach(([id,fn])=>document.getElementById(id).addEventListener('click',fn));
 
 
+
+
+function hydroDebugLog(message, level) {
+  const ts = new Date().toLocaleTimeString([], { hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const text = `[${ts}] ${message}`;
+  hydroInspectDebugEntries.push({ text, level: level || 'info' });
+  if (hydroInspectDebugEntries.length > 80) hydroInspectDebugEntries.shift();
+  if (hydroInspectDebugEnabled) renderHydroDebugLog();
+  try { console.debug('[Hydro Inspect]', message); } catch(e) {}
+}
+
+function renderHydroDebugLog() {
+  const log = document.getElementById('hydro-debug-log');
+  if (!log) return;
+  if (!hydroInspectDebugEntries.length) {
+    log.textContent = hydroInspectDebugEnabled ? 'Debug ready. Click a Hydro Class pixel to log tile and WMS checks.' : 'Debug off. Turn this on, click a Hydro pixel, then review tile/WMS details here.';
+    return;
+  }
+  log.innerHTML = hydroInspectDebugEntries.map(entry => `<div class="hydro-debug-line ${entry.level || ''}">${String(entry.text).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>`).join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+function setHydroDebugMode(active) {
+  hydroInspectDebugEnabled = !!active;
+  const btn = document.getElementById('hydro-debug-btn');
+  const panel = document.getElementById('hydro-debug-panel');
+  if (btn) {
+    btn.classList.toggle('on', hydroInspectDebugEnabled);
+    btn.textContent = hydroInspectDebugEnabled ? 'DEBUG ON' : 'DEBUG';
+  }
+  if (panel) {
+    panel.classList.toggle('open', hydroInspectDebugEnabled);
+    panel.setAttribute('aria-hidden', hydroInspectDebugEnabled ? 'false' : 'true');
+  }
+  hydroDebugLog(hydroInspectDebugEnabled ? 'Debug enabled.' : 'Debug disabled.');
+  renderHydroDebugLog();
+}
+
+function clearHydroDebugLog() {
+  hydroInspectDebugEntries = [];
+  renderHydroDebugLog();
+}
+
+function copyHydroDebugLog() {
+  const text = hydroInspectDebugEntries.map(e => e.text).join('\n');
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+}
+
+function markerLayerToArray(layer) {
+  const out = [];
+  if (!layer || !layer.eachLayer) return out;
+  layer.eachLayer(l => {
+    if (l && l.getLatLng && l._icon) out.push(l);
+    else if (l && l.eachLayer) out.push(...markerLayerToArray(l));
+  });
+  return out;
+}
+
+function setMarkerCulled(marker, hidden) {
+  if (!marker || !marker._icon) return;
+  marker._overlapCulled = !!hidden;
+  marker._icon.style.display = hidden ? 'none' : '';
+  if (marker._shadow) marker._shadow.style.display = hidden ? 'none' : '';
+  if (hidden) {
+    try { marker.closeTooltip(); } catch(e) {}
+    try { marker.closePopup(); } catch(e) {}
+  }
+}
+
+function getOverlapThresholdPx() {
+  const z = map.getZoom ? map.getZoom() : 12;
+
+  // Conservative culling: only hide nodes whose marker centers are very close.
+  // The previous thresholds were intentionally broad, but they hid points too early.
+  // These values target true pile-ups while keeping nearby-but-distinct points visible.
+  if (z >= 16) return 5;
+  if (z >= 15) return 6;
+  if (z >= 14) return 7;
+  if (z >= 13) return 8;
+  if (z >= 12) return 9;
+  if (z >= 10) return 11;
+  return 13;
+}
+
+function markerCullPriority(marker) {
+  const o = marker.options || {};
+  let score = Number(o.zIndexOffset || 0);
+  if (marker.isPopupOpen && marker.isPopupOpen()) score += 100000;
+  if (o.stationData && o.stationData.id === selectedVelStation) score += 50000;
+  return score;
+}
+
+function cullOverlapMarkersForLayers() {
+  const btn = document.getElementById('btn-overlapcull');
+  if (btn) btn.classList.toggle('on', overlapCullingEnabled);
+
+  const layers = [stationMarkerLayer, sirenLayer, fireStationLayer, riverGaugeLayer, camMarkerLayer].filter(Boolean);
+  const markers = layers.flatMap(markerLayerToArray).filter(m => m && m._map === map && m._icon && m.options.overlapCull !== false);
+
+  if (!overlapCullingEnabled) {
+    markers.forEach(m => setMarkerCulled(m, false));
+    return { shown: markers.length, hidden: 0, total: markers.length };
+  }
+
+  const threshold = getOverlapThresholdPx();
+  const cell = threshold;
+  const occupied = new Map();
+  let hidden = 0;
+
+  const sorted = markers.slice().sort((a,b) => markerCullPriority(b) - markerCullPriority(a));
+  sorted.forEach(marker => {
+    const p = map.latLngToContainerPoint(marker.getLatLng());
+    const cx = Math.round(p.x / cell);
+    const cy = Math.round(p.y / cell);
+    let overlaps = false;
+
+    for (let ix = cx - 1; ix <= cx + 1 && !overlaps; ix++) {
+      for (let iy = cy - 1; iy <= cy + 1 && !overlaps; iy++) {
+        const other = occupied.get(ix + ':' + iy);
+        if (!other) continue;
+        const dx = p.x - other.x;
+        const dy = p.y - other.y;
+        if ((dx * dx + dy * dy) < (threshold * threshold)) overlaps = true;
+      }
+    }
+
+    if (overlaps) {
+      setMarkerCulled(marker, true);
+      hidden++;
+    } else {
+      setMarkerCulled(marker, false);
+      occupied.set(cx + ':' + cy, { x:p.x, y:p.y, marker });
+    }
+  });
+
+  return { shown: markers.length - hidden, hidden, total: markers.length };
+}
+
+function scheduleOverlapCulling(delay) {
+  clearTimeout(overlapCullTimer);
+  overlapCullTimer = setTimeout(() => {
+    const result = cullOverlapMarkersForLayers();
+    const status = document.getElementById('overlap-cull-status');
+    if (status && result) status.textContent = overlapCullingEnabled ? `Showing ${result.shown} / ${result.total} nodes. Hidden until zoom: ${result.hidden}.` : 'Overlap hiding is off.';
+  }, typeof delay === 'number' ? delay : 60);
+}
+
+function toggleOverlapCulling() {
+  overlapCullingEnabled = !overlapCullingEnabled;
+  scheduleOverlapCulling(0);
+}
+
+function txdotVisibleCameraEntries(q) {
+  const candidates = [];
+  txdotCameras.forEach(cam => {
+    const key = txdotCameraKey(cam);
+    const entry = txdotMarkers[key];
+    if (!entry || !txdotMatchesFilter(cam, q) || !txdotIsCameraInCurrentView(cam)) return;
+    candidates.push(entry);
+  });
+
+  if (!overlapCullingEnabled) return candidates;
+
+  const threshold = getOverlapThresholdPx();
+  const cell = threshold;
+  const occupied = new Map();
+  const visible = [];
+
+  candidates
+    .filter(entry => entry.cam && entry.cam.latitude && entry.cam.longitude)
+    .sort((a,b) => {
+      const as = txdotSnapshots[txdotCameraKey(a.cam)] ? 10 : 0;
+      const bs = txdotSnapshots[txdotCameraKey(b.cam)] ? 10 : 0;
+      return bs - as;
+    })
+    .forEach(entry => {
+      const p = map.latLngToContainerPoint([Number(entry.cam.latitude), Number(entry.cam.longitude)]);
+      const cx = Math.round(p.x / cell);
+      const cy = Math.round(p.y / cell);
+      let overlaps = false;
+      for (let ix = cx - 1; ix <= cx + 1 && !overlaps; ix++) {
+        for (let iy = cy - 1; iy <= cy + 1 && !overlaps; iy++) {
+          const other = occupied.get(ix + ':' + iy);
+          if (!other) continue;
+          const dx = p.x - other.x;
+          const dy = p.y - other.y;
+          if ((dx * dx + dy * dy) < (threshold * threshold)) overlaps = true;
+        }
+      }
+      if (!overlaps) {
+        occupied.set(cx + ':' + cy, { x:p.x, y:p.y });
+        visible.push(entry);
+      }
+    });
+
+  return visible;
+}
 
 function renderHydroLegend() {
   const grid = document.getElementById('hydro-grid');
@@ -4243,6 +5061,57 @@ function matchHydroClassFromBandProps(props) {
   };
 }
 
+
+const HYDRO_CLASS_DECADE_VALUE_TO_CODE = {
+  10:'BI', 20:'GC', 30:'IC', 40:'DS', 50:'WS', 60:'RA', 70:'HR', 80:'BD', 90:'GR', 100:'HA', 110:'LH', 120:'GH', 130:'UK', 140:'RF'
+};
+
+function hydroItemFromCode(code) {
+  return HYDRO_CLASSES.find(item => item.code === code) || null;
+}
+
+function matchHydroClassFromValueProps(props) {
+  if (!props) return null;
+
+  const preferredValue = getNumberFromProp(props, [
+    'GRAY_INDEX', 'GRAY', 'VALUE', 'CLASS', 'CLASS_VALUE', 'CATEGORY', 'DN', 'PIXEL', 'BAND_1', 'B1'
+  ]);
+
+  const numericValues = [];
+  if (preferredValue !== null) numericValues.push(preferredValue);
+  Object.values(props || {}).forEach(v => {
+    const n = Number(v);
+    if (Number.isFinite(n) && !numericValues.includes(n)) numericValues.push(n);
+  });
+
+  for (const raw of numericValues) {
+    const rounded = Math.round(raw);
+    let item = null;
+
+    // Most GeoServer coverage responses return 0-based or 1-based class positions.
+    if (rounded >= 0 && rounded < HYDRO_CLASSES.length) item = HYDRO_CLASSES[rounded];
+    if (!item && rounded >= 1 && rounded <= HYDRO_CLASSES.length) item = HYDRO_CLASSES[rounded - 1];
+
+    // Some products expose NEXRAD-style decade values instead: 10, 20, 30, etc.
+    if (!item && HYDRO_CLASS_DECADE_VALUE_TO_CODE[rounded]) {
+      item = hydroItemFromCode(HYDRO_CLASS_DECADE_VALUE_TO_CODE[rounded]);
+    }
+
+    if (item) {
+      const rgb = hexToRgb(item.color);
+      return {
+        item,
+        source: 'featureinfo-value',
+        rawValue: raw,
+        rgb,
+        hex: item.color
+      };
+    }
+  }
+
+  return null;
+}
+
 function rgbToHex(r,g,b) {
   return '#' + [r,g,b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();
 }
@@ -4317,6 +5186,23 @@ function hideHydroMapTip() {
   tip.setAttribute('aria-hidden','true');
 }
 
+function findHydroInspectStationById(stationId) {
+  const id = String(stationId || '').toLowerCase();
+  if (!id) return null;
+
+  // Important: live NWS stations are stored in ACTIVE_STATIONS, not always ALL_STATIONS.
+  // The earlier inspect code only searched ALL_STATIONS, so live stations such as KHDX/KHDC
+  // could show Hydro tiles but still have no inspect/WMS context.
+  const merged = [...(ACTIVE_STATIONS || []), ...(ALL_STATIONS || [])];
+  const found = merged.find(s => String(s.id || '').toLowerCase() === id);
+  if (found) return { ...found, id };
+
+  // Last-resort context: GetFeatureInfo and layer names only require the station id.
+  // This keeps inspect usable even if the station list refreshes or a station was selected
+  // before ACTIVE_STATIONS finished updating.
+  return { id, name: id.toUpperCase(), label: id.toUpperCase(), tdwr: false };
+}
+
 function getHydroInspectContext(clientX, clientY) {
   const compareEl = document.getElementById('compare-map');
   const compareRect = compareEl ? compareEl.getBoundingClientRect() : null;
@@ -4324,21 +5210,44 @@ function getHydroInspectContext(clientX, clientY) {
     clientX >= compareRect.left && clientX <= compareRect.right &&
     clientY >= compareRect.top && clientY <= compareRect.bottom;
 
+  const selectedStation = findHydroInspectStationById(selectedVelStation);
+  if (!selectedStation) {
+    hydroDebugLog(`Inspect context failed: selected station ${selectedVelStation || 'none'} could not be resolved.`, 'warn');
+    return null;
+  }
+
   if (inCompare && splitRadarProduct === 'hclass') {
-    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
-    return station ? { mapObj: compareMap, station, layerName: getLayerName(station, 'hclass'), pane: 'split' } : null;
+    const layerName = getLayerName(selectedStation, 'hclass');
+    if (!layerName) {
+      hydroDebugLog(`Inspect context failed: no Hydro layer name for split station ${selectedStation.id}.`, 'warn');
+      return null;
+    }
+    return { mapObj: compareMap, station: selectedStation, layerName, pane: 'split' };
   }
 
   if (radarType === 'hclass') {
-    const station = ALL_STATIONS.find(s => s.id === selectedVelStation);
-    return station ? { mapObj: map, station, layerName: getLayerName(station, 'hclass'), pane: 'main' } : null;
+    const layerName = getLayerName(selectedStation, 'hclass');
+    if (!layerName) {
+      hydroDebugLog(`Inspect context failed: no Hydro layer name for main station ${selectedStation.id}.`, 'warn');
+      return null;
+    }
+    return { mapObj: map, station: selectedStation, layerName, pane: 'main' };
   }
 
+  hydroDebugLog(`Inspect context skipped: Hydro not active on clicked map. radarType=${radarType} split=${splitViewActive}/${splitRadarProduct}`, 'warn');
   return null;
 }
 
 function findHydroTileColorAtClient(clientX, clientY) {
-  const tiles = Array.from(document.querySelectorAll('img.leaflet-tile.hydro-tile'))
+  const inspectCtx = getHydroInspectContext(clientX, clientY);
+  if (!inspectCtx || !inspectCtx.mapObj) {
+    hydroDebugLog(`No inspect context for click ${Math.round(clientX)},${Math.round(clientY)}. Hydro visible=${isHydroVisible()} radarType=${radarType} split=${splitViewActive}/${splitRadarProduct}`, 'warn');
+    return null;
+  }
+
+  const container = inspectCtx.mapObj.getContainer();
+  const allHydroTiles = Array.from(container.querySelectorAll('img.leaflet-tile.hydro-tile'));
+  const tiles = allHydroTiles
     .filter(tile => tile.complete && tile.naturalWidth)
     .filter(tile => {
       const style = window.getComputedStyle(tile);
@@ -4347,42 +5256,64 @@ function findHydroTileColorAtClient(clientX, clientY) {
       return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
     });
 
+  hydroDebugLog(`Tile check · pane=${inspectCtx.pane} station=${inspectCtx.station && inspectCtx.station.id} layer=${inspectCtx.layerName || 'none'} loadedHydroTiles=${allHydroTiles.length} tilesUnderClick=${tiles.length}`);
+
   if (!tiles.length) return null;
 
-  const offsets = [[0,0],[-2,0],[2,0],[0,-2],[0,2],[-4,0],[4,0],[0,-4],[0,4],[-3,-3],[3,-3],[-3,3],[3,3]];
+  const offsets = [[0,0],[-2,0],[2,0],[0,-2],[0,2],[-4,0],[4,0],[0,-4],[0,4],[-3,-3],[3,-3],[-3,3],[3,3],[-6,0],[6,0],[0,-6],[0,6],[-8,0],[8,0],[0,-8],[0,8]];
+  let bestNear = null;
 
   for (let i = tiles.length - 1; i >= 0; i--) {
     const tile = tiles[i];
-    const r = tile.getBoundingClientRect();
-    const c = findHydroTileColorAtClient.canvas || (findHydroTileColorAtClient.canvas = document.createElement('canvas'));
-    c.width = tile.naturalWidth;
-    c.height = tile.naturalHeight;
-    const ctx = c.getContext('2d', { willReadFrequently: true });
-    ctx.clearRect(0, 0, c.width, c.height);
-    ctx.drawImage(tile, 0, 0);
+    try {
+      const r = tile.getBoundingClientRect();
+      const c = findHydroTileColorAtClient.canvas || (findHydroTileColorAtClient.canvas = document.createElement('canvas'));
+      c.width = tile.naturalWidth;
+      c.height = tile.naturalHeight;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.drawImage(tile, 0, 0);
 
-    for (const [dx, dy] of offsets) {
-      const x = Math.floor((clientX + dx - r.left) * (tile.naturalWidth / r.width));
-      const y = Math.floor((clientY + dy - r.top) * (tile.naturalHeight / r.height));
-      if (x < 0 || y < 0 || x >= tile.naturalWidth || y >= tile.naturalHeight) continue;
-      const px = ctx.getImageData(x, y, 1, 1).data;
-      const match = nearestHydroClass(px[0], px[1], px[2], px[3]);
-      if (match) return match;
+      for (const [dx, dy] of offsets) {
+        const x = Math.floor((clientX + dx - r.left) * (tile.naturalWidth / r.width));
+        const y = Math.floor((clientY + dy - r.top) * (tile.naturalHeight / r.height));
+        if (x < 0 || y < 0 || x >= tile.naturalWidth || y >= tile.naturalHeight) continue;
+        const px = ctx.getImageData(x, y, 1, 1).data;
+        const match = nearestHydroClass(px[0], px[1], px[2], px[3]);
+        const rawHex = rgbToHex(px[0], px[1], px[2]);
+        if (!bestNear || (match && match.distance < bestNear.distance)) {
+          bestNear = match || { distance: Infinity, hex: rawHex, rgb:{r:px[0],g:px[1],b:px[2]}, alpha:px[3] };
+        }
+        if (match) {
+          hydroDebugLog(`Canvas match · ${match.item.code}/${match.item.cls} sampled=${match.hex} alpha=${px[3]} dist=${Math.round(match.distance)} offset=${dx},${dy}`, 'ok');
+          return { ...match, source:'canvas' };
+        }
+      }
+    } catch (err) {
+      hydroDebugLog(`Canvas read blocked/failed for tile. Falling back to WMS. ${err && err.message ? err.message : err}`, 'warn');
+      continue;
     }
   }
 
+  if (bestNear) hydroDebugLog(`Canvas had tile(s), but no legend match. Nearest sampled=${bestNear.hex || 'unknown'} alpha=${bestNear.alpha ?? 'n/a'} distance=${Number.isFinite(bestNear.distance) ? Math.round(bestNear.distance) : 'n/a'}`, 'warn');
   return null;
 }
 
 async function tryHydroGetFeatureInfo(clientX, clientY) {
   const ctx = getHydroInspectContext(clientX, clientY);
-  if (!ctx || !ctx.mapObj || !ctx.station || !ctx.layerName) return null;
+  if (!ctx || !ctx.mapObj || !ctx.station || !ctx.layerName) {
+    hydroDebugLog('WMS fallback skipped: missing map/station/layer context.', 'warn');
+    return null;
+  }
 
   const mapEl = ctx.mapObj.getContainer();
   const rect = mapEl.getBoundingClientRect();
   const x = Math.round(clientX - rect.left);
   const y = Math.round(clientY - rect.top);
-  if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+  if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+    hydroDebugLog(`WMS fallback skipped: click outside target map. x=${x} y=${y} rect=${Math.round(rect.width)}x${Math.round(rect.height)}`, 'warn');
+    return null;
+  }
 
   const size = ctx.mapObj.getSize();
   const crs = ctx.mapObj.options.crs;
@@ -4395,27 +5326,54 @@ async function tryHydroGetFeatureInfo(clientX, clientY) {
     `&QUERY_LAYERS=${encodeURIComponent(ctx.layerName)}` +
     `&STYLES=&CRS=EPSG:3857&BBOX=${bbox}` +
     `&WIDTH=${size.x}&HEIGHT=${size.y}&I=${x}&J=${y}` +
-    `&FEATURE_COUNT=1&INFO_FORMAT=application/json`;
+    `&FEATURE_COUNT=3&INFO_FORMAT=application/json`;
 
+  hydroDebugLog(`WMS GetFeatureInfo · station=${ctx.station.id} layer=${ctx.layerName} x=${x} y=${y} size=${size.x}x${size.y}`);
   const res = await fetch(url, { cache: 'no-store' });
+  hydroDebugLog(`WMS HTTP ${res.status} ${res.statusText || ''}`, res.ok ? 'ok' : 'err');
   if (!res.ok) return null;
-  const json = await res.json().catch(() => null);
-  const props = json && json.features && json.features[0] && json.features[0].properties;
-  if (!props) return null;
+
+  const text = await res.text();
+  let json = null;
+  try { json = JSON.parse(text); }
+  catch (err) {
+    hydroDebugLog(`WMS returned non-JSON: ${text.slice(0, 180).replace(/\s+/g,' ')}`, 'err');
+    return null;
+  }
+
+  const features = json && json.features ? json.features : [];
+  hydroDebugLog(`WMS features=${features.length}`);
+  const props = features[0] && features[0].properties;
+  if (!props) {
+    hydroDebugLog('WMS returned no feature properties at this point.', 'warn');
+    return null;
+  }
+
+  hydroDebugLog(`WMS prop keys: ${Object.keys(props).join(', ') || 'none'}`);
+  hydroDebugLog(`WMS raw props: ${Object.entries(props).slice(0,12).map(([k,v]) => `${k}=${v}`).join(' · ')}`);
 
   const bandMatch = matchHydroClassFromBandProps(props);
   if (bandMatch && bandMatch.item) {
+    hydroDebugLog(`WMS band match · ${bandMatch.item.code}/${bandMatch.item.cls} ${bandMatch.hex || ''}`, 'ok');
     return bandMatch;
+  }
+
+  const valueMatch = matchHydroClassFromValueProps(props);
+  if (valueMatch && valueMatch.item) {
+    hydroDebugLog(`WMS value match · ${valueMatch.item.code}/${valueMatch.item.cls} raw=${valueMatch.rawValue}`, 'ok');
+    return valueMatch;
   }
 
   const raw = Object.values(props).join(' ').toLowerCase();
   for (const item of HYDRO_CLASSES) {
     if (raw.includes(item.code.toLowerCase()) || raw.includes(String(item.cls).toLowerCase())) {
-      return { item, hex: null, source: 'featureinfo' };
+      hydroDebugLog(`WMS text match · ${item.code}/${item.cls}`, 'ok');
+      return { item, hex: null, source: 'featureinfo-text' };
     }
   }
 
-  return { raw: Object.entries(props).map(([k,v]) => `${k}: ${v}`).join(' · ') };
+  hydroDebugLog('WMS returned data, but no band/value/text mapping matched the Hydro legend.', 'warn');
+  return { raw: Object.entries(props).map(([k,v]) => `${k}: ${v}`).join(' · ').slice(0, 220) };
 }
 
 async function identifyHydroAtClient(clientX, clientY, originalEvent) {
@@ -4423,6 +5381,7 @@ async function identifyHydroAtClient(clientX, clientY, originalEvent) {
 
   const status = document.getElementById('hydro-inspect-status');
   if (status) status.textContent = 'Checking Hydro Class color…';
+  hydroDebugLog(`Click · client=${Math.round(clientX)},${Math.round(clientY)} zoom=${map.getZoom()} radarType=${radarType} selectedStation=${selectedVelStation} split=${splitViewActive}/${splitRadarProduct}`);
 
   try {
     const match = findHydroTileColorAtClient(clientX, clientY);
@@ -4451,6 +5410,7 @@ async function identifyHydroAtClient(clientX, clientY, originalEvent) {
 
   hideHydroMapTip();
   if (status) status.textContent = 'No Hydro Class color identified at that point. Try clicking directly on a colored radar pixel.';
+  hydroDebugLog('Final result: no Hydro Class match from canvas or WMS fallback.', 'err');
 }
 
 function sampleHydroTileAtClient(clientX, clientY, originalEvent) {
@@ -4502,6 +5462,7 @@ function hideRadarHelp() {
 }
 
 setupHydroLegendHover();
+scheduleOverlapCulling(250);
 const hydroInspectOverlay = document.getElementById('hydro-inspect-overlay');
 if (hydroInspectOverlay) {
   hydroInspectOverlay.addEventListener('click', e => {
@@ -4511,6 +5472,9 @@ if (hydroInspectOverlay) {
   });
 }
 document.getElementById('hydro-inspect-btn')?.addEventListener('click', () => setHydroInspectMode(!hydroInspectMode));
+document.getElementById('hydro-debug-btn')?.addEventListener('click', () => setHydroDebugMode(!hydroInspectDebugEnabled));
+document.getElementById('hydro-debug-clear')?.addEventListener('click', clearHydroDebugLog);
+document.getElementById('hydro-debug-copy')?.addEventListener('click', copyHydroDebugLog);
 
 document.querySelectorAll('.rtype-btn.has-help').forEach(btn => {
   btn.addEventListener('mouseenter', () => showRadarHelp(btn));
@@ -4690,7 +5654,7 @@ setRiverGaugeButtonState();
 loadAlerts();
 loadConditions();
 buildSirens();
-buildCameras();
+initTxDotCameraControls();
 buildFireStations();
 buildFireDistricts();
 applyMobileSpaceOptimization();
@@ -4702,4 +5666,33 @@ function selectVelStation(stationId) {
 }
 </script>
 </body>
-</html>  font-size:10px;
+</html>
+<style>
+/* Split-view product toggle anchor patch
+   Keeps the right-panel product buttons tucked into the top-left of the right map pane. */
+@media (min-width: 761px) {
+  body.split-view .split-product-toggle{
+    left: calc(50% + 12px) !important;
+    top: 56px !important;
+    right: auto !important;
+    transform: none !important;
+    align-items: center;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+  body.split-view .split-product-toggle{
+    left: calc(50% + 8px) !important;
+    top: 52px !important;
+    right: auto !important;
+  }
+}
+
+/* LOCATE BUTTON CENTERING + REMOVE CITY LIMITS SEARCH STATUS */
+.city-search-status{display:none!important}
+.city-search .locate-btn{align-self:center}
+.city-search .locate-btn-icon{display:inline-block;position:relative;overflow:visible}
+.city-search .locate-btn-icon::before,
+.city-search .locate-btn-icon::after{box-sizing:border-box}
+
+</style>
