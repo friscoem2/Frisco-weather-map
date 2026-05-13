@@ -140,7 +140,41 @@
   .status-msg.error { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); display: block; }
   .status-msg.info { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,204,255,0.2); display: block; }
 
-  #map { width: 100%; height: 100%; background: var(--bg); }
+  #mapShell { position: relative; min-width: 0; min-height: 0; background: var(--bg); overflow: hidden; }
+  #map { position: absolute; inset: 0; width: 100%; height: 100%; background: var(--bg); }
+  .weather-toggle {
+    position: absolute; top: 14px; right: 14px; z-index: 950;
+    width: 44px; height: 44px; border-radius: 14px;
+    display: grid; place-items: center; cursor: pointer;
+    background: rgba(8,15,36,.92); border: 1px solid rgba(0,204,255,.32);
+    box-shadow: 0 12px 28px rgba(0,0,0,.34), 0 0 0 1px rgba(0,204,255,.08) inset;
+    font-size: 21px; line-height: 1; transition: transform .12s, border-color .15s, background .15s;
+  }
+  .weather-toggle:hover { transform: translateY(-1px); border-color: rgba(0,204,255,.62); background: rgba(12,21,48,.96); }
+  .weather-toggle.active { background: rgba(0,204,255,.16); border-color: rgba(0,204,255,.74); box-shadow: 0 0 22px rgba(0,204,255,.20), 0 12px 28px rgba(0,0,0,.34); }
+  .weather-panel {
+    position: absolute; top: 66px; right: 14px; z-index: 951;
+    width: min(360px, calc(100% - 28px)); display: none;
+    background: rgba(8,15,36,.96); border: 1px solid rgba(26,48,80,.98);
+    border-radius: 16px; box-shadow: 0 18px 44px rgba(0,0,0,.42);
+    backdrop-filter: blur(10px); overflow: hidden;
+  }
+  .weather-panel.show { display: block; }
+  .weather-panel-head { padding: 12px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--border2); background: linear-gradient(135deg, rgba(0,204,255,.10), transparent); }
+  .weather-panel-title { color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+  .weather-panel-sub { margin-top: 3px; color: var(--muted); font: 10px 'DM Mono', monospace; }
+  .weather-close { flex: none; width: 28px; height: 28px; border-radius: 9px; border: 1px solid var(--border2); background: rgba(0,0,0,.20); color: var(--muted); cursor: pointer; }
+  .weather-close:hover { color: var(--white); border-color: rgba(0,204,255,.45); }
+  .weather-panel-body { padding: 12px 14px 14px; }
+  .weather-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+  .weather-btn { min-height: 32px; border-radius: 10px; border: 1px solid var(--border2); background: rgba(0,0,0,.22); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; letter-spacing: .10em; text-transform: uppercase; cursor: pointer; }
+  .weather-btn:hover { border-color: rgba(0,204,255,.48); color: var(--text); }
+  .weather-btn.active { color: #020617; background: var(--cyan); border-color: var(--cyan); }
+  .weather-readout { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 10px; border-radius: 12px; background: rgba(0,0,0,.22); border: 1px solid var(--border); }
+  .weather-row { display: flex; justify-content: space-between; gap: 8px; color: var(--text); font-size: 11px; line-height: 1.35; }
+  .weather-row strong { flex: none; color: var(--muted); font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
+  .weather-row span { text-align: right; font-family: 'DM Mono', monospace; color: var(--cyan); }
+  .weather-note { margin-top: 9px; color: var(--muted); font-size: 10px; line-height: 1.35; }
 
   #ordersPanel { background: var(--panel); border-left: 1px solid var(--border2); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
   .orders-header { padding: 14px 16px; border-bottom: 1px solid var(--border2); background: linear-gradient(135deg, rgba(0,204,255,0.06), transparent); }
@@ -237,7 +271,10 @@
   @media (max-width: 980px) {
     body.app-mode #appScreen { grid-template-columns: 300px 1fr; grid-template-rows: 1fr 310px; }
     #sidebar { grid-row: 1 / span 2; }
+    #mapShell { grid-column: 2; grid-row: 1; }
     #ordersPanel { grid-column: 2; grid-row: 2; border-left: none; border-top: 1px solid var(--border2); }
+    .weather-toggle { top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 13px; }
+    .weather-panel { top: 58px; right: 10px; width: min(340px, calc(100% - 20px)); }
   }
 
   .leaflet-popup-content-wrapper { border-radius: 8px; background: var(--panel); color: var(--text); border: 1px solid var(--border2); }
@@ -370,7 +407,32 @@
     </div>
   </aside>
 
-  <div id="map"></div>
+  <main id="mapShell">
+    <div id="map"></div>
+    <button type="button" class="weather-toggle" id="weatherToggle" title="Weather radar" aria-label="Weather radar">🌦️</button>
+    <section class="weather-panel" id="weatherPanel" aria-label="Weather radar controls">
+      <div class="weather-panel-head">
+        <div>
+          <div class="weather-panel-title">Weather Radar</div>
+          <div class="weather-panel-sub">NWS composite reflectivity</div>
+        </div>
+        <button type="button" class="weather-close" id="weatherClose" aria-label="Close weather panel">×</button>
+      </div>
+      <div class="weather-panel-body">
+        <div class="weather-actions">
+          <button type="button" class="weather-btn active" id="weatherLiveBtn">Live</button>
+          <button type="button" class="weather-btn" id="weatherLoopBtn">Loop</button>
+          <button type="button" class="weather-btn" id="weatherHideBtn">Hide</button>
+        </div>
+        <div class="weather-readout">
+          <div class="weather-row"><strong>Clock</strong><span id="weatherClock">—</span></div>
+          <div class="weather-row"><strong>Frame</strong><span id="weatherFrame">Live</span></div>
+          <div class="weather-row"><strong>Status</strong><span id="weatherStatus">Radar off</span></div>
+        </div>
+        <div class="weather-note">Loop mode uses the latest available NWS frames from roughly the last 30 minutes and displays all times in CDT/Central time.</div>
+      </div>
+    </section>
+  </main>
 
   <aside id="ordersPanel">
     <div class="orders-header">
@@ -482,6 +544,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 let map, cluster, orderLayer, routeLayer, currentJobLayer,
     allFeatures = [], allMarkers = [], allOrders = [], scheduledOrders = [],
     orderMarkers = [], selectedAssignOrderId = null, autoRefreshTimer = null;
+
+const WEATHER_WMS_URL = 'https://opengeo.ncep.noaa.gov/geoserver/conus/ows';
+const WEATHER_RADAR_LAYER = 'conus_cref_qcd';
+const WEATHER_LOOP_MINUTES = 30;
+const WEATHER_LOOP_MAX_FRAMES = 15;
+const WEATHER_LOOP_SPEED_MS = 700;
+let weatherLiveLayer = null;
+let weatherLoopFrames = [];
+let weatherLoopLayerCache = new Map();
+let weatherLoopTimer = null;
+let weatherLoopIndex = 0;
+let weatherMode = 'off';
+let weatherClockTimer = null;
+
 const attemptedOffersByOrder = new Map();
 const currentOrderDetailsCache = new Map();
 const currentOrderDetailsFetches = new Map();
@@ -510,6 +586,9 @@ function logout() {
 
 function initMap() {
   map = L.map('map', { preferCanvas: true }).setView([32.7767, -96.7970], 6);
+  map.createPane('weatherPane');
+  map.getPane('weatherPane').style.zIndex = 350;
+  map.getPane('weatherPane').style.pointerEvents = 'none';
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 19
@@ -527,10 +606,255 @@ function initMap() {
   currentJobLayer = L.layerGroup().addTo(map);
 }
 
+
+function getWeatherEls() {
+  return {
+    toggle: document.getElementById('weatherToggle'),
+    panel: document.getElementById('weatherPanel'),
+    close: document.getElementById('weatherClose'),
+    liveBtn: document.getElementById('weatherLiveBtn'),
+    loopBtn: document.getElementById('weatherLoopBtn'),
+    hideBtn: document.getElementById('weatherHideBtn'),
+    clock: document.getElementById('weatherClock'),
+    frame: document.getElementById('weatherFrame'),
+    status: document.getElementById('weatherStatus')
+  };
+}
+
+function formatCentralTime(msOrDate, includeSeconds = false) {
+  const date = msOrDate instanceof Date ? msOrDate : new Date(msOrDate);
+  return date.toLocaleString('en-US', {
+    timeZone: 'America/Chicago',
+    month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+    second: includeSeconds ? '2-digit' : undefined,
+    timeZoneName: 'short'
+  });
+}
+
+function updateWeatherClock() {
+  const { clock } = getWeatherEls();
+  if (clock) clock.textContent = formatCentralTime(new Date(), true);
+}
+
+function setWeatherStatus(text) {
+  const { status } = getWeatherEls();
+  if (status) status.textContent = text;
+}
+
+function setWeatherButtons(mode) {
+  const { toggle, liveBtn, loopBtn, hideBtn } = getWeatherEls();
+  [liveBtn, loopBtn, hideBtn].forEach(btn => btn && btn.classList.remove('active'));
+  if (mode === 'live' && liveBtn) liveBtn.classList.add('active');
+  if (mode === 'loop' && loopBtn) loopBtn.classList.add('active');
+  if (mode === 'off' && hideBtn) hideBtn.classList.add('active');
+  if (toggle) toggle.classList.toggle('active', mode !== 'off');
+}
+
+function makeWeatherWmsLayer(opacity, time) {
+  const opts = {
+    layers: WEATHER_RADAR_LAYER,
+    format: 'image/png',
+    transparent: true,
+    opacity,
+    version: '1.3.0',
+    uppercase: true,
+    updateWhenIdle: true,
+    updateWhenZooming: false,
+    keepBuffer: 1,
+    attribution: 'NOAA/NWS MRMS',
+    crossOrigin: true,
+    pane: 'weatherPane'
+  };
+  if (time) opts.time = time;
+  return L.tileLayer.wms(WEATHER_WMS_URL, opts);
+}
+
+function stopWeatherLoopTimer() {
+  if (weatherLoopTimer) {
+    clearInterval(weatherLoopTimer);
+    weatherLoopTimer = null;
+  }
+}
+
+function clearWeatherLoopLayers() {
+  weatherLoopLayerCache.forEach(layer => {
+    if (map && map.hasLayer(layer)) map.removeLayer(layer);
+  });
+  weatherLoopLayerCache.clear();
+}
+
+function hideWeatherLiveLayer() {
+  if (weatherLiveLayer && map && map.hasLayer(weatherLiveLayer)) {
+    map.removeLayer(weatherLiveLayer);
+  }
+}
+
+function showWeatherLive() {
+  if (!map) return;
+  stopWeatherLoopTimer();
+  clearWeatherLoopLayers();
+  if (!weatherLiveLayer) weatherLiveLayer = makeWeatherWmsLayer(0.68);
+  if (!map.hasLayer(weatherLiveLayer)) weatherLiveLayer.addTo(map);
+  weatherLiveLayer.bringToFront();
+  weatherMode = 'live';
+  setWeatherButtons('live');
+  const { frame } = getWeatherEls();
+  if (frame) frame.textContent = 'Live';
+  setWeatherStatus('Live radar on');
+}
+
+function hideWeatherRadar() {
+  stopWeatherLoopTimer();
+  hideWeatherLiveLayer();
+  clearWeatherLoopLayers();
+  weatherMode = 'off';
+  setWeatherButtons('off');
+  const { frame } = getWeatherEls();
+  if (frame) frame.textContent = 'Hidden';
+  setWeatherStatus('Radar hidden');
+}
+
+async function fetchWeatherFrameTimes() {
+  setWeatherStatus('Fetching NWS frames…');
+  const url = WEATHER_WMS_URL + '?service=WMS&version=1.3.0&request=GetCapabilities&_=' + Date.now();
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error('NWS capabilities failed');
+  const text = await res.text();
+  const doc = new DOMParser().parseFromString(text, 'text/xml');
+  const layers = Array.from(doc.getElementsByTagName('Layer'));
+  const target = layers.find(layer => {
+    const nameEl = layer.getElementsByTagName('Name')[0];
+    return nameEl && nameEl.textContent.trim().toLowerCase() === WEATHER_RADAR_LAYER;
+  });
+  if (!target) throw new Error('Radar layer not found');
+
+  const timeNodes = [
+    ...Array.from(target.getElementsByTagName('Dimension')),
+    ...Array.from(target.getElementsByTagName('Extent'))
+  ];
+  const timeDim = timeNodes.find(node => (node.getAttribute('name') || '').toLowerCase() === 'time');
+  if (!timeDim) throw new Error('No radar time dimension');
+
+  const raw = (timeDim.textContent || '').trim();
+  let times = [];
+  if (raw.includes('/') && !raw.includes(',')) {
+    const parts = raw.split('/').map(s => s.trim());
+    const startMs = Date.parse(parts[0]);
+    const endMs = Date.parse(parts[1]);
+    const stepMatch = /PT(\d+)M/i.exec(parts[2] || '');
+    const stepMs = (stepMatch ? Number(stepMatch[1]) : 5) * 60 * 1000;
+    if (Number.isFinite(startMs) && Number.isFinite(endMs)) {
+      for (let ms = startMs; ms <= endMs; ms += stepMs) times.push(new Date(ms).toISOString());
+    }
+  } else {
+    times = raw.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  const cutoff = Date.now() - WEATHER_LOOP_MINUTES * 60 * 1000;
+  let frames = times
+    .map(iso => ({ iso, ms: Date.parse(iso) }))
+    .filter(frame => Number.isFinite(frame.ms) && frame.ms >= cutoff)
+    .sort((a, b) => a.ms - b.ms);
+
+  if (frames.length < 3) {
+    frames = times
+      .map(iso => ({ iso, ms: Date.parse(iso) }))
+      .filter(frame => Number.isFinite(frame.ms))
+      .sort((a, b) => a.ms - b.ms)
+      .slice(-WEATHER_LOOP_MAX_FRAMES);
+  } else {
+    frames = frames.slice(-WEATHER_LOOP_MAX_FRAMES);
+  }
+  return frames;
+}
+
+function waitForWeatherLayerReady(layer, timeoutMs = 2800) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      layer.off('load', finish);
+      layer.off('tileerror', finish);
+      resolve();
+    };
+    layer.once('load', finish);
+    layer.once('tileerror', finish);
+    setTimeout(finish, timeoutMs);
+  });
+}
+
+async function preloadWeatherFramesSequentially() {
+  clearWeatherLoopLayers();
+  for (let i = 0; i < weatherLoopFrames.length; i++) {
+    const frame = weatherLoopFrames[i];
+    setWeatherStatus(`Preloading ${i + 1}/${weatherLoopFrames.length}…`);
+    const layer = makeWeatherWmsLayer(0, frame.iso);
+    layer.addTo(map);
+    weatherLoopLayerCache.set(frame.iso, layer);
+    await waitForWeatherLayerReady(layer);
+  }
+}
+
+function showWeatherFrame(index) {
+  if (!weatherLoopFrames.length) return;
+  weatherLoopIndex = ((index % weatherLoopFrames.length) + weatherLoopFrames.length) % weatherLoopFrames.length;
+  const frame = weatherLoopFrames[weatherLoopIndex];
+  weatherLoopLayerCache.forEach(layer => layer.setOpacity(0));
+  const current = weatherLoopLayerCache.get(frame.iso);
+  if (current) {
+    current.setOpacity(0.68);
+    current.bringToFront();
+  }
+  const { frame: frameEl } = getWeatherEls();
+  if (frameEl) frameEl.textContent = `${formatCentralTime(frame.ms)} (${weatherLoopIndex + 1}/${weatherLoopFrames.length})`;
+}
+
+async function startWeatherLoop() {
+  if (!map) return;
+  stopWeatherLoopTimer();
+  hideWeatherLiveLayer();
+  weatherMode = 'loop';
+  setWeatherButtons('loop');
+  try {
+    weatherLoopFrames = await fetchWeatherFrameTimes();
+    if (!weatherLoopFrames.length) throw new Error('No recent radar frames');
+    await preloadWeatherFramesSequentially();
+    weatherLoopIndex = 0;
+    showWeatherFrame(0);
+    weatherLoopTimer = setInterval(() => showWeatherFrame(weatherLoopIndex + 1), WEATHER_LOOP_SPEED_MS);
+    setWeatherStatus(`Looping ${weatherLoopFrames.length} frames`);
+  } catch (err) {
+    console.error('Weather radar loop failed:', err);
+    setWeatherStatus('Loop unavailable — live radar on');
+    showWeatherLive();
+  }
+}
+
+function setupWeatherControls() {
+  if (setupWeatherControls._bound) return;
+  setupWeatherControls._bound = true;
+  const { toggle, panel, close, liveBtn, loopBtn, hideBtn } = getWeatherEls();
+  updateWeatherClock();
+  weatherClockTimer = weatherClockTimer || setInterval(updateWeatherClock, 1000);
+
+  toggle.addEventListener('click', () => {
+    panel.classList.toggle('show');
+    if (weatherMode === 'off') showWeatherLive();
+  });
+  close.addEventListener('click', () => panel.classList.remove('show'));
+  liveBtn.addEventListener('click', showWeatherLive);
+  loopBtn.addEventListener('click', startWeatherLoop);
+  hideBtn.addEventListener('click', hideWeatherRadar);
+  setWeatherButtons('off');
+}
+
 function bindAppEvents() {
   if (bindAppEvents._bound) return;
   bindAppEvents._bound = true;
 
+  setupWeatherControls();
   document.getElementById('loadBtn').addEventListener('click', loadDrivers);
   document.getElementById('refreshBtn').addEventListener('click', loadDrivers);
   document.getElementById('logoutBtn').addEventListener('click', logout);
