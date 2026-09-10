@@ -29,17 +29,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Build static site and inject CARTO key
+      - name: Inject CARTO API key
         env:
           CARTO_API_KEY: ${{ secrets.CARTO_API_KEY }}
         run: |
           test -n "$CARTO_API_KEY" || { echo "CARTO_API_KEY repository secret is missing"; exit 1; }
-
-          mkdir -p _site
-          cp -R . _site/
-
-          rm -rf _site/.git
-          rm -rf _site/.github
 
           python3 - <<'PY'
           import json
@@ -48,7 +42,7 @@ jobs:
 
           key = os.environ["CARTO_API_KEY"]
 
-          Path("_site/js/config.js").write_text(
+          Path("js/config.js").write_text(
               "window.CARTO_API_KEY = " + json.dumps(key) + ";\n",
               encoding="utf-8"
           )
@@ -57,7 +51,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: _site
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
