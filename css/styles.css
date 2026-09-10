@@ -288,11 +288,6 @@ body.split-view #right-map-label{
 .basemap-tile{
   filter:brightness(.9) saturate(.65);
 }
-.dark-basemap-tile{
-  /* Turn standard OSM raster tiles into a subdued dark basemap locally.
-     This keeps radar/alert overlays vivid without relying on CARTO tiles. */
-  filter:brightness(.62) invert(1) contrast(2.35) hue-rotate(200deg) saturate(.28) brightness(.72);
-}
 .radar-tile{
   image-rendering:auto;
   filter:saturate(1.2) contrast(1.08) blur(.35px);
