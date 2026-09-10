@@ -258,14 +258,18 @@ async function fetchRadarTimesForConfig(config) {
 }
 
 function makeBaseMapLayer() {
-  // CARTO's raster basemaps now require an API key. Use OpenStreetMap for
-  // both themes and create the dark appearance locally with a CSS filter so
-  // the app has no basemap API-key dependency.
+  if (darkModeEnabled) {
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      subdomains:'abcd',
+      maxZoom:20,
+      className:'basemap-tile dark-basemap-tile',
+      attribution:'© CARTO © OSM contributors'
+    });
+  }
+
   return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom:19,
-    className: darkModeEnabled
-      ? 'basemap-tile dark-basemap-tile'
-      : 'streets-basemap-tile',
+    className:'streets-basemap-tile',
     attribution:'© OpenStreetMap contributors'
   });
 }
