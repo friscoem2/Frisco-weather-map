@@ -259,12 +259,19 @@ async function fetchRadarTimesForConfig(config) {
 
 function makeBaseMapLayer() {
   if (darkModeEnabled) {
-    return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      subdomains:'abcd',
-      maxZoom:20,
-      className:'basemap-tile dark-basemap-tile',
-      attribution:'© CARTO © OSM contributors'
-    });
+    const cartoKey = String(window.CARTO_API_KEY || '').trim();
+
+    if (cartoKey) {
+      return L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+        subdomains:'abcd',
+        maxZoom:20,
+        className:'basemap-tile dark-basemap-tile',
+        attribution:'© CARTO © OpenStreetMap contributors'
+      });
+    }
+
+    // Keep the site usable if the deployment secret has not been configured yet.
+    console.warn('CARTO_API_KEY is not configured; using OpenStreetMap fallback.');
   }
 
   return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

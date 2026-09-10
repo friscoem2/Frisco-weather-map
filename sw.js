@@ -1,8 +1,9 @@
-const AW_CACHE = 'aw-weather-shell-v6';
+const AW_CACHE = 'aw-weather-shell-v7';
 const AW_SHELL = [
   './',
   './index.html',
   './css/styles.css',
+  './js/config.js',
   './js/app.js',
   './js/frisco/frisco-layers.js',
   './js/pwa.js',
